@@ -1,0 +1,60 @@
+namespace testing
+{
+	using testing.*;
+	package TestSettings DirBu
+	{
+		application function bool IsVisible ()
+		{
+			bool retval = true;
+			return retval;
+		}
+		application function bool IsEnabled ()
+		{
+			bool retval = true;
+			return retval;
+		}
+		application function int MaxPos ()
+		{
+			return 1;
+		}
+		application function int GetPos ()
+		{
+			int retval = 1;
+			return retval;
+		}
+		application function void SetPos (int pos)
+		{
+			assertSet(SetPos, 100);
+		}
+		
+		///start testing 
+		
+		test function void IsVisibleTest ()
+		{
+			assertEquals(IsVisibleMethodExists) true <=>IsVisible();
+			 
+		}
+		test function void IsEnabledTest ()
+		{
+			assertEquals(IsEnabledMethodExists) true <=>IsEnabled();
+			 
+		}
+		test function void  MaxPosTest ()
+		{
+			assertEquals(MaxPosTestMethodExists) 1<=>MaxPos();
+		}
+		
+		test function void GetPosTest ()
+		{
+			assertEquals(GetPosMethodExists) 1<=>GetPos();
+		 
+		}
+		
+		test function void SetPosTest ()
+		{
+			SetPos(100);
+			assertEquals (SetPosMethodExists) assertGet (SetPos) <=> 100;
+		}
+		
+	}
+}

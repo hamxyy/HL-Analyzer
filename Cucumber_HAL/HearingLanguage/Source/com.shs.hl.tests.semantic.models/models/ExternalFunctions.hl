@@ -1,0 +1,6 @@
+namespace testing {
+	package Lib ExternalFunctions  {
+		 function void Example() {
+		}
+	}
+}

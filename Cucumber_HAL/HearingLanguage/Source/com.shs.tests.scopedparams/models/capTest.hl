@@ -1,0 +1,21 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 2 instances in this file to assert, that cap.cl is taken into concern */
+	package Lib capTest
+	{
+		test function void HICategoryTest()
+		{
+		  	cap:HICategory;
+			assertEquals(HICategoryTest) true <=>(cap:HICategory!=null );
+		}
+		
+		test function void DefAccLevelTest()
+		{
+		   //TODO constant primitive types values tests?
+			cap:DefAccLevel;
+			assertEquals(DefAccLevelTest)cap:DefAccLevel <=> 6;
+		}
+	}
+}

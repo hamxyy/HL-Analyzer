@@ -1,0 +1,27 @@
+namespace h2 {
+
+	public function void t() {
+	
+		int a;
+		int b;
+		int two = 2;
+		 
+		switch ( a ) {
+			case crv:HL: {  // error: incompatible type
+				b = 1; 
+			}
+			case two: {
+				b = 2;
+			}  
+			case 3: { // this should work!
+				b = 2;
+			}  
+			default: { 
+				b = 3;
+			}
+		}
+		
+
+	}  
+	 
+}

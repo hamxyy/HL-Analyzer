@@ -1,0 +1,28 @@
+namespace complexinit {
+
+	package MixedMode aPackage {
+		using n2.*;
+		protected function void f1() {
+			f2();  
+		}
+		protected function void f2() {
+			f3();  	// error: protected function should not be visible
+			n2.aPackage2.f4();   // ok
+			n2.aPackage2.f5();   // ok: application function should be visible
+		}
+	}   
+}
+	
+namespace n2  {
+	package Lib aPackage2 {
+
+		protected function void f3() {
+		}
+		public function void f4() {
+		}
+		application function void f5() {
+		}
+	} 
+	
+}
+	

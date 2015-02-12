@@ -1,0 +1,18 @@
+/*
+  These are the built-in functions for the hearing language.
+  Do not change, or add new ones (they won't be generated
+  correctly!)
+*/
+
+/* 
+	Do not change name of this namespace - this is a predefined name!
+*/
+namespace packageFunctions {
+	/* all package function names are unique by name
+	packageBuiltIn [FirstFit,AutoFit,FittingAssistent] testSpecial	(int value, std:ToSubject subject)		=>	void		<==> ___testSpecial42 					
+	packageBuiltIn [FirstFit,AutoFit,FittingAssistent] testSpecial	(double value, std:ToSubject subject)	=>	double		<==> ___testSpecial42 	
+	
+	packageBuiltIn									  testSpecial2	(curve value1, int value2)			=>	curve		
+	packageBuiltIn									  testSpecial2	(int value1, int value2)			=>	void		
+	*/
+}

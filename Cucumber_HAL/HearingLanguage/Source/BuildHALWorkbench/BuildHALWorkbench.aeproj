@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2AF633DD-3F96-4308-A217-6D98C5996353}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>BuildHALWorkbench</AssemblyName>
+    <Name>BuildHALWorkbench</Name>
+    <RootNamespace>BuildHALWorkbench</RootNamespace>
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DoNotDelete" />
+    <InputFileList Include="$(MSBuildThisFileDirectory)DoNotDelete" />
+    <!-- Do not change this OutputFileList include file. Add a new one only -->
+    <OutputFileList Include="$(OutputPath)HearingLanguage_Output.zip" />
+  </ItemGroup>
+  <Import Project="..\ProjectSettings.props" />
+  <PropertyGroup Label="SHS.SAT.ALM.AdvancedExecProperties">
+    <JavaHome>$(External)Java\bin\</JavaHome>
+    <EclipseHome>$(External)Eclipse\</EclipseHome>
+    <ProductFile>$(MSBuildThisFileDirectory)..\com.shs.hl.product\shs.product</ProductFile>
+    <PluginXml>$(MSBuildThisFileDirectory)..\com.shs.hl.product\plugin.xml</PluginXml>
+    <EquinoxLauncher>$(EclipseHome)plugins\org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar</EquinoxLauncher>
+    <!-- To set all mandatory arguements for AdvancedExec Task-->
+    <Command>$(JavaHome)java.exe</Command>
+    <CommandLineArgs>-jar "$(EquinoxLauncher)" -application org.eclipse.ant.core.antRunner -buildfile "$(MSBuildThisFileDirectory)..\com.shs.hl.pde.build\build-shs.xml"</CommandLineArgs>
+    <WarningFile></WarningFile>
+    <WarningRegEx></WarningRegEx>
+    <ErrorRegEx></ErrorRegEx>
+    <ErrorFile></ErrorFile>
+    <SuccessRegEx>BUILD SUCCESSFUL\r\nBUILD SUCCESSFUL</SuccessRegEx>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <ModelFilesD8SpecificSource Include="$(FittingHIDBInterfacesBin)..\..\models\D8\**\*.*" />
+    <ModelFilesD8Source Include="$(FittingHIDBInterfacesBin)..\..\models\*.cl" />
+    <ModelFilesD9SpecificSource Include="$(FittingHIDBInterfacesBin)..\..\models\D9\**\*.*" />
+    <ModelFilesD9Source Include="$(FittingHIDBInterfacesBin)..\..\models\*.cl" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ModelFilesD8Target>$(HearingLanguageSource)Source\com.shs.hl.stdlib.D8\models\params\</ModelFilesD8Target>
+    <ModelFilesD9Target>$(HearingLanguageSource)Source\com.shs.hl.stdlib.D9\models\params\</ModelFilesD9Target>
+  </PropertyGroup>
+  <Import Condition="'$(GlobalTargetsPath)' != ''" Project="$(GlobalTargetsPath)SHS.SAT.ALM.Build.Task.AdvancedExecTask.targets" />
+  <Import Condition="'$(GlobalTargetsPath)' != ''" Project="$(GlobalTargetsPath)MSBuild.ExtensionPack.targets" />
+  <Import Condition="'$(GlobalTargetsPath)' != ''" Project="$(GlobalTargetsPath)MSBuild.Community.Tasks.targets" />
+  <Target Name="BeforeCompile" >
+    <Zip Condition="!Exists('$(EquinoxLauncher)')"  TaskAction="Extract" ExtractPath="$(EclipseHome)" ZipFileName="$(EclipseHome)eclipse.zip"/>
+
+    <Time Format="yyyy-MM-dd">
+      <Output TaskParameter="FormattedTime" PropertyName="BuildDate" />
+    </Time>
+
+    <Attrib Files="$(ProductFile)" ReadOnly="false"/>
+    <XmlUpdate XmlFileName="$(ProductFile)" XPath="/product/aboutInfo/text" Value="%0aHAL Workbench%0a%0a%0aVersion $(HearingLanguageVersion)%0aDate $(BuildDate)%0a" />
+    <Attrib Files="$(ProductFile)" ReadOnly="true"/>
+
+    <Attrib Files="$(PluginXml)" ReadOnly="false"/>
+    <XmlUpdate XmlFileName="$(PluginXml)" XPath="/plugin/extension[1]/product[1]/property[@name='aboutText']/@value" Value="HAL Workbench&#x0A;&#x0A;&#x0A;Version $(HearingLanguageVersion)&#x0A;Date $(BuildDate)" />
+    <Attrib Files="$(PluginXml)" ReadOnly="true"/>
+
+    <Copy SourceFiles="@(ModelFilesD8SpecificSource)" DestinationFiles="@(ModelFilesD8SpecificSource->'$(ModelFilesD8Target)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(ModelFilesD8Source)" DestinationFiles="@(ModelFilesD8Source->'$(ModelFilesD8Target)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(ModelFilesD9SpecificSource)" DestinationFiles="@(ModelFilesD9SpecificSource->'$(ModelFilesD9Target)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(ModelFilesD9Source)" DestinationFiles="@(ModelFilesD9Source->'$(ModelFilesD9Target)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+  </Target>
+  <Target Name="AfterCompile">
+    <Move Condition="Exists('$(OutputPath)product-win32.win32.x86.zip')" SourceFiles="$(OutputPath)product-win32.win32.x86.zip" DestinationFiles="$(OutputPath)HearingLanguage_Output.zip" />
+  </Target>
+</Project>

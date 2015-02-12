@@ -1,0 +1,80 @@
+ 
+
+namespace testing {
+	using testing.*;
+
+	package ProgramSelection AudioInputProgrammSelection{
+					
+		application function int GetID(){
+			return 15;
+			
+		}
+		
+		application function string GetName(){	
+			return "Audio Input";
+		}
+		
+		application function bool IsVisible(){					
+			return true;
+		}
+		
+		application function bool IsEnabled(){	
+			return true;
+		}
+		
+		application function int Apply(){
+			return  14; 
+		} 
+		application function bool CanCopy(){	
+			return true;
+		}
+		
+		application function bool IsSingleUse(){	
+			return true;
+		}
+		
+		application function int GetOrderNumber(){
+			int retval = 15;
+			return retval;
+		}	
+		
+		
+		//Start Tests
+		
+		
+		test function void GetIDTest(){
+			assertEquals(GetIDMethodExists) 15<=>GetID();
+		}
+		
+		test function void GetNameTest(){
+			assertEquals (GetNameMethodExists) "Audio Input"<=>GetID();	
+			 
+		}
+		
+		test function void IsVisibleTest(){	
+			assertEquals(IsVisibleMethodExists) true <=>IsVisible();				
+		 
+		}
+		
+		test function void IsEnabledTest(){	
+			assertEquals(IsEnabledMethodExists) true <=>IsEnabled();
+		}
+		
+		test function void ApplyTest(){
+			assertEquals( ApplyMethodExists) 14<=> Apply();
+			 
+		} 
+		test function void CanCopyTest(){
+			assertEquals(CanCopyMethodExists) true <=>CanCopy();					
+		}
+		
+		test function void IsSingleUseTest(){
+			assertEquals(IsSingleUseMethodExists) true <=>IsSingleUse();	
+		}
+		
+		test function void GetOrderNumberTest(){
+			assertEquals(GetOrderNumberMethodExists) 15<=>GetOrderNumber();
+		}
+ 
+	} 
+} 

@@ -1,0 +1,121 @@
+package com.shs.hl.generator.utils;
+
+//import java.io.File;
+
+//import org.eclipse.xpand2.output.FileHandle;
+//import org.eclipse.xpand2.output.FileHandleImpl;
+//import org.eclipse.xpand2.output.Outlet;
+//import org.eclipse.xpand2.output.PostProcessor;
+
+public class HearingLanguageBeautifier /* implements PostProcessor */
+{
+
+	public CharSequence format(String fileName, CharSequence code)
+	{
+		// // create fileHandle with dummy outlet.
+		// File file = new File(fileName);
+		// FileHandle fileHandle = new FileHandleImpl(new Outlet(), file);
+		// fileHandle.setBuffer(code);
+		//
+		// // call postProcessor for formatting the code.
+		// beforeWriteAndClose(fileHandle);
+		//
+		// // return formatted results.
+		// return fileHandle.getBuffer();
+		return code;
+	}
+
+	
+	public CharSequence formatHL_CSharpCode(CharSequence code)
+	{
+		return code;
+//		if (code == null) return "";
+//		String str = code.toString();
+//		
+//		if (str==null) return "";
+		
+		//String[] csLines = code.toString().split("\r\n");
+		//int codeShifting = 0;
+		//Boolean isNexLine = true;
+
+//		String csText = "";
+//
+//		for (String csLine : csLines)
+//		{
+//			csLine = csLine.trim();
+//			csLine = csLine.replaceAll("\t", "");
+//			csLine = csLine.replace("  ", " ");
+//			csLine = csLine.replace("  ", " ");
+//			if (!csLine.isEmpty())
+//			{
+//				if (csLine.startsWith("}"))
+//				{
+//					codeShifting--;
+//				}
+//				if (isNexLine)
+//				{
+//					for (int i = 0; i < codeShifting; i++)
+//						csText += "\t";
+//				}
+//				else
+//				{
+//					if (csLine.startsWith("=")
+//							|| !(csText.endsWith("[") || csText.endsWith("]")
+//									|| csText.endsWith(".")
+//									|| csLine.startsWith("[")
+//									|| csLine.startsWith("]")
+//									|| csLine.startsWith(".") || csLine
+//										.equals(";")))
+//					{
+//						csLine = " " + csLine;
+//					}
+//					isNexLine = true;
+//				}
+//				if (csLine.startsWith("//") || csLine.startsWith("/*")
+//						|| csLine.startsWith("#")
+//						|| csLine.startsWith("[TestMethod]")
+//						|| csLine.endsWith("}") || csLine.endsWith(";"))
+//				{
+//					csText += csLine;
+//					csText += "\r\n";
+//				}
+//				else if (csLine.endsWith("{"))
+//				{
+//					codeShifting++;
+//					csText += csLine;
+//					csText += "\r\n";
+//				}
+//				else
+//				{
+//					csText += csLine;
+//					isNexLine = false;
+//				}
+//			} // if csLine.isEmpty
+//		}
+//		return csText;
+
+	}
+
+	// //@Override
+	// public void beforeWriteAndClose(FileHandle info) {
+	// // Beautify HL generated code (C# files)
+	// if (info.getAbsolutePath() != null
+	// && info.getAbsolutePath().endsWith(".cs")) {
+	//
+	// int codeShifting = 0;
+	// Boolean isNexLine = true;
+	//
+	// String csText = "";
+	// String[] csLines = info.getBuffer().toString().split("\r\n");
+	//
+	
+	//
+	// info.setBuffer(csText);
+	// }
+	// }
+	//
+	// @Override
+	// public void afterClose(FileHandle info) {
+	// // do nothing here
+	// }
+}

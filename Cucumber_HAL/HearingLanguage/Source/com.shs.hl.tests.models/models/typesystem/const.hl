@@ -1,0 +1,16 @@
+namespace constStuff {
+
+	protected function void f() {
+		int i = 10;
+		i = 20; 	// works, not const 
+		
+
+		int g const;	// error: const without init makes no sense  
+		
+		
+		int j const = 20; 
+		j = 30;		// error: const cannot be reassigned
+		
+	
+	}	 
+}

@@ -1,0 +1,156 @@
+typesystem com.shs.hl.typesys.HLTypeSys
+	ecore file "platform:/resource/com.shs.hl/src-gen/com/shs/hl/HearingLanguage.ecore"
+	language package com.shs.hl.hearingLanguage.HearingLanguagePackage
+	
+//	sublanguage cl {
+//		ecore file "platform:/resource/com.shs.hl/src-gen/com/shs/hl/HearingLanguage.ecore"
+//		language package com.shs.hl.hearingLanguage.HearingLanguagePackage
+//	}	
+//	sublanguage cl {
+//		ecore file "platform:/resource/com.shs.common/src-gen/com/shs/common/CommonLanguage.ecore"
+//		language package com.shs.common.commonLanguage.CommonLanguagePackage
+//	}
+
+// Todo: Claus: do we need any rule for that
+
+//typeof Type
+//typeof SpecialType
+//typeof PseudoUnitType
+//typeof PrimitiveType
+//typeof NumericType
+//typeof IntegerParameterType
+//typeof IntSetType
+//typeof IntRangeType
+//typeof FrequencyType
+//typeof DoubleParameterType
+//typeof ArrayType
+
+
+section "Types with own implementation"
+
+	typeof NullType -> none
+	typeof EnumParameterType -> none
+	
+	
+	
+	
+
+	
+/* Base type */
+section "Primitive types"
+	typeof IntType -> clone
+
+/* 	
+	
+	
+section "Primitive types"  
+
+	typeof VoidType -> clone
+	typeof BoolType -> clone
+	typeof IntType -> clone
+	typeof DoubleType -> clone
+	
+	typeof StringType -> clone
+	typeof StringIdType -> clone
+	
+	subtype IntType base DoubleType
+	subtype StringIdType base StringType
+
+	typeof EnumRight -> EnumParameterType
+	typeof EnumLeft -> EnumParameterType
+
+//Todo: Claus eingefügt -> Ist das OK?
+
+	typeof IntRangeType -> IntType
+	typeof IntSetType -> IntType
+
+section "HI specific types"
+
+	typeof CurveType -> clone
+	typeof CurvePointType -> clone
+	
+	typeof LevelCurvesType -> clone
+	typeof LevelCurvePointType -> clone
+	
+	typeof ChannelType -> clone
+	typeof ChannelSetType -> clone
+	
+	typeof GainType -> IntType
+	typeof TimeType -> IntType
+	typeof FrequenceType -> IntType
+	typeof PercentType -> IntType
+
+section "Type of compare functions"
+
+	typeof TrueLiteral -> BoolType
+	typeof FalseLiteral -> BoolType
+	
+	typeof Greater -> BoolType
+	typeof Smaller -> BoolType
+	typeof GreaterOrEquals -> BoolType
+	typeof SmallerOrEquals -> BoolType
+	typeof Equals -> BoolType
+	typeof UnEquals -> BoolType
+	typeof And -> BoolType
+	typeof Or -> BoolType
+	
+	typeof BitAnd -> IntType
+	typeof BitOr -> IntType
+	typeof BitXor -> IntType
+	typeof BitComplementExpr -> IntType
+	typeof BitCheck -> BoolType
+
+section "Type of expressions"
+
+	typeof IsMinExpression -> BoolType
+	typeof IsMaxExpression -> BoolType
+	typeof IsValidExpression -> BoolType
+	typeof IsOffsAppExpression -> BoolType
+	
+	typeof InIntervalExpression -> BoolType
+
+	typeof DefinedExpression -> BoolType
+    typeof NullExpression -> NullType
+	
+	typeof IntRangeExpression -> IntRangeType
+	typeof IntSetExpression -> IntSetType
+
+section "Type of buildin functions"
+
+// Todo: Claus: Check AdjustCompStatement	
+	typeof AdjustCompStatement -> VoidType	
+	typeof AppOffsStatement -> VoidType
+	typeof AddToTGStatement -> VoidType
+	typeof MultToTGStatement -> VoidType
+	
+	typeof SetMinStatement -> VoidType
+	typeof SetMaxStatement -> VoidType
+
+section "Characteristic of types"
+
+	characteristic nullable {StringType, StringIdType,
+							 EnumParameterType,
+							 CurveType, CurvePointType,
+							 LevelCurvesType, LevelCurvePointType,
+							 ChannelType, ChannelSetType
+	}
+	characteristic iterable {IntRangeType, IntSetType,
+							 ArrayType,
+							 CurveType, LevelCurvesType,
+							 ChannelSetType
+	}
+	characteristic indexing {IntType, IntRangeType, IntSetType}
+	
+	*/
+	
+	
+	
+//	characteristic comparableStuff {IntType,
+//									DoubleType,
+//									EnumParameterType, IntegerParameterType,
+//									DoubleParameterType, BoolType, 
+//									StringType, StringIdType, CurvePointType,
+//									LevelCurvePointType, ChannelType,
+//									ChannelSetType
+//	}
+//cl.getBitmaskParameter, new OrderedEnum,

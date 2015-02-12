@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.shs.hlt
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: com.shs.hlt; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext;visibility:=reexport,
+ org.eclipse.xtext.xbase;resolution:=optional;visibility:=reexport,
+ org.eclipse.xtext.generator;resolution:=optional,
+ org.apache.commons.logging;bundle-version="1.0.4";resolution:=optional,
+ org.eclipse.emf.codegen.ecore;resolution:=optional,
+ org.eclipse.emf.mwe.utils;resolution:=optional,
+ org.eclipse.emf.mwe2.launch;resolution:=optional,
+ com.shs.common;bundle-version="1.0.0",
+ org.eclipse.xtext.util,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common,
+ org.antlr.runtime,
+ org.eclipse.xtext.xbase.lib
+Import-Package: org.apache.log4j
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: com.shs.hl,
+ com.shs.hl.formatting,
+ com.shs.hl.generator,
+ com.shs.hl.hearingLanguageTest,
+ com.shs.hl.hearingLanguageTest.impl,
+ com.shs.hl.hearingLanguageTest.util,
+ com.shs.hl.parser.antlr,
+ com.shs.hl.parser.antlr.internal,
+ com.shs.hl.scoping,
+ com.shs.hl.serializer,
+ com.shs.hl.services,
+ com.shs.hl.validation,
+ com.shs.hlt

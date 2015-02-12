@@ -1,0 +1,134 @@
+namespace tests
+{
+	package Lib ControlFlowTests
+	{
+		test function void whileLoop ()
+		{
+			int a = 10;
+			while (a < 20)
+			{
+				a = a + 1;
+			}
+			assertEquals (whileLoop) a <=> 20;
+		}
+		test function void doWhileLoop ()
+		{
+			int a = 10;
+			do
+			{
+				a = a + 1;
+			}
+			while (a < 20);
+			assertEquals (dowhileLoop) a <=> 20;
+			bool tes1 = true;
+			do
+			{
+				a = a + 1;
+				if (a == 27)
+				{
+					tes1 = false;
+				}
+			}
+			while (tes1);
+			assertEquals (booleanAssingmentinDoWhile) tes1 <=> false;
+		}
+		test function void ifStatementTest ()
+		{
+			int a = 10;
+			if ((a == 11) &&
+					(a <= 5) ||
+					(a < 19))
+			{
+				assertEquals (statementWithMany) 1 <=> 1;
+			}
+			else
+			{
+				fail (statementWithManyFail);
+			}
+			
+			//another if
+			if ((a == 11))
+			{
+				fail (ifFailedStatement);
+			}
+			//else if Test 
+			else if (a > 11)
+			{
+				fail (failedElseIf);
+			}
+			else
+			{
+				if(a <13)
+				{
+					assertEquals(ifinElsePass)1 <=> 1;
+				}
+				else {
+					
+					fail(elseinElse);
+				}
+				
+			}
+		}
+		test function void switchStatementTest ()
+		{
+			int a = 10;
+			switch (a)
+			{
+				case 10:{
+					assertEquals (validCase) 1 <=> 1;
+				}
+				case 11:{fail(wrongCaseStatement);}
+				
+				case (13): {
+					fail(wrongCaseStatement2);
+				}
+								
+				default: {fail(defaultCaseNotValid);}
+						
+			}
+			
+		  //switch hierachy
+		  
+		  switch (a)
+		  {
+		  	case 10:{
+		  		string str = "doSomething";
+		  		switch (str)
+		  		{
+		  			case "doWrong":{
+		  				fail (WrongCaseBranch);
+		  			}
+		  			case "doSomething":{
+		  				assertEquals (CaseInSwitchInSwitch) 1 <=> 1;
+		  			}
+		  			default:{
+		  				fail (wrongDefaultCaseInSwitchStatement);
+		  			}
+		  		}
+		  	}
+		  	
+		  }	
+	 }
+		
+		//to be ignored: 
+		test function void breakStatementTest ()
+		{
+			int a = 10;
+			while (a < 30)
+			{
+				a = a + 1;
+				if (a == 17)
+				{
+					break;
+				}
+			}
+			assertEquals (breakFromLoop) a <=> 17;
+		}
+		
+		test function void foreachStatementTest(){
+		fail(NotImplementedForEachStatement);
+	}
+
+			
+	}
+}

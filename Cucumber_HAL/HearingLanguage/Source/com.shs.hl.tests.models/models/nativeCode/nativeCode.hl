@@ -1,0 +1,25 @@
+namespace bitmaskstuff {
+
+	protected function void tueWas() {  
+	}
+	
+	native function int f1(int x) { // ok, native protected function with only delegateNative
+		delegateNative;  
+	}
+
+	native function int f2(int x) { // error, two are not allowed
+		delegateNative;  
+		delegateNative;  
+	}
+
+	native function int f3(int x) { // error, can't have anything but delegateNative
+		int y;  
+		delegateNative;  
+	}
+
+	protected function int f4(int x) { 
+		delegateNative;      // error, can't this in non-native protected functions
+		return 0; 
+	}
+
+}

@@ -1,0 +1,29 @@
+namespace curves uselib builtins {
+
+	using builtins.*;
+
+	protected function void curves() {
+	
+		curve c = crv:HL; 
+
+		curvepoint p1;
+		
+		int i = (c->MinIx)+1;
+		
+		freq f1 = p1->f;
+		gain g1 = p1->g;
+		
+		p1->f = 10;  // error: not an lvalue 
+
+		curvepoint p2 = c[5];
+		
+		if ( (crv:HL)->MinIx == 2 ) {}		
+		
+		foreach ( curvepoint p in c ) {
+			p->f;
+		}
+
+		
+	} 
+
+}

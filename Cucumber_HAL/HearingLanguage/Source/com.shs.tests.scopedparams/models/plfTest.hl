@@ -1,0 +1,17 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 1 instance in this file to assert, that plf.cl is taken into concern */
+	package Lib plfTest
+	{
+		test function void d8AgcCr1corrTest()
+		{
+			
+			plf:d8AgcCr1corr[0] = d8AgcCr1corr._64_0000;
+		    assertEquals(d8AgcCr1corrTest) plf:d8AgcCr1corr[0] <=> d8AgcCr1corr._64_0000;
+			
+		}
+	 
+	}
+}

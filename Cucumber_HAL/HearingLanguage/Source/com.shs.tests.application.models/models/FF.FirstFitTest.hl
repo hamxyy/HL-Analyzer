@@ -1,0 +1,28 @@
+namespace testing
+{
+	using testing.*;
+	package Lib FirstFitTest
+	{
+		application function void PreFit ()
+		{
+			assertSet (PreFit, 100);
+		}
+		
+		application function void PostFit ()
+		{
+			assertSet (PostFit, 100);
+		}
+		
+		test function void PreFitTest ()
+		{
+			PreFit ();
+			assertEquals (PreFitMethodExists) assertGet (PreFit) <=> 100;
+		}
+		
+		test function void PostFitTest ()
+		{
+			PostFit ();
+			assertEquals (PostFitMethodExists) assertGet (PostFit) <=> 100;
+		}
+	}
+}

@@ -1,0 +1,36 @@
+namespace testing {
+	
+	
+	//Test function calls for local functions and external functions
+	
+	package Lib FunctionCall  {
+		
+		test function  void functionCalls() {
+		 
+		 assertEquals(functionCallNoArgs) funct1() <=>2;				
+		 assertEquals(functionCallOneArg) funct2(2) <=>4;
+		 assertEquals(functionCallNArgs) funct3(2,"test") <=>"testtesttest";
+		}
+		
+		function int funct1(){
+			return 2;
+		}
+		
+		
+		function int funct2(int arg){
+			return 2*arg;
+		}
+		
+		function string funct3 (int arg, string arg3){
+		    int i=0;	
+			string res="";
+			while(i <=arg){
+				res+=arg3;
+				i+=1;
+			}
+			return res;			
+		}
+		
+		
+	}
+}

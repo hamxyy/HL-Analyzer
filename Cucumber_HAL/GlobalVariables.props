@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(BranchRoot)'==''">
+    <GlobalVariablesAlreadyImported>True</GlobalVariablesAlreadyImported>
+    <BranchRoot>$(MSBuildThisFileDirectory)</BranchRoot>
+  </PropertyGroup>
+  <PropertyGroup>
+    <External>$(BranchRoot)External\</External>
+    <UILibraryBin>$(BranchRoot)Output\UILibrary\bin\$(Configuration)\</UILibraryBin>
+    <UILibrarySource>$(BranchRoot)UILibrary\Source\</UILibrarySource>
+    <PostSharpAspectsBin>$(BranchRoot)Output\PostSharpAspects\bin\$(Configuration)\</PostSharpAspectsBin>
+    <PostSharpAspectsSource>$(BranchRoot)PostSharpAspects\Source\</PostSharpAspectsSource>
+    <CommonBin>$(BranchRoot)Output\Common\bin\$(Configuration)\</CommonBin>
+    <CommonIncludes>$(BranchRoot)Output\Common\include\</CommonIncludes>
+    <CommonLibraries>$(BranchRoot)Output\Common\lib\$(Configuration)\</CommonLibraries>
+    <CommonSource>$(BranchRoot)Common\Source\</CommonSource>
+    <CommonTestAppsBin>$(BranchRoot)Output\Common\TestApps\bin\$(Configuration)\</CommonTestAppsBin>
+    <eTemplateBin>$(BranchRoot)Output\eTemplate\bin\$(Configuration)\</eTemplateBin>
+    <HIDBBuilderBin>$(BranchRoot)Output\eTemplate\HIDBBuilder\bin\$(Configuration)\</HIDBBuilderBin>
+    <hsmlEditBin>$(BranchRoot)Output\hsmlApi\bin\$(Configuration)\</hsmlEditBin>
+    <hsmlDataD8>$(BranchRoot)Output\HSMLData\D8\</hsmlDataD8>
+    <hsmlDataD9>$(BranchRoot)Output\HSMLData\D9\</hsmlDataD9>
+    <eTemplateSource>$(BranchRoot)eTemplate\Source\</eTemplateSource>
+    <FittingHIDBInterfacesBin>$(BranchRoot)Output\FittingHIDBInterfaces\bin\$(Configuration)\</FittingHIDBInterfacesBin>
+    <FittingHIDBInterfacesInclude>$(BranchRoot)Output\FittingHIDBInterfaces\include\</FittingHIDBInterfacesInclude>
+    <FittingHIDBInterfacesSource>$(BranchRoot)FittingHIDBInterfaces\Source\</FittingHIDBInterfacesSource>
+    <HxmlSchema>$(BranchRoot)FittingHIDBInterfaces\HxmlSchema\</HxmlSchema>
+    <Globals>$(BranchRoot)Globals\</Globals>
+    <GlobalTargetsPath>$(BranchRoot)Globals\Targets\</GlobalTargetsPath>
+    <FitMeasurementBin>$(BranchRoot)Output\FitMeasurement\bin\$(Configuration)\</FitMeasurementBin>
+    <FitMeasurementTestAppsBin>$(BranchRoot)Output\FitMeasurement\TestApps\bin\$(Configuration)\</FitMeasurementTestAppsBin>    
+    <FitMeasurementSource>$(BranchRoot)FitMeasurement\Source\</FitMeasurementSource>
+    <FitMeasurementTestAppsSource>$(BranchRoot)FitMeasurement\TestApps\Source\</FitMeasurementTestAppsSource>
+    <MDIBin>$(BranchRoot)Output\MDI\bin\$(Configuration)\</MDIBin>
+    <MDISource>$(BranchRoot)MDI\Source\</MDISource>
+    <FittingBin>$(BranchRoot)Output\Fitting\bin\$(Configuration)\</FittingBin>
+    <MacroEnvBin>$(BranchRoot)Output\MacroEnvironment\bin\$(Configuration)\</MacroEnvBin>
+    <FittingIncludes>$(BranchRoot)Output\Fitting\include\</FittingIncludes>
+    <FittingLibraries>$(BranchRoot)Output\Fitting\lib\$(Configuration)\</FittingLibraries>
+    <FittingSource>$(BranchRoot)Fitting\</FittingSource>
+    <HearingLanguageBin>$(BranchRoot)Output\HearingLanguage\product\</HearingLanguageBin>
+    <HearingLanguageSource>$(BranchRoot)HearingLanguage\</HearingLanguageSource>
+    <SupportToolsBin>$(BranchRoot)Output\SupportTools\bin\$(Configuration)\</SupportToolsBin>
+    <SupportToolsSource>$(BranchRoot)SupportTools\Source\</SupportToolsSource>
+  </PropertyGroup>
+</Project>

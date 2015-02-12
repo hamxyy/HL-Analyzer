@@ -1,0 +1,14 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 1 instance in this file to assert, that hiSwCombPar.cl is taken into concern */
+	package Lib hiSwCombParTest
+	{
+		test function void d8SwOutLimTest ()
+		{
+			hi:d8SwOutLim = d8SwOutLim.M15dB;
+			assertEquals(d8SwOutLimTest)hi:d8SwOutLim <=> d8SwOutLim.M15dB;
+		}
+	}
+}

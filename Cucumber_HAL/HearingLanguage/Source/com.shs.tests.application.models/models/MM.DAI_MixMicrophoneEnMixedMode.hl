@@ -1,0 +1,106 @@
+namespace testing
+{
+	using testing.*;
+	package MixedMode DAI_MixMicrophoneEnMixedMode
+	{
+		application function bool IsVisible ()
+		{
+			return true;
+		}
+		
+		application function bool IsEnabled ()
+		{
+			return false;
+		}
+		
+		application function int MaxPos ()
+		{
+			return 1;
+		}
+		
+		application function int MaxPhysicalPos()
+		{
+			return 1;
+		}
+		
+		application function bool IsVisiblePhysicalPos ()
+		{
+			return false;
+		}
+		
+		application function bool IsEnabledPos (int pos)
+		{
+			return true;
+		}
+		
+		application function bool IsEnabledPhysicalPos(int pos)
+		{
+			return true;
+		}
+		
+		application function int GetPos ()
+		{
+			return 11;
+		}
+		
+		application function void SetPos(int pos)
+		{
+			assertSet (SetPos, 100);
+		}
+		
+		//begin Tests
+		
+		test function  void IsVisibleTest ()
+		{
+			assertEquals(IsVisibleMethodExists) true <=>IsVisible();
+		}
+		
+		test function void IsEnabledTest ()
+		{
+			assertEquals(IsEnabledMethodExists) false <=>IsEnabled();
+	
+		}
+		
+		test function void MaxPosTest ()
+		{
+			assertEquals(IsEnabledMethodExists) 1<=>MaxPos();
+			
+		}
+		
+		test function void MaxPhysicalPosTest()
+		{
+			assertEquals(MaxPhysicalPosMethodExists) 1<=>MaxPhysicalPos();
+			
+		}
+		
+		test function void IsVisiblePhysicalPosTest ()
+		{
+			assertEquals(IsVisiblePhysicalPosMethodExists) false <=>IsVisiblePhysicalPos();
+			
+		}
+		
+		test function void IsEnabledPosTest ()
+		{
+			assertEquals(IsEnabledPosMethodExists) true <=>IsEnabledPos(110);
+			
+		}
+		
+		test function void IsEnabledPhysicalPosTest()
+		{
+			assertEquals(IsEnabledPhysicalPosMethodExists) true <=>IsEnabledPhysicalPos(21);
+			
+		}
+		
+		test function void GetPosTest ()
+		{
+			assertEquals( GetPosMethodExists) 11<=> GetPos();
+			
+		}
+		
+		test function void SetPosTest()
+		{
+			SetPos(22);
+			assertEquals (SetPosMethodExists) assertGet (SetPos) <=> 100;
+	   }
+ }
+}

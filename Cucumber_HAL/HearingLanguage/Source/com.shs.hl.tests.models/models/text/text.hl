@@ -1,0 +1,15 @@
+namespace unitsAndParameterArrays {
+
+	protected function void f1() {
+		string s = "Hallo";
+		int t = "Kaputt";   // error: wrong type 
+
+		stringID ss1 = "aValidOne";  // shorter than 16 chars 
+		stringID  ss2 = "thisOneIsWaaaaaaaaaaaaaaayTooLong";  // error: > 16
+		s = ss1; // ok 
+		ss2 = "Hallo"; // error: they are implicitly const 
+		
+	}
+	
+	 
+}

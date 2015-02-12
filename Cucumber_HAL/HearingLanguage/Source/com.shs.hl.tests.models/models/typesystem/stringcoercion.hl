@@ -1,0 +1,20 @@
+namespace stringcoercion {
+
+	protected function void stuff() {
+ 
+ 		int iii = 10;
+   
+		string s = 10; 	// error: coercion just works under a plus
+		
+		string t = "Hallo " + "noch einer";
+		
+		string s1 = "Hallo " + 10;
+		string s1b = t + 10;
+			 
+		int i; 
+		string s2 = "Hallo " + i;
+		 
+	
+	}
+	 
+}

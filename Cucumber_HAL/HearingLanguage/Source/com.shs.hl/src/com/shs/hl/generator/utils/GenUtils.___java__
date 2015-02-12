@@ -1,0 +1,167 @@
+package com.shs.hl.generator.utils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+
+import com.shs.common.commonLanguage.EnumLiteral;
+import com.shs.common.commonLanguage.EnumParameter;
+import com.shs.common.commonLanguage.SymbolDeclaration;
+import com.shs.hl.hearingLanguage.FunctionDeclaration;
+import com.shs.hl.hearingLanguage.FunctionKind;
+import com.shs.hl.hearingLanguage.IsOffsAppExpression;
+import com.shs.hl.hearingLanguage.Module;
+import com.shs.hl.hearingLanguage.Namespace;
+import com.shs.hl.hearingLanguage.ParameterReadExpression;
+import com.shs.hl.hearingLanguage.SymbolReference;
+import com.shs.hl.typesystem.HLTypesystem;
+
+import de.itemis.xtext.typesystem.ITypesystem;
+import de.itemis.xtext.typesystem.trace.TypeCalculationTrace;
+
+public class GenUtils {
+
+	// private static final ParameterReadExpression appEx = null;
+	private static ITypesystem	ts					= new HLTypesystem();
+	private static int			uid					= 0;
+
+	private static List<String>	testFunctionCalls	= new ArrayList<String>();
+
+	public static Boolean hastTestFunctions(Object ns) {
+		if (ns instanceof Namespace) {
+			return hasTestFunctions((Namespace) ns);
+		}
+		return false;
+	}
+
+	public static Boolean hasTestFunctions(Namespace ns) {
+		for (SymbolDeclaration decl : ns.getFunctions()) {
+			if (((FunctionDeclaration) decl).getKind() == FunctionKind.TEST)
+				return true;
+		}
+		return false;
+	}
+
+	// TODO method too many args that cn be derived from 1st arg
+	public static String registerTestFunction(FunctionDeclaration d, String ns, String classname) {
+		testFunctionCalls.add("new " + ns + "." + classname + "()." + d.getName() + "()");
+		return "";
+	}
+
+	public static List<String> getTestFunctionCalls() {
+		return testFunctionCalls;
+	}
+
+
+	public static List<ParameterReadExpression> getParameterReadExpressions(Object functionDeclaration) {
+		List<ParameterReadExpression> parameterReadExpressions = new ArrayList<ParameterReadExpression>();
+		List<String> functionNames = new ArrayList<String>();
+		getRecursiveParameterReadExpressions(functionDeclaration, parameterReadExpressions, functionNames);
+		return parameterReadExpressions;
+	}
+
+	public static void getRecursiveParameterReadExpressions(Object functionDeclaration, List<ParameterReadExpression> parameterReadExpressions, List<String> functionNames) {
+
+		if (!AddFunctionNameToList(functionDeclaration, functionNames))
+			return;
+
+		TreeIterator<EObject> allContents = ((EObject) functionDeclaration).eAllContents();
+		while (allContents.hasNext()) {
+			EObject object = allContents.next();
+			if (ParameterReadExpression.class.isAssignableFrom(object.getClass())) {
+				boolean bFound = false;
+				for (ParameterReadExpression parameterReadExpression : parameterReadExpressions) {
+					if (parameterReadExpression.getParam() == ((ParameterReadExpression) object).getParam()) {
+						bFound = true;
+						break;
+					}
+				}
+				if (!bFound) {
+					parameterReadExpressions.add((ParameterReadExpression) object);
+				}
+			}
+
+		}
+
+		for (SymbolReference calledFunctionDeclaration : EcoreUtil2.getAllContentsOfType((EObject) functionDeclaration, SymbolReference.class)) {
+			getRecursiveParameterReadExpressions(calledFunctionDeclaration.getSymbol(), parameterReadExpressions, functionNames);
+		}
+	}
+
+	public static List<EnumLiteral> getEnumLiterals(Object functionDeclaration) {
+		List<EnumLiteral> enumLiteralElements = new ArrayList<EnumLiteral>();
+		List<String> functionNames = new ArrayList<String>();
+		getRecursiveEnumLiterals(functionDeclaration, enumLiteralElements, functionNames);
+		return enumLiteralElements;
+	}
+
+	public static void getRecursiveEnumLiterals(Object functionDeclaration, List<EnumLiteral> literalList, List<String> functionNames) {
+
+		if (!AddFunctionNameToList(functionDeclaration, functionNames)) return;
+
+		TreeIterator<EObject> allContents = ((EObject) functionDeclaration).eAllContents();
+		while (allContents.hasNext())
+		{
+
+			EObject object = allContents.next();
+
+			if (IsOffsAppExpression.class.isAssignableFrom(object.getClass())) {
+
+				SymbolReference to = (SymbolReference) ((IsOffsAppExpression) object).getArgTo();
+				Object someTmp = to.getSymbol();
+
+				if (!(someTmp instanceof EnumLiteral))
+					return;
+
+				EnumLiteral lit = (EnumLiteral) someTmp;
+				EnumParameter parm = ((EnumParameter) lit.eContainer());
+
+				boolean bFound = false;
+				for (EnumLiteral enumLiteral : literalList) {
+					if (enumLiteral.getName() == lit.getName()) {
+						if (((EnumParameter) enumLiteral.eContainer()).getName() == parm.getName()) {
+							bFound = true;
+							break;
+						}
+					}
+				}
+
+				if (!bFound) {
+					literalList.add(lit);
+				}
+			}
+		}
+
+		for (SymbolReference calledFunctionDeclaration : EcoreUtil2.getAllContentsOfType((EObject) functionDeclaration, SymbolReference.class)) {
+			getRecursiveEnumLiterals(calledFunctionDeclaration.getSymbol(), literalList, functionNames);
+		}
+	}
+
+	private static boolean AddFunctionNameToList(Object functionDeclaration, List<String> functionNames) {
+		if (!FunctionDeclaration.class.isAssignableFrom(functionDeclaration.getClass()))
+			return false;
+		String ownFunctionName = ((FunctionDeclaration) functionDeclaration).getName();
+		for (String functionName : functionNames) {
+			if (functionName == ownFunctionName)
+				return false;
+		}
+		functionNames.add(ownFunctionName);
+		return true;
+	}
+
+	public static Object typeof(Object o) {
+		return ts.typeof((EObject) o, new TypeCalculationTrace());
+	}
+
+
+	public static String uniquify(String name) {
+		return name + (uid++);
+	}
+
+
+}

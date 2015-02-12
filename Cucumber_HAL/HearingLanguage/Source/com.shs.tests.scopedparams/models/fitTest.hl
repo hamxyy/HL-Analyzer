@@ -1,0 +1,19 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 2 instances in this file to assert, that fit.cl is taken into concern */
+	package Lib fitTest
+	{
+		test function void ExpLevelTest()
+		{
+		  	assertEquals(ExpLevelTest) true <=>(env:Sides != null);
+		}
+		
+		test function void AccLevelTest()
+		{
+		   //TODO constant values tests?
+			assertEquals(AccLevelTest)env:ProgramSlots <=> 6;
+		}
+	}
+}

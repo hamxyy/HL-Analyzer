@@ -1,0 +1,43 @@
+namespace domainfunctions1 {
+	
+	package Lib Dom1 {
+
+		public function void d1() {
+			f11(); // ok
+			domainfunctions2.Dom2.d21(); // error: call no other domain protected functions
+			//domainfunctions2.Dom2.d22(); // ok
+		} 
+	   
+		protected function void f11() {
+			f12(); // ok
+			domainfunctions2.Dom2.d21(); // error: call no other domain protected functions
+			domainfunctions2.Dom2.d22(); // ok
+// TODO: Claus: does not work 
+//			domainfunctions1.Dom11.f11(); // ok
+//			domainfunctions1.Dom11.f12(); //ok
+		}
+	 
+		public function void f12() {
+		}
+
+	}
+	
+	package Lib Dom11 {	
+		protected function void f11() {
+		}
+		public function void f12() {
+		}
+	}
+	
+}
+
+namespace domainfunctions2 {
+	
+	package Lib Dom2 {
+		protected function void d21() {
+		}  		
+		public function void d22() {
+		}
+	} 
+	 
+}

@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.shs.applicationtests.model
+Bundle-SymbolicName: com.shs.tests.application.models
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Siemens Hearing Systems (SHS)
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.emf.mwe2.launch,
+ org.apache.log4j;bundle-version="1.2.15",
+ org.apache.commons.logging,
+ com.shs.common;bundle-version="1.0.0",
+ de.itemis.xtext.typesystem;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy

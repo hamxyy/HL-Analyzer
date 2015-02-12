@@ -1,0 +1,75 @@
+namespace testing
+{
+	using testing.*;
+	package Lib hiLLD8Test
+	{
+
+	//const test macros can not set/modify such parameters
+		test function void d8PAgcCk3BbEnTest ()
+		{
+			assertEquals (d8PAgcCk3BbEnTest) hi:d8PAgcCk3BbEn <=> d8PAgcCk3BbEn.off;
+		}
+
+		/* to test: hi enum  */
+		test function void d8PFbcLevEnNraTest ()
+		{
+			hi:d8PFbcLevEnNra = d8PFbcLevEnNra.off;
+			assertEquals (d8PFbcLevEnNraTest) hi:d8PFbcLevEnNra <=> d8PFbcLevEnNra.off;
+			//switch to another state;
+			hi:d8PFbcLevEnNra = d8PFbcLevEnNra.on;
+			assertEquals (d8PFbcLevEnNraTest) hi:d8PFbcLevEnNra <=> d8PFbcLevEnNra.on;
+		}
+
+		//test ordered enum, shift position and test result
+		test function void d8PFbcLevImpPrbTest ()
+		{
+			hi:d8PFbcLevImpPrb = d8PFbcLevImpPrb.med_sensitive;
+			assertEquals (d8PFbcLevImpPrbTest) hi:d8PFbcLevImpPrb <=> d8PFbcLevImpPrb.med_sensitive;
+			//shift throught the ordered list
+			hi:d8PFbcLevImpPrb >> 1;
+			assertEquals (d8PFbcLevImpPrbTest) hi:d8PFbcLevImpPrb <=> d8PFbcLevImpPrb.disabled;
+			//TODO: what happens if we shift beyond the boundary?
+
+		}
+
+		/* to test: hi int[] */
+		test function void d8PAgcAlmTcAttSlowTest ()
+		{
+			hi:d8PAgcAlmTcAttSlow [ 0 ] = 44;
+			hi:d8PAgcAlmTcAttSlow [ 4 ] = 34;
+			assertEquals (d8PAgcAlmTcAttSlowTest) hi:d8PAgcAlmTcAttSlow [ 0 ] <=> 44;
+			assertEquals (d8PAgcAlmTcAttSlowTest) hi:d8PAgcAlmTcAttSlow [ 4 ] <=> 34;
+		}
+
+		/* to test: hi double[] */
+		test function void d8PAgcAlmSlopeAttTest ()
+		{
+			hi:d8PAgcAlmSlopeAtt [ 0 ] = 44.99;
+			hi:d8PAgcAlmSlopeAtt [ 4 ] = 34.67;
+			//we should get error, indexing starts with 0;
+			hi:d8PAgcAlmSlopeAtt [ 0 ] = 44.99;
+			assertEquals (d8PAgcAlmSlopeAttTest) hi:d8PAgcAlmSlopeAtt [ 0 ] <=> 44.99;
+			assertEquals (d8PAgcAlmSlopeAttTest) hi:d8PAgcAlmSlopeAtt [ 4 ] <=> 34.67;
+		}
+
+		/* to test: hi enum[] */
+		test function void d8PAgcAlmTcCtrlEnTest ()
+		{
+			hi:d8POutAgcoAddTcRel [ 0 ] = d8POutAgcoAddTcRel.none;
+			assertEquals (d8PAgcAlmTcCtrlEnTest) hi:d8POutAgcoAddTcRel [ 0 ] <=> d8POutAgcoAddTcRel.none;
+		}
+
+		/* to test: hi ordered enum[] */
+		test function void d8POutAgcoAddTcRelZTest ()
+		{
+			hi:d8POutAgcoAddTcRel [ 0 ] = d8POutAgcoAddTcRel.none;
+			assertEquals (d8POutAgcoAddTcRelZTest) hi:d8POutAgcoAddTcRel [ 0 ] <=> d8POutAgcoAddTcRel.none;
+            //shift..			
+			hi:d8POutAgcoAddTcRel [ 0 ] >> 2;
+			assertEquals (d8POutAgcoAddTcRelZTest) hi:d8POutAgcoAddTcRel [ 0 ] <=> d8POutAgcoAddTcRel._2_shifts;
+			
+			
+		}
+		
+	}
+}

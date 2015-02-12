@@ -1,0 +1,491 @@
+package com.shs.hl.generator.utils
+
+import com.google.inject.Inject
+import com.shs.common.commonLanguage.ChannelParameter
+import com.shs.common.commonLanguage.DoubleParameter
+import com.shs.common.commonLanguage.EnumLiteral
+import com.shs.common.commonLanguage.EnumParameter
+import com.shs.common.commonLanguage.IntegerParameter
+import com.shs.common.commonLanguage.ParameterScope
+import com.shs.common.commonLanguage.SymbolDeclaration
+import com.shs.hl.hearingLanguage.AddToTGStatement
+import com.shs.hl.hearingLanguage.AdjustCompStatement
+import com.shs.hl.hearingLanguage.And
+import com.shs.hl.hearingLanguage.AppOffsStatement
+import com.shs.hl.hearingLanguage.ArrayAccessExpression
+import com.shs.hl.hearingLanguage.AssertEqualsStatement
+import com.shs.hl.hearingLanguage.AssertGetExpression
+import com.shs.hl.hearingLanguage.AssertSetStatement
+import com.shs.hl.hearingLanguage.AssertStatement
+import com.shs.hl.hearingLanguage.AssignmentStatement
+import com.shs.hl.hearingLanguage.AtsideExpression
+import com.shs.hl.hearingLanguage.BitAnd
+import com.shs.hl.hearingLanguage.BitComplementExpr
+import com.shs.hl.hearingLanguage.BitOr
+import com.shs.hl.hearingLanguage.BuiltInCall
+import com.shs.hl.hearingLanguage.DefinedExpression
+import com.shs.hl.hearingLanguage.Div
+import com.shs.hl.hearingLanguage.DoWhileStatement
+import com.shs.hl.hearingLanguage.ElseIf
+import com.shs.hl.hearingLanguage.EnumLeft
+import com.shs.hl.hearingLanguage.EnumRight
+import com.shs.hl.hearingLanguage.Equals
+import com.shs.hl.hearingLanguage.Expression
+import com.shs.hl.hearingLanguage.ExpressionStatement
+import com.shs.hl.hearingLanguage.FailStatement
+import com.shs.hl.hearingLanguage.FalseLiteral
+import com.shs.hl.hearingLanguage.ForVarDeclaration
+import com.shs.hl.hearingLanguage.ForeachStatement
+import com.shs.hl.hearingLanguage.FunctionDeclaration
+import com.shs.hl.hearingLanguage.Greater
+import com.shs.hl.hearingLanguage.GreaterOrEquals
+import com.shs.hl.hearingLanguage.IfStatement
+import com.shs.hl.hearingLanguage.IsMaxExpression
+import com.shs.hl.hearingLanguage.IsMinExpression
+import com.shs.hl.hearingLanguage.IsOffsAppExpression
+import com.shs.hl.hearingLanguage.IsValidExpression
+import com.shs.hl.hearingLanguage.LocalVariableDeclaration
+import com.shs.hl.hearingLanguage.LocalVariableDeclarationStatement
+import com.shs.hl.hearingLanguage.LogChanCountExpression
+import com.shs.hl.hearingLanguage.Minus
+import com.shs.hl.hearingLanguage.MinusEqualsStatement
+import com.shs.hl.hearingLanguage.MultToTGStatement
+import com.shs.hl.hearingLanguage.Multi
+import com.shs.hl.hearingLanguage.MultiplicationEqualsStatement
+import com.shs.hl.hearingLanguage.Namespace
+import com.shs.hl.hearingLanguage.NotExpression
+import com.shs.hl.hearingLanguage.NullExpression
+import com.shs.hl.hearingLanguage.NumberLiteral
+import com.shs.hl.hearingLanguage.OppositeExpression
+import com.shs.hl.hearingLanguage.Or
+import com.shs.hl.hearingLanguage.ParameterReadExpression
+import com.shs.hl.hearingLanguage.ParenExpr
+import com.shs.hl.hearingLanguage.Plus
+import com.shs.hl.hearingLanguage.PlusEqualsStatement
+import com.shs.hl.hearingLanguage.PreDecrementExpr
+import com.shs.hl.hearingLanguage.PreIncrementExpr
+import com.shs.hl.hearingLanguage.PrintStatement
+import com.shs.hl.hearingLanguage.ReturnStatement
+import com.shs.hl.hearingLanguage.SetMaxStatement
+import com.shs.hl.hearingLanguage.SetMinStatement
+import com.shs.hl.hearingLanguage.SitExpression
+import com.shs.hl.hearingLanguage.Smaller
+import com.shs.hl.hearingLanguage.SmallerOrEquals
+import com.shs.hl.hearingLanguage.Statement
+import com.shs.hl.hearingLanguage.StatementList
+import com.shs.hl.hearingLanguage.SwitchStatement
+import com.shs.hl.hearingLanguage.SymbolReference
+import com.shs.hl.hearingLanguage.TextLiteral
+import com.shs.hl.hearingLanguage.TrueLiteral
+import com.shs.hl.hearingLanguage.Type
+import com.shs.hl.hearingLanguage.UnEquals
+import com.shs.hl.hearingLanguage.WhileStatement
+import com.shs.hl.util.LineGene
+import org.eclipse.emf.ecore.EObject
+
+class GenCodeRegions {
+	
+	@Inject	extension GenUtils utilsEx
+	
+	@Inject  extension Ranges ranges
+	
+	@Inject extension LineGene lineGene
+	
+	def dispatch CharSequence genCode(StatementList stList)
+		'''{«FOR stm : stList.statements»
+		 	«stm.genCode»
+		 «ENDFOR»
+		 }
+		'''
+	
+	
+	def dispatch genCode(WhileStatement whlSt)
+		
+		'''«whlSt.getStartRegion("",whlSt.eClass.name)»	while ( «whlSt.expr.genCode» )
+		     «whlSt.body.genCode»«whlSt.getEndRegion("")»'''
+	
+	
+	def dispatch genCode(EnumLiteral enumLit){
+		'''«enumLit.eContainer.enumCode»_«enumLit.name»
+		'''
+	}
+	
+	def dispatch genCode(ExpressionStatement statement){
+		'''«statement.expr.genCode»;'''
+	}
+	def dispatch genCode(DoWhileStatement statement){
+		'''«statement.getStartRegion("",statement.eClass.name)» do «statement.body.genCode» while ( «statement.expr.genCode»);«statement.getEndRegion("")»'''
+	}
+	
+	def dispatch genCode(AssertSetStatement statement)'''
+	 	_AssertSet("«statement.id»",«statement.assertSetValue»);'''
+		
+	def dispatch genCode(AssertGetExpression statement)'''
+	_AssertGet("«statement.id»");'''
+	
+	def dispatch genCode(AssertStatement statement)'''
+		_Assert("«statement.qualID()»",«statement.expr.genCode»,« statement.msg.genCode»);
+	'''
+	
+	
+	
+	def dispatch genCode(FailStatement statement)'''
+	   _Fail("«statement.qualID()»");
+	'''
+	
+	def dispatch genCode(AssertEqualsStatement statement)
+    '''
+    «val exp = GenUtils::uniquify("expected")»
+	«var act = GenUtils::uniquify("actual")»
+	Object «exp» = «statement.expected.genCode»;   
+	Object «act» = «statement.actual.genCode»;
+	_AssertEquals("«statement.qualID()»",«exp»,«act»);
+    '''
+	
+	def dispatch genCode(ReturnStatement statement)'''
+	 «statement.getStartRegion("",statement.eClass.name)»	return «statement.expr.genCode» «statement.getEndRegion("")»;
+	'''
+		
+	def dispatch genCode(ForeachStatement statement)
+	'''«statement.getStartRegion("",statement.eClass.name)»«statement.rangeForeachState» «statement.getEndRegion("")»''' 
+	
+	def dispatch genCode(PrintStatement statement)
+	'''«statement.getStartRegion("",statement.eClass.name)»Debug.WriteLine(«messageCode(statement.msg)»);
+	«statement.getEndRegion("")»'''
+	
+	
+	def dispatch messageCode(TextLiteral literal)
+	'''"«literal.value»" '''
+	
+	
+	def dispatch messageCode(NumberLiteral literal)
+	'''«literal.value»'''
+	
+	
+	def dispatch messageCode(SymbolReference literal)
+	'''«literal.symbol.name»'''
+	
+	def dispatch messageCode(Expression literal)
+	'''«literal.genCode»'''
+	
+	def dispatch genCode(AssignmentStatement statement)
+	'''
+	«statement.getStartRegion("",statement.eClass.name)»
+	«statement.lvalue.assignmentCode(statement.rvalue)»
+	«statement.getEndRegion("")»
+	'''
+	
+	def dispatch assignmentCode(AtsideExpression lvalue , Expression rvalue)
+	'''«lvalue.AtsideAssignment(rvalue)»;'''
+	
+	def dispatch assignmentCode(Expression lvalue , Expression rvalue)
+	'''«lvalue.genCode» = «rvalue.genCode»;'''
+	
+	def dispatch genCode(PlusEqualsStatement statement)
+	'''«statement.lvalue.genCode» += «statement.rvalue.genCode»;'''
+	
+	def dispatch genCode(MinusEqualsStatement statement)
+	'''«statement.lvalue.genCode» -= «statement.rvalue.genCode»;'''
+	
+	def dispatch genCode(SetMaxStatement statement)
+	'''_setMax(«statement.expr.builtInExpressionCode»;'''
+	
+	def dispatch genCode(SetMinStatement statement)
+	'''_setMax(«statement.expr.builtInExpressionCode»;'''
+	
+	
+		
+	def dispatch genCode(AdjustCompStatement statement)
+	'''_adjustComprHoldMedLev();'''
+	
+	def dispatch genCode(AddToTGStatement statement)
+	'''_addCurveToTG(«statement.arg.genCode» , «statement.argTo.genCode»);'''
+	
+	
+	def dispatch genCode(MultToTGStatement statement)
+	'''_multCurveToTG(«statement.arg.genCode» , «statement.argTo.genCode»);'''
+	
+	
+	def dispatch genCode(AppOffsStatement statement)
+	'''_applyOffset(«statement.argId.genCode»,«statement.argTo.genCode»,«statement.argApply.genCode»);'''
+	
+	def dispatch genCode(LocalVariableDeclarationStatement statement)
+	'''«statement.^var.genCode»'''
+	
+	def dispatch genCode(LocalVariableDeclaration statement)
+	'''«statement.getStartRegion("",statement.eClass.name)»
+	«statement.type.genCode» «statement.name» «IF statement.init !=null»= «statement.init.genCode»«ENDIF»;
+		«statement.getEndRegion("")»
+	'''
+		
+	
+	def dispatch genCode(IfStatement statement)
+	'''	«statement.getStartRegion("",statement.eClass.name)» 
+		if ( «statement.condition.genCode» ) 
+		«statement.thenBody.genCode»
+	«FOR elzz : statement.elseIfs»
+	 «elzz.genCode»
+	«ENDFOR»
+	«IF statement.elseBody !=null» «statement.elseBody.getStartRegion("",statement.eClass.name)» else  «statement.elseBody.genCode» «statement.elseBody.getEndRegion("")»
+	
+	«ENDIF»«statement.getEndRegion("")»'''
+	
+	def dispatch genCode(ElseIf statement)
+	'''«statement.getStartRegion("",statement.eClass.name)» 
+	else if  ( «statement.condition.genCode» )   «statement.body.genCode» «statement.getEndRegion("")»'''
+	
+	def dispatch CharSequence switchStatementCode(SymbolReference statement) 
+	'''«IF statement.symbol instanceof EnumLiteral »
+	«statement.symbol.switchStatementCode» 
+	«ELSE»
+	«statement.symbol.genCode»
+	«ENDIF»'''
+	
+	def dispatch switchStatementCode(Expression statement)
+	'''«statement.genCode»'''
+	
+	def dispatch switchStatementCode(SymbolDeclaration statement)
+	'''«statement.genCode»'''
+	
+	def dispatch switchStatementCode(EnumLiteral statement)
+	'''«statement.pos»'''
+	
+	 
+	def dispatch  genCode(SwitchStatement statement)
+	'''«statement.getStartRegion("",statement.eClass.name)»  switch ( «statement.expr.genCode»)  
+		{
+		«FOR ca : statement.cases»
+		 	«ca.getStartRegion("",statement.eClass.name)»case   «ca.expr.switchStatementCode» :
+			{
+				«FOR stmnt: ca.body.statements»
+				 «stmnt.genCode»
+				«ENDFOR»
+				 break;
+			}
+			«ca.getEndRegion("")»
+			«ENDFOR»
+		«IF statement.defaultBlock !=null»«statement.defaultBlock.getStartRegion("",statement.eClass.name)» default:
+		{
+		 «FOR stmt: statement.defaultBlock.statements»
+		  «stmt.genCode»
+		  «ENDFOR»
+		   break;	
+		}
+		«statement.defaultBlock.getEndRegion("")»	
+		«ENDIF»
+	 }
+	 «statement.getEndRegion("")»
+	'''
+	
+	
+	
+	def dispatch genCode(Type typ)''' «typ.asCsType» 
+	'''
+	
+ //This is the generic template for expressions that is executed
+//polymorphically if no more specific template is available.
+ //These are defined below.
+ 	def dispatch genCode(Expression exp)
+ 	'''//no code generator for expression «exp.eClass.name»'''
+ 
+  	def dispatch genCode(ArrayAccessExpression arry)
+  	'''«arry.arrayCode(arry.expr)»'''
+
+  	def  dispatch arrayCode(ArrayAccessExpression expArry, Expression expre)
+  	'''«expre.genCode»[«expArry.index.arrayIndexCode»]'''
+  
+  	def  dispatch arrayCode(ArrayAccessExpression expArry,ParameterReadExpression expr)
+  	'''«expr.genCode(true)» [«expArry.index.arrayIndexCode»]
+  	«IF expr.scope == ParameterScope::HI» «expr.param.parameterReadScopeAccess» «ENDIF»'''
+  
+    def dispatch  genCode(ParameterReadExpression para)
+	 '''«para.genCode(false)»'''
+	
+	def  genCode(ParameterReadExpression para,boolean array) 
+	'''«para.scope.scopeArray»[«para.param.parameterReadScopeCode(para.scope)»«para.param.name»]
+	«IF (!array &&  (para.scope == ParameterScope::HI))»«para.param.parameterReadScopeAccess»«ENDIF»'''
+	  
+	def dispatch arrayIndexCode(Expression expre)
+	'''«expre.genCode»'''
+
+  	def dispatch arrayIndexCode(ForVarDeclaration expre)
+  	'''«expre.eCrossReferences().get(0).genCode»'''
+  
+  	def dispatch genCode(ForVarDeclaration  statement)
+  	'''«statement.genCode»'''
+  
+ 	 def dispatch genCode(Object  statement) 
+  	'''// no specific code generator(genCode) for : «statement»'''
+  
+	def dispatch genCode(PreIncrementExpr expre) '''++«expre.expr.genCode» '''
+	
+	def dispatch genCode(PreDecrementExpr expre) '''--«expre.expr.genCode» '''
+	
+	def dispatch genCode(MultiplicationEqualsStatement statement)
+	'''«statement.getStartRegion("",statement.eClass.name)»«statement.lvalue.genCode» *= «statement.rvalue.genCode»;«statement.getEndRegion("")»'''
+	
+	
+	
+	def dispatch parameterReadScopeCode(ChannelParameter channel , ParameterScope scope)'''HIChannels.'''
+	
+	
+	def dispatch parameterReadScopeCode(SymbolDeclaration symbDecl , ParameterScope scope)
+	'''«scope.controlsClass».«scope.parameterReadScope»'''
+	
+	def dispatch parameterReadScopeAccess(DoubleParameter dparam)'''.PhysVal'''
+	
+	def dispatch parameterReadScopeAccess(IntegerParameter dparam)'''.PhysVal'''
+	
+	
+	def dispatch parameterReadScopeAccess(EnumParameter dparam)''''''
+	
+	
+	def dispatch parameterReadScopeAccess(SymbolDeclaration dparam)''''''
+	
+	def dispatch  genCode(NullExpression nExp) '''null'''
+	
+	
+	def dispatch  genCode(BuiltInCall biCall) '''«biCall.expr.genCode».«biCall.builtIn.csFunction»'''
+	
+	def dispatch  genCode(NotExpression expre) '''!(«expre.expr.genCode»)'''
+		
+	def dispatch  builtInExpressionCode(Expression expre)
+	'''//no code generator for symbol «expre.eClass.name»'''
+	
+	def dispatch  builtInExpressionCode(SymbolReference expre)
+	'''«(expre.symbol.eContainer  as EnumParameter).scope.controlsClass».«(expre.symbol.eContainer  as EnumParameter).name»'''
+	
+	def dispatch  builtInExpressionCode(ParameterReadExpression expre)
+	'''«expre.scope.controlsClass».«expre.scope.parameterReadScope»«expre.param.name» '''
+	
+	def dispatch  builtInExpressionCode(ArrayAccessExpression expre)
+	'''«expre.codeArrayAccess»'''
+	
+	def dispatch genCode(SitExpression expre)'''_sit(«expre.index»,«expre.hiExpression.builtInExpressionCode»)'''
+	
+	
+	def dispatch genCode(OppositeExpression expre)
+	'''«IF expre.expr instanceof ArrayAccessExpression»
+	    _opp(«(expre.expr as ArrayAccessExpression).expr.builtInExpressionCode»)[«(expre.expr as ArrayAccessExpression).index.genCode»]
+	«ELSE»
+	    _opp(«expre.expr.builtInExpressionCode»)
+	«ENDIF»'''
+	
+	def AtsideAssignment(AtsideExpression atside, Expression assign)
+	'''«atside.baseCode».Val =«assign.genCode»'''
+	
+	def AtsideAssignment(Expression expr, Expression rvalue)
+	'''//ERROR «expr.genCode»'''
+	
+	def dispatch genCode(AtsideExpression  expre)
+	'''«expre.baseCode»'''
+	
+	def baseCode(AtsideExpression atsExpr)
+	'''«IF atsExpr.expr instanceof ArrayAccessExpression»
+	   _side(«atsExpr.argSide.genCode» , «atsExpr.expr.codeArrayAccess»)
+	«ELSE»
+	   _side(«atsExpr.argSide.genCode», «atsExpr.expr.builtInExpressionCode»)
+	«ENDIF»'''
+	
+	def dispatch CharSequence codeArrayAccess(ArrayAccessExpression arrayAccessExpre)
+	'''«arrayAccessExpre.expr.builtInExpressionCode»[«arrayAccessExpre.index.genCode»]'''
+	
+	def dispatch codeArrayAccess(Expression expre)
+	'''	// ERROR -  no code generator for «expre.eClass.name»'''
+	
+	def dispatch genCode(DefinedExpression expre)'''_isDefined(«expre.expr.builtInExpressionCode»)'''
+	
+	
+	def dispatch genCode(LogChanCountExpression expre)'''_logChanCount(«expre.argId.genCode»)'''
+	
+	def dispatch genCode(IsValidExpression expre)'''_isValid(«expre.expr.builtInExpressionCode»,«expre.expr.genCode»)'''
+		
+	def dispatch genCode(IsMinExpression expre)'''_isMin(«expre.expr.builtInExpressionCode»)'''
+	
+	def dispatch genCode(IsMaxExpression expre)'''_isMax(«expre.expr.builtInExpressionCode»)'''
+	
+    def dispatch genCode(IsOffsAppExpression expre)'''_isOffsetApplicable(«expre.argId.genCode»,«expre.argTo.genCode»,«expre.argApply.genCode»)'''	
+
+	def dispatch  genCode(BitOr bitOr) '''«bitOr.left.genCode» | «bitOr.right.genCode»'''
+	
+	def dispatch  genCode(BitAnd ops) '''«ops.left.genCode» & «ops.right.genCode»'''
+	
+	def dispatch  genCode(BitComplementExpr expre) '''~ «expre.expr.genCode»'''
+	
+	def dispatch  genCode(EnumRight ops) '''«ops.left.genCode» += «ops.right.genCode»'''
+	
+	def dispatch  genCode(EnumLeft ops) '''«ops.left.genCode» -= «ops.right.genCode»'''
+	
+	def dispatch  genCode(Equals ops) '''«ops.left.genCode» == «ops.right.genCode»'''
+	
+	def dispatch  genCode(UnEquals ops) '''«ops.left.genCode» != «ops.right.genCode»'''
+	
+	def dispatch  genCode(Greater ops) '''«ops.left.genCode» > «ops.right.genCode»'''
+	
+	def dispatch  genCode(Smaller ops) '''«ops.left.genCode» < «ops.right.genCode»'''
+	
+	def dispatch  genCode(GreaterOrEquals ops) '''«ops.left.genCode» >= «ops.right.genCode»'''
+	
+	def dispatch  genCode(SmallerOrEquals ops) '''«ops.left.genCode» <= «ops.right.genCode»'''
+	
+	def dispatch  genCode(Plus ops) '''«ops.left.genCode» + «ops.right.genCode»'''
+	
+	def dispatch  genCode(Minus ops) '''«ops.left.genCode» - «ops.right.genCode»'''
+	
+	def dispatch  genCode(Multi ops) '''«ops.left.genCode» * «ops.right.genCode»'''
+	
+	def dispatch  genCode(Div ops) '''«ops.left.genCode» / «ops.right.genCode»'''
+	
+	def dispatch  CharSequence genCode(And ops) '''«ops.left.genCode» && «ops.right.genCode»'''
+	
+	def dispatch  genCode(Or ops) '''«ops.left.genCode» || «ops.right.genCode»'''
+	
+	def dispatch  genCode(TrueLiteral literal) '''true'''
+	
+	def dispatch  genCode(FalseLiteral literal) '''false'''
+	
+	def dispatch  genCode(ParenExpr literal) '''(«literal.expr.genCode»)'''
+		
+	def dispatch  genCode(NumberLiteral literal) '''«literal.value»'''
+	
+	def dispatch  genCode(TextLiteral literal) '''"«literal.value»"'''
+
+    	
+	def dispatch genCode(Statement statement){
+		'''
+		// no code generator for statement «statement.eClass.name»
+		'''
+	}
+	
+		
+	def dispatch enumCode(EnumParameter para){
+		'''«para.enumScopeTag»«para.name»'''
+	}
+	
+	def dispatch enumCode(EObject para){
+		'''//ERROR no code generator for «para»	'''
+	}
+	
+	def dispatch  genCode(SymbolReference ref)
+	'''«IF (ref.symbol instanceof FunctionDeclaration)»
+	         «IF (ref.symbol.eContainer as Namespace).csNamespace == (ref.goUpToFunction.eContainer as Namespace).csNamespace»
+					«ref.symbol.name»( «ref.genArgs» )
+			«ELSE»
+	         ((«(ref.symbol.eContainer as Namespace).csNamespace»)GetMacro<«(ref.symbol.eContainer as Namespace).csNamespace»>()).«ref.symbol.name»( «ref.genArgs» )
+			«ENDIF»
+		«ELSE»
+		«ref.symbol.SymbolReferenceCode»	
+	    «ENDIF»'''
+	    
+    def dispatch SymbolReferenceCode (EnumLiteral enm)
+    '''«enm.genCode»'''
+    
+    def dispatch  SymbolReferenceCode(SymbolDeclaration symDecl)
+    '''«symDecl.name»'''
+    
+    def dispatch  SymbolReferenceCode(EObject ob)
+    '''//NO specific code generation for «ob.eClass.name»'''
+    
+   def genArgs(SymbolReference ref)
+   '''«var args = ref.argList.args»«FOR arg :args »«arg.genCode»«IF args.get(args.size-1) != arg»,«ENDIF»«ENDFOR»'''
+}

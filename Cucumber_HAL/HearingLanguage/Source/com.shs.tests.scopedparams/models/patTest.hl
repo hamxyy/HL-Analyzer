@@ -1,0 +1,20 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 2 instances in this file to assert, that pat.cl is taken into concern */
+	package Lib patTest
+	{
+		test function void GenderTest()
+		{
+		 	assertEquals(GenderTest)true <=>(pat:Gender != null);
+		}
+		
+		test function void AgeTest()
+		{
+		   //TODO constant values tests?
+			plf:d8AgcCr1corr;
+			assertEquals(AgeTest)pat:Age <=> 6;
+		}
+	}
+}

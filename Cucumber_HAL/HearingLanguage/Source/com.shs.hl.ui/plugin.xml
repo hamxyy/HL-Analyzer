@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<plugin>
+    <extension
+            point="org.eclipse.ui.editors">
+        <editor
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            default="true"
+            extensions="hl"
+            id="com.shs.hl.HearingLanguage"
+            name="HearingLanguage Editor">
+        </editor>
+    </extension>
+    <extension
+        point="org.eclipse.ui.handlers">
+        <handler
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
+            commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
+            <activeWhen>
+                <reference
+                    definitionId="com.shs.hl.HearingLanguage.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+        <handler
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
+            commandId="com.shs.hl.HearingLanguage.validate">
+         <activeWhen>
+            <reference
+                    definitionId="com.shs.hl.HearingLanguage.Editor.opened">
+            </reference>
+         </activeWhen>
+      </handler>
+    </extension>
+    <extension point="org.eclipse.core.expressions.definitions">
+        <definition id="com.shs.hl.HearingLanguage.Editor.opened">
+            <and>
+                <reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
+                <with variable="activeEditor">
+                    <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
+                        value="com.shs.hl.HearingLanguage" 
+                        forcePluginActivation="true"/>
+                </with>        
+            </and>
+        </definition>
+    </extension>
+    <extension
+            point="org.eclipse.ui.preferencePages">
+        <page
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:com.shs.hl.ui.preferences.HLPreferencePage"
+            id="com.shs.hl.HearingLanguage"
+            name="HearingLanguage">
+            <keywordReference id="com.shs.hl.ui.keyword_HearingLanguage"/>
+        </page>
+        <!--
+        <page
+            category="com.shs.hl.HearingLanguage"
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:com.shs.hl.ui.preferences.TestPreferencesPage"
+            id="com.shs.hl.HearingLanguage.coloring"
+            name="Test Runner">
+            <keywordReference id="com.shs.hl.ui.keyword_HearingLanguage"/>
+        </page>
+        -->
+        <page
+            category="com.shs.hl.HearingLanguage"
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:com.shs.hl.ui.preferences.GraphVizPrefPage"
+            id="com.shs.hl.HearingLanguage.coloring"
+            name="Graphviz">
+            <keywordReference id="com.shs.hl.ui.keyword_HearingLanguage"/>
+        </page>
+        
+        <page
+            category="com.shs.hl.HearingLanguage"
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
+            id="com.shs.hl.HearingLanguage.coloring"
+            name="Syntax Coloring">
+            <keywordReference id="com.shs.hl.ui.keyword_HearingLanguage"/>
+        </page>
+        <page
+            category="com.shs.hl.HearingLanguage"
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
+            id="com.shs.hl.HearingLanguage.templates"
+            name="Templates">
+            <keywordReference id="com.shs.hl.ui.keyword_HearingLanguage"/>
+        </page>
+    </extension>
+    <extension
+        point="org.eclipse.ui.keywords">
+        <keyword
+            id="com.shs.hl.ui.keyword_HearingLanguage"
+            label="HearingLanguage"/>
+    </extension>
+    <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Trigger expensive validation"
+            id="com.shs.hl.HearingLanguage.validate"
+            name="Validate">
+      </command>
+    </extension>
+    <extension point="org.eclipse.ui.menus">
+        <menuContribution
+            locationURI="popup:#TextEditorContext?after=group.edit">
+             <command
+                 commandId="com.shs.hl.HearingLanguage.validate"
+                 style="push"
+                 tooltip="Trigger expensive validation">
+            <visibleWhen checkEnabled="false">
+                <reference
+                    definitionId="com.shs.hl.HearingLanguage.Editor.opened">
+                </reference>
+            </visibleWhen>
+         </command>  
+         </menuContribution>
+    </extension>
+    <extension point="org.eclipse.ui.menus">
+		<menuContribution locationURI="popup:#TextEditorContext?endof=group.find">
+			<command commandId="org.eclipse.xtext.ui.editor.FindReferences">
+				<visibleWhen checkEnabled="false">
+                	<reference definitionId="com.shs.hl.HearingLanguage.Editor.opened">
+                	</reference>
+            	</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+	
+	
+	<extension point="org.eclipse.ui.handlers">
+	    <handler
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
+            commandId="org.eclipse.xtext.ui.editor.FindReferences">
+            <activeWhen>
+                <reference
+                    definitionId="com.shs.hl.HearingLanguage.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
+    </extension>   
+
+<!-- adding resource factories -->
+
+	<extension
+		point="org.eclipse.emf.ecore.extension_parser">
+		<parser
+			class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="hl">
+		</parser>
+	</extension>
+	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
+        <resourceServiceProvider
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+            uriExtension="hl">
+        </resourceServiceProvider>
+    </extension>
+
+
+
+
+	<!-- Quick Outline -->
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler 
+			class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
+			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
+			<activeWhen>
+				<reference
+					definitionId="com.shs.hl.HearingLanguage.Editor.opened">
+				</reference>
+			</activeWhen>
+		</handler>
+	</extension>
+	<extension
+		point="org.eclipse.ui.commands">
+		<command
+			description="Open the quick outline."
+			id="org.eclipse.xtext.ui.editor.outline.QuickOutline"
+			name="Quick Outline">
+		</command>
+	</extension>
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:#TextEditorContext?after=group.open">
+			<command commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline"
+				style="push"
+				tooltip="Open Quick Outline">
+				<visibleWhen checkEnabled="false">
+					<reference definitionId="com.shs.hl.HearingLanguage.Editor.opened"/>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+   <!-- quickfix marker resolution generator -->
+   <extension
+         point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator">
+      </markerResolutionGenerator>
+   </extension>
+   
+    <extension
+         point="org.eclipse.ui.handlers">
+         <handler 
+         	class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:com.shs.hl.ui.actions.ShowTypeDeclarationActionHandler"
+         	commandId="com.shs.hl.ui.actions.showTypeDeclaration">
+       </handler>
+     </extension>
+     <extension
+          point="org.eclipse.ui.commands">
+       <command
+             description="Show the type declaration of the selected element."
+             id="com.shs.hl.ui.actions.showTypeDeclaration"
+             name="Type declaration">
+       </command>
+     </extension>
+
+
+     <extension point="org.eclipse.ui.menus">
+         <menuContribution
+             locationURI="popup:#TextEditorContext?after=group.open">
+              <command commandId="com.shs.hl.ui.actions.showTypeDeclaration"
+                  style="push"
+                  tooltip="Show type declaration">
+          </command>
+          </menuContribution>
+     </extension>
+    <extension point="org.eclipse.ui.bindings">
+      <key  sequence="M1+M2+Z" 
+      		commandId="com.shs.hl.ui.actions.showTypeDeclaration" 
+      		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+    </extension>
+   
+   
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+      	name="SIEMENS Hearing Systems"
+      	id="com.shs.category"/>
+      <wizard
+            category="com.shs.category"
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:com.shs.hl.ui.wizard.HearingLanguageNewProjectWizard"
+            finalPerspective="com.shs.hl.ui.perspective"
+            icon="icons/projecticon.png"
+            id="com.shs.hl.ui.wizard.HearingLanguageNewProjectWizard"
+            name="Siemens HearingLanguage Project"
+            project="true">
+      </wizard>
+      <wizard
+            category="com.shs.category"
+            class="com.shs.hl.ui.wizard.NewHLFileWizard"
+            icon="icons/hlfileicon.png"
+            id="com.shs.hl.ui.wizards.NewHLFileWizard"
+            name="New HL File">
+      </wizard>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.shs.hl.ui.perspective.HLPerspectiveFactory"
+            id="com.shs.hl.ui.perspective"
+            name="Siemens HL Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.shs.hl.ui.perspective">
+         <newWizardShortcut
+               id="com.shs.hl.ui.wizards.NewHLFileWizard">
+         </newWizardShortcut>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="com.shs.hl.ui.perspective">
+         <newWizardShortcut
+               id="com.shs.hl.ui.wizard.HearingLanguageNewProjectWizard">
+         </newWizardShortcut>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="com.shs.hl.ui.perspective">
+         <showInPart
+               id="org.eclipse.ui.navigator.ProjectExplorer">
+         </showInPart>
+         <hiddenToolBarItem
+               id="org.eclipse.debug.internal.ui.actions.DebugDropDownAction">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.externaltools.ExternalToolMenuDelegateToolbar">
+         </hiddenToolBarItem>
+         <hiddenMenuItem
+               id="org.eclipse.ui.externaltools.ExternalToolMenuDelegateMenu">
+         </hiddenMenuItem>
+          <hiddenMenuItem
+               id="org.eclipse.ui.run">
+         </hiddenMenuItem>
+     </perspectiveExtension>
+   </extension>
+   
+   
+   
+ <!--<extension point="org.eclipse.ui.popupMenus"> 
+	<objectContribution
+        id="com.shs.hl.ui.generate.contribution"
+        objectClass="org.eclipse.core.resources.IResource">
+      <action
+            class="com.shs.hl.ui.generator.XMIGeneratorAction"
+            enablesFor="*"
+            id="com.shs.hl.ui.xmigenerate.action"
+            label="Generate XMI files"
+            menubarPath="additions"
+            tooltip="Generate XMI Files from Models">
+      </action>
+    </objectContribution>
+  </extension> -->
+  
+ <!--   -->
+  
+ 
+ <!--  <extension point="org.eclipse.ui.popupMenus"> 
+	<objectContribution
+        id="com.shs.hl.ui.generate.contribution"
+        objectClass="org.eclipse.core.resources.IResource">
+      <action
+            class="com.shs.hl.ui.generator.CodeGraphAction"
+            enablesFor="*"
+            id="com.shs.hl.ui.graghgenerate.action"
+            label="Generate CallGraph"
+            menubarPath="additions"
+            tooltip="Generate CallGraph for Models">
+      </action>
+    </objectContribution>
+  </extension> -->
+   
+ <!--  <extension point="org.eclipse.ui.popupMenus"> 
+	<objectContribution
+        id="com.shs.hl.ui.generate.contribution"
+        objectClass="org.eclipse.jdt.core.IJavaElement">
+      <action
+            class="com.shs.hl.ui.generator.CodeGraphAction"
+            enablesFor="*"
+            id="com.shs.hl.ui.graghgenerate.action"
+            label="Generate CallGraph"
+            menubarPath="additions"
+            tooltip="Generate CallGraph for Models">
+      </action>
+     </objectContribution>
+  </extension> -->
+ 
+  
+  
+  
+  
+ <!-- <extension point="org.eclipse.ui.popupMenus"> 
+	<objectContribution
+        id="com.shs.hl.ui.generate.contribution"
+        objectClass="org.eclipse.jdt.core.IJavaElement"> 
+       <action
+            class="com.shs.hl.ui.generator.TestRunnerAction"
+            enablesFor="*"
+            id="com.shs.hl.ui.testrunner.action"
+            label="Run Test-Runner"
+            menubarPath="additions"
+            tooltip="Run Test Runner">
+       </action>
+       <visibility>
+                <objectState name="projectNature" value="com.shs.hl.ui.hltestnature"/>
+      </visibility>
+    </objectContribution>
+  </extension> -->
+    
+   <!-- disabled, using the context menu to generate artifacts
+   <extension
+         point="org.eclipse.xtext.builder.participant">
+      <participant
+            class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant">
+      </participant>
+   </extension> -->
+   
+   
+   <!--Add Test Nature to Project-->
+   <extension
+      point="org.eclipse.core.resources.natures"
+      id="hltestnature"
+      name="HL Testnature">
+      <runtime>
+         <run class="com.shs.hl.ui.nature.HLTestNature"/>
+      </runtime>
+   </extension>
+   
+   
+ <!--  <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="com.shs.hl.ui.addTestNature"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="com.shs.hl.ui.actions.HLTestProjectNatureAction"
+               id="com.shs.hl.ui.actions.Add.HLTestNatureAction"
+               label="Add HL Test Nature"
+               menubarPath="org.eclipse.ui.projectConfigure/additions">
+         </action>
+         <visibility>
+         	<not>
+	            <objectState
+    	              name="nature"
+        	          value="com.shs.hl.ui.hltestnature">
+            	</objectState>
+            </not>
+         </visibility>
+      </objectContribution>
+   </extension> -->
+   
+   
+  <!-- <extension
+         point="org.eclipse.ui.popupMenus">
+           <objectContribution
+            adaptable="true"
+            id="com.shs.hl.ui.removeTestNature"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="com.shs.hl.ui.actions.HLTestProjectNatureAction"
+               id="com.shs.hl.ui.actions.remove.HLTestNatureAction"
+               label="Remove HL Test Nature"
+               menubarPath="org.eclipse.ui.projectConfigure/additions"
+               >
+         </action>
+         <visibility>
+               <objectState
+    	              name="nature"
+        	          value="com.shs.hl.ui.hltestnature">
+            	</objectState>
+         </visibility>
+      </objectContribution>
+   </extension> -->
+   
+   
+<!--   <extension point="org.eclipse.ui.popupMenus"> 
+	<objectContribution
+        id="com.shs.hl.ui.generate.contribution"
+        objectClass="org.eclipse.jdt.core.IJavaElement">
+      <action
+            class="com.shs.hl.ui.generator.TestRunnerAction"
+            enablesFor="*"
+            id="com.shs.hl.ui.testrunner.action"
+            label="Run Test-Runner"
+            menubarPath="additions"
+            tooltip="Run Test Runner">
+      </action>
+      <filter
+           name="projectNature"
+           value="com.shs.hl.ui.hltestnature">
+      </filter>
+    </objectContribution>
+  </extension>  -->
+  
+    
+  
+  
+  <extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="com.shs.hl.ui.hlcategory"
+              name="hlcatecategopry">
+        </category>
+     <command
+           id="com.shs.hl.ui.commands.changeversionbundle"
+           categoryId="com.shs.hl.ui.hlcategory"
+           name="Change Hi Platform (STDLIB) version..."/>
+  </extension>
+  <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+        class="com.shs.hl.ui.actions.handler.ChangeVersionBundleHandler"
+        commandId="com.shs.hl.ui.commands.changeversionbundle">
+     </handler>
+</extension>
+
+  <extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="com.shs.hl.ui.hlcategory"
+              name="hlcatecategopry">
+        </category>
+     <command
+           id="com.shs.hl.ui.commands.cleanoutputdir"
+           categoryId="com.shs.hl.ui.hlcategory"
+           name="Clean output 'src-gen' directory "/>
+  </extension>
+  <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+        class="com.shs.hl.ui.actions.handler.CleanOutputDirHandler"
+        commandId="com.shs.hl.ui.commands.cleanoutputdir">
+     </handler>
+</extension>
+
+<!-- Menu  Contribus for Package Explorer -->
+
+
+<extension 
+  id="add.item"
+  point="org.eclipse.ui.menus">
+  <menuContribution
+           locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?before=additions">
+       
+         <command
+              commandId="com.shs.hl.ui.commands.generatorAction">
+        </command>
+        
+        <command
+              commandId="com.shs.hl.ui.commands.enhancedGeneratorAction">
+        </command>
+         <command
+              commandId="com.shs.hl.ui.commands.cleanoutputdir">
+        </command>
+
+        <command
+              commandId="com.shs.hl.ui.commands.changeversionbundle">
+        </command>
+        
+        <command
+              commandId="com.shs.hl.ui.commands.generatexmi">
+        </command>
+
+        <command
+              commandId="com.shs.hl.ui.commands.semanticAnalysisAction">
+        </command>        
+     </menuContribution>
+</extension>
+
+
+<!-- Menu  Contribus for Project Explorer -->
+
+<extension 
+  id="add.item"
+  point="org.eclipse.ui.menus">
+    <menuContribution
+        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+        <separator
+               name="com.shs.hl.ui.separator1"
+               visible="true">
+        </separator>
+        <command
+              commandId="com.shs.hl.ui.commands.generatorAction"
+              icon="icons/generate_code.png">
+        </command>
+        
+        <command
+              commandId="com.shs.hl.ui.commands.enhancedGeneratorAction"
+              icon="icons/generate_build.png">
+        </command>
+        <separator
+               name="com.shs.hl.ui.separator2"
+               visible="true">
+         </separator>
+         <command
+              commandId="com.shs.hl.ui.commands.cleanoutputdir"
+              icon="icons/clean_output.png">
+        </command>
+        <separator
+               name="com.shs.hl.ui.separator3"
+               visible="true">
+        </separator>
+        <command
+              commandId="com.shs.hl.ui.commands.changeversionbundle"
+              icon="icons/changeSTDLIB.png">
+        </command>
+       </menuContribution>
+       
+       <menuContribution
+        locationURI="toolbar:org.eclipse.ui.main.toolbar">
+        <toolbar id="HAL_custom_toolbar">
+          <command
+              commandId="com.shs.hl.ui.commands.generatorAction"
+              icon="icons/generate_code.png">
+          </command>
+          <command
+              commandId="com.shs.hl.ui.commands.enhancedGeneratorAction"
+              icon="icons/generate_build.png">
+          </command>
+          <command
+              commandId="com.shs.hl.ui.commands.semanticAnalysisAction"
+              icon="icons/testfunction.png">
+          </command>
+          <command
+              commandId="com.shs.hl.ui.commands.cleanoutputdir"
+              icon="icons/clean_output.png">
+          </command>
+          <command
+              commandId="com.shs.hl.ui.commands.changeversionbundle"
+              icon="icons/changeSTDLIB.png">
+          </command>
+      </toolbar>
+        
+     </menuContribution>
+  </extension>
+  
+  <extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="com.shs.hl.ui.hlcategory"
+              name="hlcatecategopry">
+        </category>
+     <command
+           id="com.shs.hl.ui.commands.generatorAction"
+           categoryId="com.shs.hl.ui.hlcategory"
+           name="Generate C# files"/>
+  </extension>
+  
+  <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+        class="com.shs.hl.ui.actions.handler.GeneratorHandler"
+        commandId="com.shs.hl.ui.commands.generatorAction">
+     </handler>
+</extension> 
+ 
+
+    <extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="com.shs.hl.ui.hlcategory"
+              name="hlcatecategopry">
+        </category>
+     <command
+           id="com.shs.hl.ui.commands.semanticAnalysisAction"
+           categoryId="com.shs.hl.ui.hlcategory"
+           name="Let's test macro!"/>
+  </extension>
+  
+    <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+        class="com.shs.hl.ui.actions.handler.StaticAnalysisHandler"
+        commandId="com.shs.hl.ui.commands.semanticAnalysisAction">
+     </handler>
+</extension> 
+  
+  
+   <extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="com.shs.hl.ui.hlcategory"
+              name="hlcatecategopry">
+        </category>
+     <command
+           id="com.shs.hl.ui.commands.enhancedGeneratorAction"
+           categoryId="com.shs.hl.ui.hlcategory"
+           name="Generate C# files and build Assembly "/>
+  </extension>
+  <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+        class="com.shs.hl.ui.actions.handler.EnhancedGeneratorHandler"
+        commandId="com.shs.hl.ui.commands.enhancedGeneratorAction">
+     </handler>
+</extension> 
+  
+ 
+
+  
+
+<extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="com.shs.hl.ui.hlcategory"
+              name="hlcatecategopry">
+        </category>
+     <command
+           id="com.shs.hl.ui.commands.generatexmi"
+           categoryId="com.shs.hl.ui.hlcategory"
+           name="Generate XMI Files from Models"/>
+  </extension>
+  <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+        class="com.shs.hl.ui.actions.handler.GeneratorXMIHandler"
+        commandId="com.shs.hl.ui.commands.generatexmi">
+     </handler>
+</extension> 
+ 
+  
+ 
+     
+  
+  
+  <extension
+        point="org.eclipse.core.runtime.preferences">
+     <initializer
+           class="com.shs.hl.ui.HearingLanguageExecutableExtensionFactory:com.shs.hl.ui.preferences.HLPrefInitialiser">
+     </initializer>
+  </extension>
+  
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+          class="com.shs.hl.ui.DisabledNewEditorHandler"
+          commandId="org.eclipse.ui.window.newEditor">
+       <enabledWhen>
+          <count value="-1">
+          </count>
+       </enabledWhen>
+       <activeWhen>
+          <not>
+             <count value="-1">
+             </count>
+          </not>
+       </activeWhen>
+    </handler>
+</extension>
+  
+ <extension
+ 	point="org.eclipse.ui.startup">
+ 		<startup class="com.shs.hl.ui.HLBundleStartUp"/>
+ </extension>
+  
+ <extension
+       point="org.eclipse.ui.activities">
+ <activity id="com.shs.hl.debug.activity.disable" name="disable menus">
+   <enabledWhen>
+      <with variable="true">
+         <equals value="false">
+         </equals>
+      </with>                                                         
+   </enabledWhen>
+</activity>                                                                      
+ <activityPatternBinding activityId="com.shs.hl.debug.activity.disable" pattern="(org\.eclipse\.team..*)"/>
+</extension>
+ <extension
+       point="org.eclipse.ui.cheatsheets.cheatSheetContent">
+    <category
+          id="com.shs.hl.ui.category125703478"
+          name="HL-Workbench">
+    </category>
+    <cheatsheet
+          category="com.shs.hl.ui.category125703478"
+          composite="true"
+          contentFile="$nl$/docs/hl-cheatsheet.xml"
+          id="com.shs.hl.ui.cheatsheet2032110925"
+          name="Title">
+       <description>
+          HL-Workbench
+       </description>
+    </cheatsheet>
+ </extension>
+
+ <extension point="org.eclipse.ui.startup">
+     <startup class="com.shs.hl.ui.PluginChecker"/>
+   </extension>
+ <extension
+       point="org.eclipse.ui.decorators">
+    <decorator
+          class="com.shs.hl.ui.labeling.LightweightLabelDecoratorImpl"
+          id="com.shs.hl.ui.version.decorator"
+          label="STDLIB Version"
+          lightweight="true"
+          location="TOP_RIGHT"
+          >
+    </decorator>
+ </extension>
+ 
+ </plugin>

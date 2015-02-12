@@ -1,0 +1,166 @@
+package com.shs.hl.generator.utils
+
+
+import com.shs.hl.hearingLanguage.Module
+import org.eclipse.emf.ecore.EObject
+import com.shs.hl.hearingLanguage.Namespace
+import com.shs.hl.hearingLanguage.FunctionDeclaration
+import com.shs.hl.hearingLanguage.FunctionKind
+import com.shs.hl.hearingLanguage.ParameterReadExpression
+import com.shs.common.commonLanguage.EnumLiteral
+//import org.eclipse.xtext.EcoreUtil2
+import com.google.inject.Inject
+import com.shs.hl.hearingLanguage.ParameterDeclaration
+
+class GeneratorHelper {
+	
+	@Inject extension GenUtils genUtil;
+	@Inject extension GenCode  gen;
+	
+	
+	def getRootNamespace (){
+		"SHS.SAT.FittingHIDBInterfaces.HearingLanguageRuntime"
+	}
+	
+	def String getFile(Module mode){
+		 ''
+	}
+	
+	def  CharSequence getCsharpHeader()
+	'''
+	namespace «rootNamespace»
+		 { 
+			using System;
+			using System.Diagnostics;
+			using System.Collections.Generic;
+			using Identifiers;
+			using HIPlatformData.D8.HearingAidLanguage;
+	 
+	 '''
+	
+	def String getNameSpaceHeader(Namespace  space){
+		''
+	}
+	
+    def String name(EObject obj){
+    	obj.name;
+    }
+	
+	
+	def boolean isModule(EObject ob)
+	{
+		switch(ob)
+		{
+			Module:	true
+			default: false
+		}
+			
+	}
+
+
+//		//for debuging, remove , targeted generation of specific HL file
+//	def boolean canGenerate(Module m){
+//	 EcoreUtil2::getAllContentsOfType(m,typeof(Namespace)).map(b | b.name.equals("BasicLibrary_MicrophoneMix") ).contains(true)
+//	 }
+	
+	
+	def generate(EObject ob)
+	{
+		switch (ob)
+		{
+			Module: doGenerateModule(ob)
+			Namespace: doGenerateNamespace(ob)
+			default: '''//Error no toplevel element'''
+		}
+	}
+
+		 	
+	def doGenerateModule( Module m ) {
+		'''
+		«csharpHeader»
+		«FOR c : m.namespaces»
+		   «c.doGenerateNamespace»
+		«ENDFOR»
+		}
+		'''
+	}
+	
+	
+	def CharSequence doGenerateNamespace( Namespace n ) '''
+		 «IF n.isPackage»
+		 «IF GenUtils::hasTestFunctions(n)»
+		 using SHS.SAT.HAL.Testing;
+		 «ENDIF»
+		 
+		 public class «n.name» «n.extendsClause()»
+		 {
+		 «IF GenUtils::hasTestFunctions(n)»
+		  «TestCaseGen::genTest(n)» 
+		 «ENDIF»
+		 «IF(n.mixedMode)»
+		   «FOR m :n.functions.filter(typeof(FunctionDeclaration))»
+		       «m.functionDefinitionDependency»
+		    «ENDFOR»
+		 «ENDIF»
+		  
+		  «FOR m :n.functions.filter(typeof(FunctionDeclaration))»
+		       «m.functionDefinition»
+		  «ENDFOR»
+		 }
+		 «ELSE»
+		 namespace «n.csNamespace» { «FOR kind  :n.namespaces »
+		  «doGenerateNamespace(kind)»
+		 «ENDFOR»
+		 }
+		 «ENDIF»
+		'''
+		
+	
+	
+	def CharSequence functionDefinition (FunctionDeclaration decl)
+		'''
+		«IF (decl.kind == FunctionKind::TEST )»[TestMethod] «GenUtils::registerTestFunction(decl, (decl.eContainer as Namespace).csNamespace,(decl.eContainer as Namespace).csNamespace)» «ENDIF»
+		«IF (decl.kind == FunctionKind::APPLICATION)»/*application*/ «ENDIF»
+		 public «IF (decl.kind == FunctionKind::APPLICATION)»override«ENDIF» «decl.type.asCsType» «decl.name»(«val params=decl.args.filter(typeof(ParameterDeclaration))» «FOR arg:params» «arg.type.asCsType» «arg.name»«IF params.last != arg»,«ENDIF» «ENDFOR» )
+		 «decl.body.genCode»
+		'''
+		
+	def functionDefinitionDependency(FunctionDeclaration decl)
+		'''
+		«IF (decl.kind == FunctionKind::APPLICATION)»
+		public override IEnumerable<object> Get«decl.name»Dependencies() {
+         	«FOR paraEx :GenUtils::getParameterReadExpressions(decl)»
+         	 «paraEx.parameterReadExpressionDependency»
+         	«ENDFOR»
+         	«FOR enuLit : GenUtils::getEnumLiterals(decl)»
+         	  «enuLit.enumLitealDependency» 
+         	«ENDFOR»
+			yield break;
+		}
+         «ENDIF»		
+		'''
+	
+	
+	def parameterReadExpressionDependency(ParameterReadExpression readExpr)	'''
+		«IF(readExpr.scope.toString.equals("hi"))»
+		yield return «readExpr.scope.controlsClass».«readExpr.param.name»;
+		«ENDIF»
+	'''
+	
+	
+	def enumLitealDependency(EnumLiteral literal)
+		'''	yield return «literal.genCode»;'''
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
+}

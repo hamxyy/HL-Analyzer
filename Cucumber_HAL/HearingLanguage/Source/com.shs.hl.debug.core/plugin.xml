@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+ <extension-point id="shs.com.hldebug.datalistenerExt" name="HLDebug Data Listener" schema="schema/shs.com.hldebug.datalistener.exsd"/>
+
+  <extension
+         point="org.eclipse.debug.core.breakpoints">
+      <breakpoint
+            markerType="hl.lineBreakpoint.marker"
+            class="com.shs.hl.debug.core.breakpoints.HLDebugLineBreakpoint"
+            id="com.shs.debuger.core.hl.lineBreakpoint">
+      </breakpoint>
+  </extension>
+   
+   <extension
+         id="hl.lineBreakpoint.marker"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.debug.core.lineBreakpointMarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+  
+</plugin>

@@ -1,0 +1,14 @@
+namespace n2 {
+
+	protected function void n2f1() {
+				
+	} 
+
+	public protected function void publicn2f1() {
+				
+	} 
+
+	
+	
+
+}

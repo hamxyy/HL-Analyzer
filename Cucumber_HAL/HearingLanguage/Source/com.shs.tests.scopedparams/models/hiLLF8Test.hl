@@ -1,0 +1,14 @@
+namespace testing
+{
+	using testing.*;
+	package Lib hiLLF8Test
+	{
+
+	/* dummy to check access to hiLLF8.cl */
+		test function void d8PDummyFelixTest ()
+		{
+			hi:d8FAacEn = d8FAacEn.off;
+			assertEquals (d8PDummyFelixTest) hi:d8FAacEn <=> d8FAacEn.off;
+		}
+	}
+}

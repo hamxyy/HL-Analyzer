@@ -1,0 +1,19 @@
+namespace precedence {
+
+	protected function void dummy() {
+		int x = 1 + 2;
+		int y = 1*2 + 2*3;
+		
+		if ( 1 > 2 ) {}
+		
+		if ( 1*2 > 2*3 ) {}
+		
+		bool a;
+		bool b;
+		if ( a && b) {}  
+	
+		if ( x>1 && y > 2) {}   
+	
+	}
+	 
+}

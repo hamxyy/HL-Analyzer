@@ -1,0 +1,14 @@
+namespace testing
+{
+	using testing.*;
+	package Lib hiLLFWTest
+	{
+
+	   /*Enable periodic / automatic learning steps in intervalls defined by f_thi_auto_time.*/
+	   /*test wether enums defined in hiLLFW are accessible */
+		test function void d8FThiAutoEnTest()
+		{
+		   assertEquals(d8FThiAutoEnTest)true <=>(hi:d8FThiAutoEn != null);
+		}
+	}
+}

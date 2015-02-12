@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="com.shs.hl.debug.ui.launching.HLDebugLaunchConfigurationTabGroup"
+            description="Starting HL-Macro Debuging"
+            id="com.shs.hl.debug.ui.launchConfiguration"
+            type="com.shs.hl.debug.ui.launchConfigurationType">
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.shs.hl.debug.ui.launching.HLDebugLaunchDelegate"
+            id="com.shs.hl.debug.ui.launchConfigurationType"
+            modes="debug"
+            name="HL-Macro Debug">
+      </launchConfigurationType>
+   </extension>
+   <!-- 
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      	<launchConfigurationTypeImage
+            configTypeID="com.shs.hl.debug.ui.launchConfigurationType"
+            icon="com.shs.hl.debug.ui.launchConfigurationTypeImage1"
+            id="com.shs.hl.debug.ui.launchConfigurationTypeImage">
+      	</launchConfigurationTypeImage>
+   </extension> 
+   -->
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="com.shs.hl.debug.ui.launching.HLDebugLaunchShortCut"
+            id="com.shs.hl.debug.ui.shortcut"
+            label="HL-Macro Debug"
+            modes="com.shs.hl.debug.ui.shortcut">
+      </shortcut>
+   </extension>
+   
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            class="com.shs.hl.debug.ui.editor.HLDebugBreakpointAdapterFactory"
+            adaptableType="org.eclipse.ui.editors.text.TextEditor">
+         <adapter
+               type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget">
+         </adapter>
+      </factory>
+   </extension>
+<!--  TODO    
+  <extension
+       point="org.eclipse.ui.editorActions">
+  <editorContribution
+		targetID="com.shs.hl.HearingLanguage"
+		id="hl.rulerActions">
+	<action
+		label="Not Used"
+		class="com.shs.hl.debug.ui.editor.RulerToggleBreakpointAction"
+		actionID="RulerDoubleClick"
+		style ="push"
+		id="hl.doubleClickBreakpointAction"/>
+	</editorContribution>
+  </extension>
+  
+  
+  
+  <extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="com.shs.hl.HearingLanguage"
+              name="hlcatecategopry">
+        </category>
+     <command
+           id="com.shs.hl.ui.commands.generatexmi"
+           categoryId="com.shs.hl.ui.hlcategory"
+           name="Generate XMI Files from Models"/>
+  </extension>
+  <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+        class="com.shs.hl.ui.actions.handler.RulerToggleBreakpointHandler"
+        commandId="com.shs.hl.ui.commands.generatexmi">
+     </handler>
+</extension> 
+
+
+-->
+<extension 
+  id="add.item"
+  point="org.eclipse.ui.menus">
+ <menuContribution
+           locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+        <command
+              commandId="com.shs.hl.ui.commands.generatexmi">
+        </command>
+     </menuContribution>
+</extension>
+  
+ <!-- TODO 
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="org.eclipse.debug.ui"
+            class="com.shs.hl.debug.ui.views.WatchWindow"
+            id="com.shs.hl.debug.ui.views.WatchWindow"
+            name="Watch Window">
+      </view>
+   </extension>
+   <extension
+         point="shs.com.hldebug.datalistenerExt">
+        <listener
+            class="com.shs.hl.debug.ui.views.DataListener">
+        </listener>
+   </extension>
+-->
+  
+</plugin>

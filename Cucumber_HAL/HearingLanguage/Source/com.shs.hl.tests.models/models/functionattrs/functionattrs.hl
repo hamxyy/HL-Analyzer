@@ -1,0 +1,14 @@
+namespace n1 {
+
+	@weightReset
+	protected function void f1() {
+	}
+	
+	@text 1 [1,2,3 "Hallo"]
+	protected function void f2() {
+	}
+	
+	
+
+}
+

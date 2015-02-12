@@ -1,0 +1,29 @@
+// Note how this grammar extends the common language so we can
+// review was all language concepts defined there
+grammar com.shs.hl.HearingLanguageTest with com.shs.common.CommonLanguage
+
+generate hearingLanguageTest "http://www.shs.com/HearingLanguageTest"
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://www.shs.com/common/CommonLanguage" as common
+
+Model:
+	(testcases+=TestCase)*;
+
+TestCase:
+	"TestCase" name=ID for=ForBlock when=WhenBlock? then=ThenBlock? "End"?;
+
+ForBlock:
+	"For" macro=QID "->" function=ID "(" (actualArgs+=LiteralValue ","?)* ")";
+
+WhenBlock:
+	"When" setups+=KeyValuePair ("," setups+=KeyValuePair)*;
+
+ThenBlock:
+	{ThenBlock} "Then" (asserts+=KeyValuePair ("," asserts+=KeyValuePair)*)? ("Return" returnValue=LiteralValue)?;
+
+KeyValuePair:
+	scope=ParameterScope ":" param=[common::SymbolDeclaration] "=" (value=[common::SymbolDeclaration|QID] |
+	LiteralValue);
+
+LiteralValue:
+	"true" | "false" | DECIMAL_NUMBER;

@@ -1,0 +1,31 @@
+namespace levelcurveStuff uselib builtins {
+
+	using builtins.*;
+
+	protected function void afunction() {
+	
+		levelcurves c; // where do we get them from? param? 
+		
+		levelcurvepoint p1;
+		
+		int i = (c->MinIx)+1;
+		
+		freq f1 = p1->f;
+		gain g1 = p1->g_low;
+		gain g2 = p1->g_med;
+		gain g3 = p1->g_high; 
+		
+		levelcurvepoint p2 = c[5];
+		
+		foreach ( levelcurvepoint p in c ) {
+			p->f;
+		}
+		     
+		
+		levelcrv:TG[0]->g_high = 3;	// should work according to change requests end of March	
+		levelcrv:TG[0]->g_med = 3;		
+		levelcrv:TG[0]->g_low = 3;		
+		
+	} 
+
+}

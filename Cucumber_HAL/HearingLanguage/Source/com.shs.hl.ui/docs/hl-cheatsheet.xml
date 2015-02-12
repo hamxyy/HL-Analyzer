@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<compositeCheatsheet name="Title">
+   <taskGroup kind="set" name="HL-Workbench" skip="false">
+      <intro>
+         <b>Introduction</b>
+      </intro>
+      <onCompletion>
+         <b>Conclusion</b>
+      </onCompletion>
+      <task kind="cheatsheet" name="New HL-Project" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path">
+         </param>
+      </task>
+      <task kind="cheatsheet" name="Call - Graph -Generation" skip="true">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+      </task>
+      <task kind="cheatsheet" name="XMI- Generation" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+      </task>
+      <task kind="cheatsheet" name="HL Tests" skip="true">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+      </task>
+   </taskGroup>
+</compositeCheatsheet>

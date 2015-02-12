@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition="'$(GlobalVariablesAlreadyImported)' != 'True'" Project="$(MSBuildThisFileDirectory)..\..\GlobalVariables.props" />
+
+  <PropertyGroup>
+    <OutputPath>$(HearingLanguageBin)</OutputPath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,50 @@
+<config>
+<MacroKind name=“MacroProgramSelectionBase">
+                 <AppFunction name=“IsVisible" result=“bool“/>
+                 <AppFunction name=“IsEnabled" result=“bool“/>
+                 <AppFunction name=“IsSingleUse" result=“bool“/>
+                 <AppFunction name=“GetID" result=“int“/>
+                 <AppFunction name=“GetOrderNumber" result=“int“/>
+                 <AppFunction name=“GetName" result=“string“/>
+                 <AppFunction name=“Apply" result=“void“/>
+                 <AppFunction name=“CanCopy" result=“bool“/>
+                 
+</MacroKind>
+
+
+<MacroKind name=“MacroMixedModeBase">
+                <AppFunction name=“IsVisible" result=“bool“/>
+                <AppFunction name=“IsEnabled" result=“bool“/>
+                <AppFunction name=“MaxPos" result=“int“/>
+                <AppFunction name=“MaxPhysicalPos" result=“int“/>
+                <AppFunction name=“IsVisiblePhysicalPos" result=“bool“/>
+                <AppFunction name=“IsEnabledPos" result=“bool“/>
+                <AppFunction name=“IsEnabledPhysicalPos" result=“bool“/>
+                <AppFunction name=“GetPos" result=“int“/>
+                <AppFunction name=“SetPos" result=“void“/>
+</MacroKind>
+
+<MacroKind name=“MacroFirstFitBase">
+                <AppFunction name="PreFit" result=“void“/>
+                <AppFunction name="PostFit" result=“void“/>        
+</MacroKind>
+
+<MacroKind name=“MacroTargetSelectionBase">
+                <AppFunction name=“SelectTargetFormula" result=“void“/>
+                <AppFunction name=“PostTargetProcessing" result=“void“/>
+</MacroKind>
+
+
+<MacroKind name=“MacroTargetSyncBase">
+                <AppFunction name="SyncTargetFormula" result=“void“/>
+</MacroKind>
+
+
+<MacroKind name=“MacroMixedModeBase">
+                <AppFunction name=“IsVisible" result=“bool“/>
+                <AppFunction name=“IsEnabled" result=“bool“/>
+                <AppFunction name=“GetPos" result=“int“/>
+                <AppFunction name=“SetPos" result=“void“/>
+</MacroKind>
+
+</config>

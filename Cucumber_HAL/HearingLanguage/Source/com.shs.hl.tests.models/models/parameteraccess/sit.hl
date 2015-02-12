@@ -1,0 +1,23 @@
+namespace sitStuff {
+
+ 	using builtins.*;
+ 
+	protected function void tueWas() {  
+	
+			if ( hi:d8PAgcChannelGain[0] == d8PAgcChannelGain.LogicalPosition_0 ) {
+				 
+			}
+			
+			sit( 1, hi:d8PAgcChannelGain[1] ); 
+			 
+			
+			if ( hi:d8PAgcChannelGain[0] == sit(1, hi:d8PAgcChannelGain[0]) ) {}  // ok
+
+			sit( 1.3, hi:d8PAgcChannelGain[1] );  	// error: only int indexes allowed 
+	 		sit( 1, 22 );  				// error: only hi param access allowed 
+			sit( 1, pat:Age );  		// error: only hi param access allowed 
+			
+					
+	}
+
+}

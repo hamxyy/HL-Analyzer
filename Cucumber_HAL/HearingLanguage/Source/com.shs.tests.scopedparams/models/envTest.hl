@@ -1,0 +1,19 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 2 instances in this file to assert, that env.cl is taken into concern */
+	package Lib envTest
+	{
+		test function void SidesTest()
+		{
+		   assertEquals(SidesTest)true <=> true;
+		}
+		
+		test function void ProgramSlotsTest()
+		{
+		   //TODO constant values tests?
+			assertEquals(ProgramSlotsTest)env:ProgramSlots <=> 6;
+		}
+	}
+}

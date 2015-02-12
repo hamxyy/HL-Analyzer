@@ -1,0 +1,20 @@
+namespace nulltest {
+
+	protected function void f() {
+		int i = null;		// error: int not nullable
+	}  
+	
+	protected function void g() {
+		string s = null;		// works, string is nullable
+		channel c = null;		// works
+		levelcurves cc = null;	// works	
+	}  
+	
+	
+	protected function void y() {
+		
+		
+		
+	}
+	 
+}

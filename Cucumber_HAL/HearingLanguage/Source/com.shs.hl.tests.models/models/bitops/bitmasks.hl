@@ -1,0 +1,19 @@
+namespace bitmasks  {
+	
+	package Lib bitmasks {
+	
+		protected function void f() {
+	
+// TODO: Claus
+//			int m = cap:ProgNumDelivery;  	  	 		// coerced
+			
+//			int sum =  cap:ProgNumDelivery + 10;         // coerced
+			 
+//			int sum2 =  cap:ProgNumDelivery & 0b1000;    // coerced
+			 
+	
+		}
+
+	}
+
+}

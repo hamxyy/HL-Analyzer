@@ -1,0 +1,14 @@
+«IMPORT com::shs::hl::ui::wizard»
+
+«DEFINE main FOR HearingLanguageTestProjectInfo»
+«EXPAND model FOR this»
+«ENDDEFINE»
+
+«DEFINE model FOR HearingLanguageTestProjectInfo»
+«FILE "src/model/Model.hlt"-»
+/*
+ * This is an example model
+ */
+Hello Xtext!
+«ENDFILE»
+«ENDDEFINE»

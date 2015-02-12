@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." name="com.shs.common" default="all">
+	<property name="workflow" value="src/com/shs/hl/GenerateHearingLanguage.mwe2" />
+	<property name="EclipseHome" value="D:/Eclipse/Current" />
+	<property name="BaseDir" value="${basedir}" />
+	<path id="eclipsePlugins">
+		<fileset dir="${EclipseHome}/plugins/">
+			<patternset>
+				<exclude name="*.source_*.jar" />
+				<include name="org.eclipse.emf.*.jar" />
+				<include name="org.eclipse.xtext*.jar" />
+				<include name="org.eclipse.xtend*.jar" />
+				<include name="org.eclipse.xpand*.jar" />
+				<include name="org.eclipse.jdt.*.jar" />
+				<include name="org.apache.commons*.jar" />
+				<include name="org.apache.log4j*.jar" />
+				<include name="org.antlr.runtime*.jar" />
+				<include name="javax.inject*.jar" />
+				<include name="com.ibm.icu*.jar" />
+				<include name="com.google.inject*.jar" />
+				<include name="com.google.guava*.jar" />	
+				<include name="de.itemis.*.jar"/>
+				
+			</patternset>
+		</fileset>
+		<fileset dir="." includes=".antlr-generator-3.2.0.jar" />
+	</path>
+
+	
+	
+	<path id="classpath">
+		<path refid="eclipsePlugins" />
+		<!--<fileset dir="./lib/" includes="*.jar"/>-->
+		<fileset dir="." includes=".antlr-generator-3.2.0.jar" />
+		<!--<pathelement location="src"/>-->
+	</path>
+
+	<path id="searchpath">
+		<path refid="classpath" />
+		<dirset dir=".." casesensitive="false">
+			<patternset>
+				<include name="com.shs.**/src**" />
+				<include name="com.shs.**/src-gen**" />
+				<include name="com.shs.**/xtend-gen**" />
+				<include name="com.shs.**/bin**" />
+				<include name="com.shs.**/@dot**" />				
+			</patternset>
+		</dirset>
+	</path>
+
+
+	<target name="clean">
+		<delete dir="ant" />
+	</target>
+
+	<target name="generate-xtext-artifacts">
+		<!--
+        <java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" classpathref="classpath" fork="true">
+            <arg value="${workflow}"/>
+        </java>
+        -->
+	</target>
+
+	<target name="compile-xtend">
+		<pathconvert pathsep="${path.separator}" property="classpath-string" refid="searchpath">
+		</pathconvert>
+
+		<java classname="org.eclipse.xtend.core.compiler.batch.Main" classpathref="eclipsePlugins" dir="." fork="true" failonerror="yes">
+			<arg value="-cp" />
+			<arg value="${classpath-string}" />
+			<arg value="-d" />
+			<arg value="${BaseDir}/xtend-gen" />
+			<arg value="src-gen${path.separator}src${path.separator}xtend-src" />
+		</java>
+	</target>
+
+
+
+
+
+	<target name="compile-java">
+		<!--
+		<mkdir dir="ant/bin"/>
+		<javac classpathref="classpath" destdir="ant/bin" source="1.6" target="1.6" includeantruntime="true">
+			<src path="src" />
+			<src path="src-gen" />
+			<src path="ant/xtend-gen" />
+		</javac>
+		<copy todir="ant/bin">
+		    <fileset dir="src" excludes="**/*.java,**/*.xtend" />
+		    <fileset dir="src-gen" excludes="**/*.java,**/*.xtend" />
+		    <fileset dir="ant/xtend-gen" excludes="**/*.java,**/*.xtend" />
+		</copy>
+		-->
+	</target>
+
+	<target name="all" depends="clean,generate-xtext-artifacts,compile-xtend,compile-java" description="build all">
+
+	</target>
+</project>

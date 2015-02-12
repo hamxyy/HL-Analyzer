@@ -1,0 +1,21 @@
+namespace vortragAmDienstag {
+ 
+	application protected function void modifyCk() {
+		if ( crv:HL[11] - crv:HL[10] > 20) { 
+			for ( int i in 8 .. 12 ) {
+				hi:AgcCk[i] = AgcCk.db45;
+			}
+		} 
+		settledSenior(70);
+	}
+ 
+	// geht!
+	protected function void settledSenior(int age) {
+		if ( (hi:VadEn == VadEn.off) 
+		      && (pat:Age > age) ) {
+			hi:VadEn = VadEn.on;
+		}
+	}
+
+
+}

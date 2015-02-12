@@ -1,0 +1,521 @@
+// Note how this grammar extends the common language so we can
+// review was all language concepts defined there
+grammar com.shs.hl.HearingLanguage with com.shs.common.CommonLanguage
+
+generate hearingLanguage "http://www.shs.com/hl/HearingLanguage"
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://www.shs.com/common/CommonLanguage" as common
+
+// -----------------------------------------------------
+// IMPORTANT!
+// Before trying to understand the grammar, take a look at a 
+// couple of sample programs (e.g. in the com.shs.hl.tests.models
+// plugin. It's hard to understand a grammar if you haven't
+// seen examples!
+// -----------------------------------------------------
+
+
+// modules are the top level element and contains
+// a number of namespaces 
+Module:
+	(namespaces+=Namespace)*; // namespaces have names and can contain other namespaces
+// or using statements, as well as the macro functions and builtins
+// Namespaces can either be normal namespaces or packages in which case
+// they have a special package kind attribute that determines how the package
+// is going to be used by the host application. Constraints limit what can be contained
+// ( e.g. functions can only be contained in packages)
+// TODO: Refactor to make this two different subtypes	
+enum PackageKind:
+	FirstFit | AutoFit | TargetSelection | TargetSync | ProgramSelection | MonAppProgramSelection | TestSettings | Lib |
+	MixedMode |
+	FittingAssistent;
+
+Namespace:
+	(isNamespace?="namespace" | (isPackage?="package" packKind=PackageKind)) name=ID ("uselib" lib=[Namespace|QID])? "{"
+	(namespaces+=Namespace | usings+=Using | functions+=FunctionDeclaration | builtIns+=BuiltInOp |
+	packageBuiltIns+=BuiltInMethod)* "}";
+
+	//TableDefinition:
+//	isTable?="table" tableKind=TableKind name=ID	"constraints" "("(constraintDefs+=Type)+")" "positions" "("(pos+=INT ";")?")"
+//	"{"
+//		tableLines+=TableLine
+//	"}" 
+//	
+//;
+//
+//enum TableKind:
+//		Constraint|Master|Value;
+//
+//TableLine:
+//	(hasConstraint?="["constraintDef=TableConstraint"]")? "("content = TableLineContent ")";
+//
+//TableConstraint:
+//	(constraint+=Expression)+
+//;
+//
+//
+//TableLineContent:
+//	(hasRestriction?="[" isMaster?="master elementType=]")? (contentVal+=Expression)+
+//;
+
+
+// A built in operation is a kind of special operator available
+// on certain types (typically parameters). A library of predefined built-ins
+// is available in the com.shs.hl.builtins. This project is expected to be used
+// but every user of the hearing language 
+BuiltInOp:
+	"builtin" contextType=Type "::" name=ID ("(" (argsTypes+=Type ","?)* ")")? "=>" resultType=Type
+	(isWritable?="writable")?;
+
+	// we want something like
+// int|	std:ToSubject|double param1, int|std:special param2
+//	BuiltInArgList:
+//		{BuiltInArgList} '('((types+=Type "|"?) attName=Expression","?)*')';
+BuiltInMethod returns common::SymbolDeclaration:
+	{BuiltInMethod} "builtinMethod" (isSpecial?='[' validPackages+=PackageKind (',' validPackages+=PackageKind)* ']')?
+	type=Type name=ID (args+=ParameterDeclaration (',' args+=ParameterDeclaration)*)? ')'
+	"=>" resultType=Type;
+
+	// makes another namespace visible. The name "importedNamespace" is magic - triggers the
+// Xtext behaviour that makes the elements visible	
+Using:
+	'using' importedNamespace=ImportName ";"; // ... and ID with .* at the end.
+ImportName:
+	ID ('.' '*')?;
+
+enum FunctionKind:
+	protected | application | public | test | native; // These are attributes that can be annotated to functions
+
+
+// a function declaration is a symbol (so it can be referenced)
+// and has a type, arguments and a body. The function kind determines
+// how this function can be called. Constraints check this.
+FunctionDeclaration returns common::SymbolDeclaration:
+	({FunctionDeclaration} (attributes+=FunctionAttribute)* (kind=FunctionKind)?
+	'function' type=Type name=ID '(' (args+=ParameterDeclaration (',' args+=ParameterDeclaration)*)? ')'
+	(body=StatementList)?);
+
+	// currently I have no idea how they are used		
+// TODO do we really need this	
+FunctionAttribute:
+	WeightResetAttribute | TextAttribute;
+
+WeightResetAttribute:
+	{WeightResetAttribute} "@weightReset";
+
+TextAttribute:
+	"@text" i1=DECIMAL_NUMBER "[" n1=DECIMAL_NUMBER "," n2=DECIMAL_NUMBER "," n3=DECIMAL_NUMBER text=STRING "]";
+
+	// a parameter is a symbol so it can be referenced
+ParameterDeclaration returns common::SymbolDeclaration:
+	{ParameterDeclaration} type=Type name=ID; // a list of statements with curly braces around it.
+
+
+// used in all kinds of bodies
+StatementList:
+	{StatementList} "{" (statements+=Statement)* "}";
+
+	// the abstract concept for everything that can be used as a statement.
+// -------------------------------------------------------------------------------
+// Statements
+// -------------------------------------------------------------------------------
+Statement:
+	LocalVariableDeclarationStatement | ReturnStatement | IfStatement | BreakStatement | ForeachStatement |
+	SwitchStatement | WhileStatement | DoWhileStatement | ExpressionStatement | TestingStatement |
+	TestingControlStatement | AssertionStatement | PrintStatement | BuiltinStatement | AssignmentLikeThings;
+
+	// defines a local variable. Note how we have factored out the actual declaration, because the statement has to inherit from
+// Statement, and the declaration must be a SymbolDeclaration.
+LocalVariableDeclarationStatement:
+	{LocalVariableDeclarationStatement} var=LocalVariableDeclaration;
+
+	// as usual: type, name, optional init expression
+LocalVariableDeclaration returns common::SymbolDeclaration:
+	{LocalVariableDeclaration} type=Type name=ID (isConst?="const")? ("=" init=Expression)? ";";
+
+ReturnStatement:
+	"return" expr=Expression ";";
+	// an if statement with the usual syntax. Note that the curly braces are part of the StatementList.	
+IfStatement:
+	"if" "(" condition=Expression ")"
+	thenBody=StatementList
+	(elseIfs+=ElseIf)*
+	("else" elseBody=StatementList)?;
+
+	// ... the elseif part
+ElseIf:
+	"else" "if" "(" condition=Expression ")" body=StatementList; // this one used for ( int i in 10 -> 20 ) syntax	
+
+
+// Constraints ensure that it is only used inside of loops
+BreakStatement:
+	{BreakStatement} "break" ";"; // Assertion statement
+
+
+// Loops
+// ============================================
+ForeachStatement:
+	"foreach" "(" iterator=ForVarDeclaration "in" range=Expression ")" body=StatementList;
+
+	// and the var declaration for the For2
+ForVarDeclaration returns common::SymbolDeclaration:
+	{ForVarDeclaration} type=Type name=ID;
+
+WhileStatement:
+	"while" "(" expr=Expression ")" body=StatementList; // a do-while statements as we know it...
+DoWhileStatement:
+	"do" body=StatementList "while" "(" expr=Expression ")" ";";
+
+	// ============================================
+// ============================================
+
+// a switch; it does not use fall-through and break, rather
+// each case has a curly-brace-enclosed body; default is optional
+SwitchStatement:
+	"switch" "(" expr=Expression ")" "{" (cases+=Case)* ("default" ":" defaultBlock=StatementList)? "}";
+
+	// a case used in the switch
+Case:
+	"case" expr=Expression ":" body=StatementList;
+
+	// sometimes you want to use expressions in statement context,for example calling another function without doing anything
+// with the return value. An ExpressionStatement is used for this purpose	
+ExpressionStatement:
+	expr=Expression ";"; // Denotes that the implementation of a function is implemented
+
+
+// as native code and not in hearing language
+//DelegateNativeStatement: 	{DelegateNative} "delegateNative" ";";
+AssertionStatement:
+	"assertion" "(" assertDecide=Expression "," assertMessage=Expression ")" ";";
+
+PrintStatement:
+	{PrintStatement} "println" "(" msg=Expression ")" ";";
+
+	// Special statements to be used only for testing. We test the hearing
+// language generator for generating C# code and then running it.
+// Embedded assertions check whether the system actually works correctly
+TestingControlStatement:
+	AssertSetStatement;
+
+AssertSetStatement:
+	"assertSet" "(" id=ID "," assertSetValue=DECIMAL_NUMBER ")" ";"; // the while statement as we know it...
+TestingStatement:
+	AssertStatement | AssertEqualsStatement | FailStatement;
+
+AssertStatement:
+	"assert" "(" id=ID ")" expr=Expression "=>" msg=Expression ";";
+
+AssertEqualsStatement:
+	"assertEquals" "(" id=ID ")" expected=Expression "<=>" actual=Expression ";";
+
+FailStatement:
+	"fail" "(" id=ID ")" ";";
+
+	// built ins ------------------------------
+BuiltinStatement:
+	SetMinStatement | SetMaxStatement | AdjustCompStatement | AddToTGStatement | MultToTGStatement | AppOffsStatement |
+	FittingAssistStatement;
+
+	// sets a parameter to its minimum position
+SetMinStatement:
+	{SetMinStatement} "setMin" "(" expr=Expression ")" ";";
+	// sets a parameter to its maximum position
+SetMaxStatement:
+	{SetMaxStatement} "setMax" "(" expr=Expression ")" ";";
+
+AdjustCompStatement:
+	{AdjustCompStatement} "adjustComprHoldMedLev" "(" ")" ";";
+
+AddToTGStatement:
+	{AddToTGStatement} "addCurveToTG" "(" arg=Expression "," argTo=Expression ")" ";";
+
+MultToTGStatement:
+	{MultToTGStatement} "multCurveToTG" "(" arg=Expression "," argTo=Expression ")" ";";
+
+AppOffsStatement:
+	{AppOffsStatement} "applyOffset" "(" argId=Expression "," argTo=Expression "," argApply=Expression ")" ";";
+
+	// Due to a demand and agreement we need to support Fitting Assistant with some special global function statements
+// as long we do not have an additional specification language for providing global functions, we have to provide it here
+
+// TODO: Reduce complexity to use just some simpler function statements
+FittingAssistStatement:
+	SetApply1IsVisible | SetApply1IsEnabled | SetProposalTextID1 | SetApply2IsVisible |
+	SetApply2IsEnabled | SetProposalTextID2;
+
+SetApply1IsVisible:
+	{SetApply1IsVisible} "setApply1IsVisible" "(" argVis=Expression ")" ";";
+
+SetApply1IsEnabled:
+	{SetApply1IsEnabled} "setApply1IsEnabled" "(" argEn=Expression ")" ";";
+
+SetProposalTextID1:
+	{SetProposalTextID1} "setProposalTextID1" "(" argText=Expression ")" ";";
+
+SetApply2IsVisible:
+	{SetApply2IsVisible} "setApply2IsVisible" "(" argVis=Expression ")" ";";
+
+SetApply2IsEnabled:
+	{SetApply2IsEnabled} "setApply2IsEnabled" "(" argEn=Expression ")" ";";
+
+SetProposalTextID2:
+	{SetProposalTextID2} "setProposalTextID2" "(" argText=Expression ")" ";";
+
+	// Assigment, and things like it. To understand the strange way of writing the rules please take a look at the section on 
+// "Assignment Actions" in the Xtext docs. This is used all over the place in the HL grammar.
+
+
+// -------------------------------------------------------------------------------
+AssignmentLikeThings:
+	Expression (({AssignmentStatement.lvalue=current} "=") |
+	({PlusEqualsStatement.lvalue=current} "+=") |
+	({MinusEqualsStatement.lvalue=current} "-=") |
+	({MultiplicationEqualsStatement.lvalue=current} "*=") |
+	({BitWiseAndEqualsStatement.lvalue=current} "&=") |
+	({BitWiseOrEqualsStatement.lvalue=current} "|=")) rvalue=Expression ";";
+	// return.... constraints make sure it can only be used in function bodies
+
+
+// -------------------------------------------------------------------------------
+// Expression tree 
+// -------------------------------------------------------------------------------
+
+// The following is the whole expression subtree. Please be sure to first understand
+// how expressions work in Xtext (based on tutorials) before you try to understand this one
+// the top level  expressions (i.e. the ones with the lowest priority) are the comparison operators
+Expression:
+	LogicalOpLevel; // Logical and and or should be obvious
+LogicalOpLevel returns Expression:
+	ComparisonLevel (({And.left=current} '&&' | {Or.left=current} '||') right=ComparisonLevel)*;
+
+	// comparison *is an* expression and combines two expressions of the next-higher prio level (AdditionLevel). 
+// depending on the comp operator, we instantiate different meta classes using the assignment actions.
+// TODO: add a constraint that makes sure that the enumeration shift operators only work on ordered enumerations
+ComparisonLevel returns Expression:
+	AdditionLevel ((({Equals.left=current} '==') |
+	({UnEquals.left=current} '!=') |
+	({Greater.left=current} '>') |
+	({Smaller.left=current} '<') |
+	({EnumRight.left=current} '>>') | // shifts an ordered enumeration  to the right
+	({EnumLeft.left=current} '<<') | // shifts an ordered enumeration to the left
+	({GreaterOrEquals.left=current} '>=') |
+	({SmallerOrEquals.left=current} '<=')) right=AdditionLevel)*;
+
+	// addition *is an* expression and combines two expressions of the next-higher prio level (Multiplication). 
+AdditionLevel returns Expression:
+	MultiplicationLevel (({Plus.left=current} '+' |
+	{Minus.left=current} '-' |
+	{BitOr.left=current} '|' |
+	{BitXor.left=current} '^') right=MultiplicationLevel)*;
+
+	//then we combine two unary expressions to be the multiplicatoin level 
+MultiplicationLevel returns Expression:
+	UnaryOperatorLevel2 (({Multi.left=current} '*' |
+	//{Div.left=current} '/' | 
+	{BitCheck.left=current} '#' |
+	{BitAnd.left=current} '&') right=UnaryOperatorLevel2)*; // handles array access, ++ and --
+UnaryOperatorLevel2 returns Expression:
+	UnaryOperatorLevel1 (
+	// built-in call is used to call the built-ins provided by the standard library
+	// TODO: check if they actually can have arguments
+	({BuiltInCall.expr=current} "->" builtIn=[BuiltInOp] ("(" (actualArgs+=Expression ","?)* ")")?) |
+
+	// range expressions are used in for statements
+	({IntRangeExpression.low=current} ".." high=Expression) |
+	// a special comparison operator the checks if the value is within a range
+	({InIntervalExpression.expr=current} "within" range=Expression))?;
+
+	// The area a expression is its own level because we want to make sure
+// that one can write things like hi:someparam[i]->doSomething
+UnaryOperatorLevel1 returns Expression:
+	PrimaryExpression (({ArrayAccessExpression.expr=current} "[" index=Expression "]"))?;
+
+	// the agument list, only to be used with ref to functions 
+ArgList:
+	{ArgList} '(' (args+=Expression (',' args+=Expression)*)? ')';
+
+	// these are the atomic expressions. 
+PrimaryExpression returns Expression:
+	({TrueLiteral} "true") |
+	({FalseLiteral} "false") |
+	({BuiltInMethodCall} "System." method=[BuiltInMethod] ("(" (actualArgs+=Expression ","?)* ")")?) |
+
+	// parens can be used to nest any other expression
+	({ParenExpr} '(' expr=Expression ')') |
+	// number literals are expressions 
+	{NumberLiteral} value=(DECIMAL_NUMBER | HEX_NUMBER | BINARY_NUMBER) |
+	// so are text literals
+	{TextLiteral} value=STRING |
+	// null
+	{NullExpression} "null" |
+
+	// negation for booleans
+	({NotExpression} "!" expr=Expression) |
+	// preincrement/decrement
+	({PreIncrementExpr} "++" expr=Expression) |
+	({PreDecrementExpr} "--" expr=Expression) |
+	// bit complement
+	({BitComplementExpr} "~" expr=Expression) |
+	({IntSetExpression} "#(" (exprs+=Expression) (";" exprs+=Expression)+ ")") | // check if parameters are defined
+
+	// accessing audio parameters
+	({ParameterReadExpression} scope=ParameterScope ":" param=[common::SymbolDeclaration]) |
+
+	// and finally, the symbol reference
+	{SymbolReference} symbol=[common::SymbolDeclaration|QID] (argList=ArgList)? |
+
+	// built in methods
+	// ----------------------------------------------------------------
+	// extract to external file
+	//opposite stuff
+	({OppositeExpression} "opp" "(" expr=Expression ")") |
+	// at given side stuff
+	({AtsideExpression} "side" "(" argSide=Expression "," expr=Expression ")") |
+
+	// sit-stuff
+	({SitExpression} "sit" "(" index=Expression "," hiExpression=Expression ")") | // sets
+
+	({DefinedExpression} "isDefined" "(" expr=Expression ")") | // check if parameters are defined
+	({IsValidExpression} "isValid" "(" expr=Expression ")") | // check if parameters is at minimum position
+	({IsMinExpression} "isMin" "(" expr=Expression ")") | // check if parameters is at maximum position
+	({IsMaxExpression} "isMax" "(" expr=Expression ")") | // checks, if an OffsetIsApplicable
+	({IsOffsAppExpression} "isOffsetApplicable" "(" argId=Expression "," argTo=Expression "," argApply=Expression ")") |
+
+	// retrieves the number of logical channels
+	({LogChanCountExpression} "logChanCount" "(" argId=Expression ")") |
+	// return a value set in testing case 
+	({AssertGetExpression} "assertGet" "(" id=ID ")") |
+	({GetProposalText1} "getProposalTextID1" "(" ")") |
+	({GetProposalText2} "getProposalTextID2" "(" ")") |
+	({GetCurve} "getCurve" "(" argCurve=Expression ")") |
+	({ExistsCurve} "existsCurve" "(" argCurve=Expression ")") |
+	({IsCurveApplicable} "isCurveApplicable" "(" argCurve=Expression "," argToSubject=Expression "," argApply=Expression
+	"," argStartFreq=Expression "," argStopFreq=Expression ")") |
+	({ApplyCurve} "applyCurve" "(" argCurve=Expression "," argToSubject=Expression "," argApply=Expression ","
+	argStartFreq=Expression "," argStopFreq=Expression ")") |
+	({ExistsCurveFromLc} "existsCurveFromLc" "(" argLC=Expression "," argLevel=Expression ")") |
+	({GetCurveFromLc} "getCurveFromLc" "(" argLC=Expression "," argLevel=Expression ")") |
+	({ExistsProgramControl} "existsProgramControl" "(" ")") |
+	({ExistsVolumeControl} "existsVolumeControl" "(" ")") |
+	({GetStepsBelowMax} "getStepsBelowMax" "(" arg=Expression ")") |
+	({SetStepsBelowMax} "setStepsBelowMax" "(" arg=Expression "," val=Expression ")") |
+	({GetStepsAboveMin} "getStepsAboveMin" "(" arg=Expression ")") |
+	({SetStepsAboveMin} "setStepsAboveMin" "(" arg=Expression "," val=Expression ")");
+
+	// ===============================================================================
+// TYPES
+// ===============================================================================
+Type:
+	PrimitiveType | SpecialType | IntRangeType | IntSetType | ArrayType; // check for inteset and intrange
+
+
+// of additional types called PseudoUnitType
+//----------------------------------------------------------------------------
+// PRIMITIVE TYPE
+//----------------------------------------------------------------------------
+PrimitiveType:
+	VoidType | BoolType | NumericType | TextType | PseudoUnitType | NullType;
+
+VoidType:
+	{VoidType} "void";
+
+BoolType:
+	{BoolType} "bool";
+
+	// Numeric ------------------	
+NumericType:
+	IntType | DoubleType;
+
+IntType:
+	{IntType} "int";
+
+DoubleType:
+	{DoubleType} "double";
+
+	// Text ----------------------
+TextType:
+	StringType | StringIdType;
+
+StringType:
+	{StringType} "string"; // regular string without specific limitations
+StringIdType:
+	{StringIdType} "stringID"; //a short string used to identify something 
+
+// Special unit stuff ----------------
+PseudoUnitType:
+	GainType | FrequencyType;
+
+GainType:
+	{GainType} "gain";
+
+FrequencyType:
+	{FrequenceType} "freq";
+
+	// --- NO TYPE
+NullType:
+	{NullType} "$$$null$$$";
+
+	//----------------------------------------------------------------------------
+// Special Type
+//----------------------------------------------------------------------------
+SpecialType:
+	EnumParameterType | IntegerParameterType | DoubleParameterType |
+	CurveType | CurvePointType | LevelCurvesType | LevelCurvePointType | ChannelSetType | ChannelType;
+
+EnumParameterType:
+	param=[common::EnumParameter];
+
+IntegerParameterType:
+	param=[common::IntegerParameter];
+
+DoubleParameterType:
+	param=[common::DoubleParameter];
+
+CurveType:
+	{CurveType} "curve";
+
+CurvePointType:
+	{CurvePointType} "curvepoint";
+
+LevelCurvesType:
+	{LevelCurvesType} "levelcurves";
+
+LevelCurvePointType:
+	{LevelCurvePointType} "levelcurvepoint";
+
+ChannelSetType:
+	{ChannelSetType} "channels";
+
+ChannelType:
+	{ChannelType} "channel";
+
+	//----------------------------------------------------------------------------		
+// IntRangeType -- DISABLED
+//----------------------------------------------------------------------------	
+IntRangeType:
+	{IntRangeType} "intrange";
+
+	//----------------------------------------------------------------------------	
+// IntSetType -- DISABLED
+//----------------------------------------------------------------------------	
+IntSetType:
+	{IntSetType} "intset"; // these are special types to act as types of the parameters
+ArrayType:
+	"arrayOf" baseType=Type; // The primitive type are the usual suspects, as well as a couple
+
+
+// numbers. We use the type system to distinguish ints from floats etc.
+terminal DECIMAL_NUMBER:
+	("-")? ('0'..'9')* ('.' ('0'..'9')+)?;
+
+terminal BINARY_NUMBER:
+	'0b' ('0'..'1')+;
+
+terminal HEX_NUMBER:
+	'0x' (('0'..'9') | ('a'..'f') | ('A'..'F'))+;
+
+terminal INT returns ecore::EInt:
+	'$$$$$$$this one has been deactivated$$$$$$$';
+
+	

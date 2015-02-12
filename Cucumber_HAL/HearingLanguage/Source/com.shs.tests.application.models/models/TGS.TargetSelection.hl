@@ -1,0 +1,30 @@
+namespace testing
+{
+	using testing.*;
+	package TargetSelection TGS
+	{
+		
+		application function void SelectTargetFormula ()
+		{
+			assertSet(SelectTargetFormula,100);
+		}
+		
+		application function int PostTargetProcessing ()
+		{
+			return 2;
+			assertSet(PostTargetProcessing,100);
+			return 1;
+		}
+				
+		//start testing 
+		test function void SelectTargetFormulaTest ()
+		{
+			assertEquals(SelectTargetFormulaMethodExists) 100 <=> SelectTargetFormula();		
+		}
+		
+		test function void PostTargetProcessingTest ()
+		{
+			assertEquals(PostTargetProcessingMethodExists) 100 <=> PostTargetProcessing();
+		}
+	}
+}	  

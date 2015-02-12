@@ -1,0 +1,143 @@
+package com.shs.hl.generator
+
+
+import com.google.inject.Inject
+import com.shs.common.commonLanguage.EnumLiteral
+import com.shs.hl.generator.utils.GenCodeRegions
+import com.shs.hl.generator.utils.GeneratorHelper
+import com.shs.hl.generator.utils.TestCaseGen
+import com.shs.hl.generator.utils.GenUtils
+import com.shs.hl.hearingLanguage.FunctionDeclaration
+import com.shs.hl.hearingLanguage.FunctionKind
+import com.shs.hl.hearingLanguage.Module
+import com.shs.hl.hearingLanguage.Namespace
+import com.shs.hl.hearingLanguage.ParameterDeclaration
+import com.shs.hl.hearingLanguage.ParameterReadExpression
+import com.shs.hl.generator.utils.HLCSharpBeautifier
+import com.shs.hl.util.LineGene
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.generator.IFileSystemAccess
+import org.eclipse.xtext.generator.IGenerator
+
+import static extension com.shs.hl.generator.utils.GenUtils.*
+
+class HearingLanguageGeneratorNrLines implements IGenerator {
+	
+	@Inject extension GeneratorHelper helper
+	
+		
+	@Inject	extension UtilsEx utilsEx
+	
+	@Inject	extension TestCaseGen testCaseGen
+	
+	@Inject	extension GenCodeRegions gencode
+	
+	@Inject extension LineGene lineGene
+	
+	@Inject extension  HearingLanguageBeautifier beauti
+	
+	
+	
+	
+	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
+		
+	    for(namesp : resource.allContents.toIterable.filter(typeof(Namespace)))	
+      	 if(isModule(namesp.eContainer()) && !namesp.name.equals("builtins"))
+      	  {fsa.generateFile((namesp.eContainer() as Module).resFileName,format((namesp.eContainer() as Module).resFileName,'''
+      	 	 //#HL-SourceFile:«(namesp.eContainer() as Module).hlsourceFile»
+      	 	 «(namesp.eContainer() as Module).doGenerate»  	 
+      	 '''))
+      	 }
+      	
+	} 
+	
+	//for debuging, remove , targeted generation of specific HL file
+	def boolean canGenerate(Module m){
+	 EcoreUtil2::getAllContentsOfType(m,typeof(Namespace)).map(b | b.name.equals("BasicLibrary_MicrophoneMix") ).contains(true)
+	 }
+	
+		 	
+	def dispatch doGenerate( Module m ) {
+		'''
+		«csharpHeader»
+		«FOR c : m.namespaces»
+		   «c.doGenerate»
+		«ENDFOR»
+		
+		}
+		'''
+	}
+	
+	
+	def dispatch doGenerate( Namespace n ) '''
+		 «IF n.isPackage»
+		 «IF n.hasTestFunctions»
+		 using SHS.SAT.HAL.Testing;
+		 «ENDIF»
+		 
+		 public class «n.name» «n.extendsClause()»
+		 {
+		 «IF n.hasTestFunctions»
+		  «n.genTest» 
+		 «ENDIF»
+		 «IF(n.mixedMode)»
+		   «FOR m :n.functions.filter(typeof(FunctionDeclaration))»
+		       «m.functionDefinitionDependency»
+		    «ENDFOR»
+		 «ENDIF»
+		  
+		  «FOR m :n.functions.filter(typeof(FunctionDeclaration))»
+		       «m.functionDefinition»
+		  «ENDFOR»
+		 }
+		 «ELSE»
+		 namespace «n.csNamespace» { «FOR kind  :n.namespaces »
+		  «doGenerate(kind)»
+		 «ENDFOR»
+		 }
+		 «ENDIF»
+		'''
+		
+	def getFQNamespace(Namespace na){
+		rootNamespace +"."+na.csNamespace
+	}
+	
+	def functionDefinition (FunctionDeclaration decl)
+		'''
+		«IF (decl.kind == FunctionKind::TEST )»[TestMethod] «decl.registerTestFunction((decl.eContainer as Namespace).csNamespace,(decl.eContainer as Namespace).csNamespace)» «ENDIF»
+		«IF (decl.kind == FunctionKind::APPLICATION)»/*application*/ «ENDIF»
+		«decl.getStartRegion("",(decl.eContainer as Namespace).FQNamespace+"::"+decl.name)» public «IF (decl.kind == FunctionKind::APPLICATION)»override«ENDIF» «decl.type.asCsType» «decl.name»(«val params=decl.args.filter(typeof(ParameterDeclaration))» «FOR arg:params» «arg.type.asCsType» «arg.name»«IF params.last != arg»,«ENDIF» «ENDFOR» )
+		«decl.getEndRegion("")» 
+		 «decl.body.genCode»
+		'''
+		
+	def functionDefinitionDependency(FunctionDeclaration decl)
+		'''
+		«IF (decl.kind == FunctionKind::APPLICATION)»
+		«decl.getStartRegion("$Dependencies","")»
+		public override IEnumerable<object> Get«decl.name»Dependencies() {
+         «decl.getEndRegion("$Dependencies")»
+         	«FOR paraEx :decl.parameterReadExpressions»
+         	 «paraEx.parameterReadExpressionDependency»
+         	«ENDFOR»
+         	«FOR enuLit : decl.enumLiterals»
+         	  «enuLit.enumLitealDependency» 
+         	«ENDFOR»
+			yield break;
+		}
+		
+         «ENDIF»		
+		'''
+	
+	
+	def parameterReadExpressionDependency(ParameterReadExpression readExpr)	'''
+		«IF(readExpr.scope.toString.equals("hi"))»
+		yield return «readExpr.scope.controlsClass».«readExpr.param.name»;
+		«ENDIF»
+	'''
+ 
+ def enumLitealDependency(EnumLiteral literal)
+		'''	yield return «literal.genCode»;'''
+	
+ }

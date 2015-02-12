@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FA322ADC-28F0-4598-B531-8E1D0224B4D4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>$(MacroLibrary)</RootNamespace>
+    <AssemblyName>$(MacroLibrary)</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(VendorOutputBase)'==''">
+	<VendorOutputBase>SI</VendorOutputBase>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(ReferenceDirectory)' == ''">
+    <ReferenceDirectory>$(ProgramFiles)\SAT\Fitting</ReferenceDirectory>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(OutputDBDir)'==''">
+    <OutputDBDir>HiDB</OutputDBDir>
+  </PropertyGroup>
+
+
+  <!-- enable a more precise definition where the output goes 
+  
+       in general we have \Sat\Fitting\HIDB\SI as general output but on the 
+       buildsystem and for the HAL-WB it is necessary to specify it more precise
+  -->
+  <PropertyGroup Condition="'$(OutputBasePath)'==''">
+    <OutputBaseDir>$(ReferenceDirectory)</OutputBaseDir>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(OutputBasePath)'!=''">
+    <OutputBaseDir>$(OutputBasePath)</OutputBaseDir>
+  </PropertyGroup>
+  
+    <PropertyGroup Condition="'$(OutputRoot)' == ''">
+    <OutputRoot>$(OutputBaseDir)\$(OutputDBDir)</OutputRoot>
+  </PropertyGroup>
+
+
+                 
+
+  <!-- specify OutputPath if some base location is set -->
+  <PropertyGroup Condition="'$(OutputPathOverwrite)' != ''">
+    <OutputPath>$(OutputPathOverwrite)</OutputPath>
+  </PropertyGroup>
+ 
+
+  
+  <!-- Fall back solution  use predefined folder under fitting -->
+  <PropertyGroup Condition="'$(OutputPathOverwrite)' == ''">
+    <OutputPath>$(OutputRoot)\$(VendorOutputBase)</OutputPath>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <ReferencePath>$(ReferenceDirectory)</ReferencePath>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(GenerationPath)' == ''">
+    <GenerationPath>.</GenerationPath>
+  </PropertyGroup>
+  
+  
+  
+
+
+<!--
+################################################################################
+REFERENCES
+################################################################################
+-->
+  
+  <ItemGroup Condition="'$(TestConfig)' == 'Test'">
+    <Reference Include="SHS.SAT.HAL.TestAssembly" />
+  </ItemGroup>
+  
+<!--  
+******************************************************************************
+Platform neutral    (needed for HAL-RT)
+*****************************************************************************
+-->
+  <ItemGroup>
+	  <Reference Include="SHS.SAT.FittingHIDBInterfaces">
+		<SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+	
+	 <Reference Include="SHS.SAT.FittingHIDBInterfaces.HearingLanguageRuntime">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <!--
+  ******************************************************************************
+  D8 specific           (needed for PlatformData)                
+  ******************************************************************************
+  -->
+  <ItemGroup Condition="'$(HAPlatform)'=='D8'">
+    <Reference Include="SHS.SAT.FittingHIDBInterfaces.HIPlatformData.D8">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+   
+  <!--
+  ******************************************************************************
+  D9 specific           (needed for PlatformData)                			    
+  ******************************************************************************
+  -->
+  <ItemGroup Condition="'$(HAPlatform)'=='D9'">
+    <Reference Include="SHS.SAT.FittingHIDBInterfaces.HIPlatformData.D9">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  
+  
+  
+<!--
+******************************************************************************
+Additional references
+******************************************************************************
+-->
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+  </ItemGroup>  
+  
+  <Target Name="CollectGeneratedItems">
+	<CreateItem Include="$(GenerationPath)\*.cs">
+		<Output TaskParameter="Include" ItemName="Compile"/>
+	</CreateItem>
+  </Target>
+  
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+	<CoreCompileDependsOn>CollectGeneratedItems;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+  </PropertyGroup>  
+  
+ <!-- 
+       To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+ -->
+  <Target Name="BeforeBuild">
+    <Message Text ="=================================================================================="/>
+    <Message Text ="Generation Path = $(GenerationPath)"/>
+    <Message Text ="Reference Path  = $(ReferencePath)"/>
+    <Message Text ="OutputPath Path = $(OutputPath)"/>
+    <Message Text ="Reference DIR   = $(ReferenceDirectory)"/>
+    <Message Text ="VendorOutputBase= $(VendorOutputBase)"/>
+    <Message Text ="HAPlatform      = $(HAPlatform)"/>	
+	<Message Text ="BUILD DIRECTORY = $(builddir)"/>
+    <Message Text ="=================================================================================="/>
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  
+  
+ 
+</Project>

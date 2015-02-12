@@ -1,0 +1,16 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 1 instance in this file to assert, that std.cl is taken into concern */
+	
+	package Lib stdTest
+	{
+		test function void ApplyTest()
+		{
+			std:Apply = Apply.Complete;
+			assertEquals(ApplyTest)std:Apply <=> Apply.Complete;
+		}
+	 
+	}
+}

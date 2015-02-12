@@ -1,0 +1,16 @@
+namespace negativeNumbers {
+
+	protected function void f() {
+		int i = 10;
+		i = -20; 	// works, not const -- and notice the negative number!
+
+		int jj = 10 - 2; // works - in spite of the minus
+		int jj3 = 10 + -2;
+		
+		double f = -10.2;
+		
+		double g = 20 + -10.2;
+		
+	
+	}	 
+}

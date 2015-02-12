@@ -1,0 +1,45 @@
+namespace xmltest1  {
+	
+	package Lib xmltest1 {
+	 
+		protected function void tueWas() {  
+	
+			hi:d8PAgcAlmTcRelFast[0]  = 10;   
+			hi:d8FAacEn = d8FAacEn.enable;     
+			hi:d8FAacEn = d8FAacEn.off;  
+	   
+			hi:d8FAgcCk1[0] = d8FAgcCk1.M2_dBspl;
+				 
+			if ( hi:d8FAgcCk1[0] == d8FAgcCk1.M2_dBspl ) {}
+			if ( hi:d8FAgcCk1[0] != d8FAgcCk1.M2_dBspl ) {}
+	
+	// TODO: Claus -> till now no const avaliable
+	//		hi:Level = Level.db20; 				// error: Level is const
+	
+			hi:Gender = Gender.male;		// error: cannot be resolved (from scope)
+	
+	//TODO: Claus -> pat shall not be changeable
+	//		pat:Gender = Gender.male;      // error 
+				
+			if ( isDefined( crv:HL )) {  // ok
+				
+			}
+			if( isDefined( Gender.male ) ) { // enabled works ONLY on enum literals
+				
+			}
+			
+			/* TODO: Claus -> no ordered value available
+				 
+			if ( hi:Level > 10 ) {}	 // error: Level is not ordered
+			if ( hi:Size > Size.small ) {} // ok, Size is ordered
+			if ( hi:Size < Size.small ) {} // ok, Size is ordered
+			if ( hi:Size >= Size.small ) {} // ok, Size is ordered
+			if ( hi:Size <= Size.small ) {} // ok, Size is ordered
+			if ( hi:Size == Size.small ) {} // ok anyway 
+			*/
+	
+			if ( pat:Gender == Gender.male ) {}
+			  
+		}
+	}
+}

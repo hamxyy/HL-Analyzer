@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--This is a sample configuration file exposing all the valid parameters-->
+<PackagingInfo>
+  <Packages>
+    <Package Name="BST_HearingLanguage_Workbench" PackageType="Legacy" ComponentType="PCC_Legacy">
+      <Include Path="product" BSTPath="HAL_Workbench" />
+      <Output Type="exe" Name="B_%ComponentName%_%Version%.%SHSBuildNumber%_%date%_Workbench"/>
+      <Deployment SubPath="%ComponentName%\%Version%\B_%ComponentName%_%Version%.%SHSBuildNumber%_%date%"  SourceSubPath="%VariableDropPath%\%ComponentName%\Legacy">
+        <Deploy Site="DEERL01" Deploy="true"/>
+        <Deploy Site="sgsgp01" Deploy="true"/>
+        <Deploy Site="Instanbul" Deploy="true"/>
+      </Deployment>
+    </Package>
+	<Package Name="TFS_HearingLanguage_Output" PackageType="TFS" ComponentType="PCC_TFS">
+    <Include Path="HearingLanguage\product\HearingLanguage_Output.zip" />
+	  <Output Type="uncompressed" />
+      <Deployment SubPath="%VariableDropPath%\%ComponentName%\TFS">
+        <Deploy Site="DEERL01" Deploy="true"/>
+        <Deploy Site="sgsgp01" Deploy="true"/>
+        <Deploy Site="Instanbul" Deploy="true"/>
+      </Deployment>
+    </Package>
+  </Packages>
+</PackagingInfo>

@@ -1,0 +1,13 @@
+namespace increnum {
+
+	protected function void f() {
+		int a = 2;
+		hi:d8PFbcFbdThrReset = d8PFbcFbdThrReset.high_sensitivity;
+		hi:d8PFbcFbdThrReset >> a; 
+		hi:d8PFbcFbdThrReset << a; 
+		
+			
+	
+	}	 
+}
+

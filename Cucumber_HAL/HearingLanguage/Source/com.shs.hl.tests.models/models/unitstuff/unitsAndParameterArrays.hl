@@ -1,0 +1,17 @@
+namespace unitsAndParameterArrays {
+
+	package Lib unitsAndParameterArray {
+		protected function void f1() {
+
+// TODO: Claus	
+//			hi:d8FAacPeriod = 10 dB; // ok    
+			
+			hi:d8FAacIaacEn = d8FAacIaacEn.enable;
+
+// TODO: Claus	    
+//			hi:d8FAacCk1Offset[0] = 10 dB; // ok
+			hi:d8FAacCk1Offset[0] = d8FAacCk1Offset.M10_dB; // ok
+		
+		}
+	}	 
+}

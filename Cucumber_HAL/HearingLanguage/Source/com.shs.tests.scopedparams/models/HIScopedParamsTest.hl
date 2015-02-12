@@ -1,0 +1,20 @@
+namespace testing
+{
+	using testing.*;
+	package Lib HiScopedParamsTest uselib builtins
+	{
+		test function void hiHighLevelEnumTest ()
+		
+		{
+		  hi:d8PhlMicMode = d8PhlMicMode.spatial_omni;
+		  assertEquals(hiHighLevelEnumTest) d8PhlMicMode.spatial_omni <=> hi:d8PhlMicMode;
+		}
+		
+		test function void d8PhlFineOnTest(){
+		  hi:d8PhlFineOn = d8PhlFineOn.off;
+		  assertEquals(d8PhlFineOnTest)  hi:d8PhlFineOn <=> d8PhlFineOn.off;
+		}
+		
+		
+	}
+}

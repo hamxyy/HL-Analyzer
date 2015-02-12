@@ -1,0 +1,29 @@
+namespace complexinit {
+ 
+	protected function void tueWas() {  
+	
+		curvepoint p = new curvepoint( 100, 1+2 );	// ok, same type
+
+		int i = new int();	  					// error: int is not newable
+
+		int x = new curvepoint( 100, 40 );			// error: wrong type
+   
+	 
+		curve c1 = new curve(  
+					new curvepoint(10,10), 
+					new curvepoint(10,10),
+					new curvepoint(10,10),
+					new curvepoint(10,10), 
+					new curvepoint(10,10),
+					new curvepoint(10,10), 
+					new curvepoint(10,10), 
+					new curvepoint(10,10),
+					new curvepoint(10,10),
+					new curvepoint(10,10), 
+					new curvepoint(10,10) 
+		          );	 
+	
+	
+	}
+
+}

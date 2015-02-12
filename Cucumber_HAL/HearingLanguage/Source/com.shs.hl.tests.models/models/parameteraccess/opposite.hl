@@ -1,0 +1,49 @@
+namespace opposite uselib builtins
+{
+	using builtins.*;
+	package  Lib testing
+	{
+		protected function void f ()
+		{
+			curvepoint p;
+
+			// opposite should be allowed for crv ... 
+			if (opp (crv:HL)->MinIx == 2)
+			{
+			}
+			// ... but not for hi, for example     
+			if (opp (hi:d8FAacEn) == d8FAacEn.off)
+			{
+			}
+			if (opp (env:CompanyCode) == CompanyCode.Siemens)
+			{
+			}
+			// ... and not for anything else  
+			if (opp (21) == 0)
+			{
+			}
+		}
+		protected function void more ()
+		{
+			if (cap:WlsUserControl == WlsUserControl.RCU
+			)
+			{
+			} // works because param can be coerced to int
+			if (opp (cap:WlsUserControl) > WlsUserControl.RCU)
+			{
+			} // works because opp(..) works on parameters 
+			if (cap:WlsPhone == WlsPhone.exists)
+			{
+			}
+			if (opp (cap:WlsPhone) == WlsPhone.exists)
+			{
+			}
+			if (opp (cap:WlsUserControl) > WlsUserControl.e2e &&
+					opp (cap:WlsPhone) == WlsPhone.exists &&
+					opp (cap:WlsPhone == WlsPhone.exists))
+			{
+			} // error: unexpected
+
+		}
+	}
+}

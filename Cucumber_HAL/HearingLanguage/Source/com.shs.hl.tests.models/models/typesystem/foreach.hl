@@ -1,0 +1,31 @@
+namespace foreachTest {
+
+	protected function void f() {
+
+		int a;
+		foreach( int i in #(1;3;5;a) ) {} 		
+
+		foreach( int j in 10 .. 20 ) {} 		
+
+		channels chs;
+		foreach( channel c in chs ) {}
+		 
+		foreach( curvepoint x in 2+3 ) {}   // error: incompatible type
+		 
+		curve cr;
+		foreach( curvepoint p1 in chs ) {
+			break;	
+		}   
+		// error: incompatible type
+		foreach( curvepoint p2 in cr ) {}   
+ 
+		levelcurves lc;
+		foreach( levelcurvepoint lcp in lc ) {}   
+	
+	}
+	
+	protected function void g() {
+		break;		 		// error: break must be in a loop
+	}
+		 
+}

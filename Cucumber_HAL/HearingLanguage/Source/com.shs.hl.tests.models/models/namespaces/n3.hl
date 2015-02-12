@@ -1,0 +1,11 @@
+namespace n3 {
+
+	protected function void n3f1() {
+				
+	} 
+
+	public protected function void publicn3f1() {
+				
+	} 
+
+}

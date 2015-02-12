@@ -1,0 +1,21 @@
+namespace h2 {
+
+	protected function int dummy() {
+		int x = 1 + 1;
+		int y = x + 2; 
+		
+		// result should be double, 
+		// but the numbers should be addable
+		int error1 = y + 22.2;               
+
+		// the next two should work!
+		double ok1 = 21 + 22.2;              
+		double ok2 = 21 + 22;              
+ 
+ 		int xyz = 0.2;
+ 
+		return 0;
+
+	}  
+	 
+}

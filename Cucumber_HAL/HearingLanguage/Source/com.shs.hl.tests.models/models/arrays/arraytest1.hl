@@ -1,0 +1,21 @@
+namespace arraytest1  {
+
+	protected function void f1() {
+		foreach ( int i in 0 .. 2 )  {
+			hi:d8PAgcChannelGain[i] = d8PAgcChannelGain.LogicalPosition_0; 
+			hi:d8PAgcChannelGain = d8PAgcChannelGain.LogicalPosition_0;  	// error: Array Qualifier missing
+			//hi:d8PAgcDirGainAttEn = d8PAgcDirGainAttEn.off;	 	 	  
+		}        
+	}
+
+
+	protected function void f2() {
+		hi:d8PAgcDirGainAttEn[1] = d8PAgcDirGainAttEn.off;			// error: d8PAgcDirGainAttEn is not an array type  
+	}
+
+
+	protected function void f3() {
+		int someInt;
+		someInt[10];			 // error: someInt is not an array
+	}			 
+}

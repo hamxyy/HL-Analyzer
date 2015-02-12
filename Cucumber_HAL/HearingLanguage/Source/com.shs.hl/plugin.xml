@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<plugin>
+
+  <extension point="org.eclipse.emf.ecore.generated_package">
+    <package 
+       uri = "http://www.shs.com/hl/HearingLanguage" 
+       class = "com.shs.hl.hearingLanguage.HearingLanguagePackage"
+       genModel = "com/shs/hl/HearingLanguage.genmodel" /> 
+  </extension>
+</plugin>
+ 

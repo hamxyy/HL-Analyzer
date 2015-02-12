@@ -1,0 +1,13 @@
+namespace interval {
+
+	protected function void f() {
+		
+		int a;
+		int j;
+		
+		if ( a within j .. 100 ) {  
+			
+		}		
+	
+	}	 
+}

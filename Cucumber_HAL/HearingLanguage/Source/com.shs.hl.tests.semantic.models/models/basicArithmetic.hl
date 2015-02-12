@@ -1,0 +1,61 @@
+namespace tests {
+	
+	package Lib ArithmeticTest {
+
+	 	test function void basicArithmetic() {
+	 		int a = 10;
+	 		int b = 5;
+	
+	 		int s = a + b;
+	 		assertEquals(sum) s <=> 15;  
+	
+	 		int d = a - b;
+	 		assertEquals(diff) d <=> 5; 
+	
+	 		int m = a * b;
+	 		assertEquals(mult) m <=> 50; 
+	
+	 		int div = a / b;
+	 		assertEquals(div) div <=> 2; 
+	 		
+	 		double f1 = 1.3;
+	 		double f2 = 2.2;
+	 		assertEquals(floatAdd) f1+f2 <=> 3.5;
+	 	 		
+	 	}
+	 	
+	 	test function void extendedArithmetic(){
+	 		int a= 10;
+	 		int b= 5;
+	 		int c =3;
+	 		int  s =a+c*b;
+	 		int p = c + a /b;
+	 		int m = c + a /b - 4;
+	 		int n = (b+c)*a;
+	 		assertEquals(multiplicationPrecendence)  25 <=> s;
+	 		assertEquals(divisonPrecedence) 5 <=> p;
+	 		assertEquals(divionAdditionSubPrecendence) 1 <=> m;
+	 		assertEquals(bracketProductPrecedence) 80 <=> n;
+		
+	 	}
+
+       test function void shortHandArithmetic(){
+       		int m =3;
+			++m;
+			assertEquals(incrementByOne)  4 <=> m;
+       	    int p = 5;
+       	    --p;
+       	    assertEquals(decrementByOne)  4 <=> p;
+       	       	
+       }	 	
+	 	
+	  
+	 	
+	   // to implement :  << , >> 	
+	 	
+	 	
+	 	
+		
+	}
+	 	
+}

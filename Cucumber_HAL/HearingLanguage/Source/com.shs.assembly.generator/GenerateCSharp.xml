@@ -1,0 +1,95 @@
+<project name="Headless Generator Run" basedir="." default="run">
+
+	<!-- The folder where the HalWorkspace.exe is placed -->
+	<property name="workbench.home" value="../" />
+	
+	<!-- The folder which contains the projects with the hearing language files -->  
+	<property name="projects.folder" value="W:/Workspace/SIFIT7.3.0/HIData/HI/hiMacro" />
+	
+	<!-- The name of the project for which the code should be generated -->
+	<property name="project.name" value="com.shs.d8PlatformMacros" />
+	
+	<!-- The path relative to the project folder where the *.hl files can be found -->
+	<property name="model.path" value="./models" />
+	
+		
+	
+	<property name="stdlib.version" value = "D8" />
+	
+	<!--The path to standard library -->
+	
+	<!--
+		<property name="hicommon.stdlib" value= "/plugins/com.shs.hl.stdlib.D8_1.0.0" />
+		<property name="hicommon.stdlib.basefolder" value = "${eclipse.home}"/>
+		<property name="hicommon.stdlib.folder" location="${hicommon.stdlib.basefolder}${hicommon.stdlib}" />
+	-->
+	<!--
+	<property name="workflow.module" value="HearingLanguageGeneratorWorkflow" />
+	<property name="workflow.path"  value="com/shs/hl/generator/"/>
+	-->
+	
+	<target name="run">
+		<path id="generator.classpath">
+			<fileset dir= "${workbench.home}/plugins">
+				<include name="com.shs.hl.codegenerator*.jar"/>
+				<exclude name="*.source_*.jar" />
+				<exclude name="org.eclipse.xtend.standalone*.jar"/>
+				
+				
+				<include name= "javax.inject*.jar" />
+				<include name= "com.google.guava*.jar"/>
+				<include name= "com.google.inject*.jar"/>
+				<include name= "com.ibm.icu*.jar" />
+				
+				<!-- some antlr + apache-->
+				<include name= "org.antlr.runtime*.jar" />
+				<include name= "org.apache.commons*.jar" />
+				<include name= "org.apache.log4j*.jar" />
+				
+				<!-- some equinox, osgi -->
+				<include name= "org.eclipse.core.*.jar"/>
+				<include name= "org.eclipse.emf.*.jar" />
+				<include name= "org.eclipse.jdt.*.jar" />
+				
+				
+				<!-- Xtext, Xpand and relevant jars -->
+				<include name= "org.eclipse.xpand*.jar"/>
+				<include name= "org.eclipse.xtend*.jar"/>
+				<include name= "org.eclipse.xtext*.jar"/>
+
+				<!-- Hearing language stuff -->
+				<include name= "com.shs.common*.jar"/>
+				<include name= "com.shs.hl.stdlib.*.jar"/>
+				<include name= "com.shs.hl*.jar"/>				
+				<!-- Type system -->
+				<include name="de.itemis.*.jar"/>
+			</fileset>
+			
+			
+			<dirset dir="${projects.folder}">
+				<include name="${projects.name}" />
+			</dirset>
+		</path>
+
+		
+		
+<!--
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" fork="true" dir="${projects.folder}/${project.name}" failonerror="true">
+			<arg line="${workflow.module} -pmodelPath=${model.path} -pplatform='${stdlib.version}'"/>
+			<classpath refid="workflow.classpath"/>			
+		</java>
+		
+	-->	
+
+<!--	
+		<pathconvert pathsep="${line.separator}"  property="classalligned" refid="generator.classpath"/>
+		<echo message="${classalligned}"/>
+	-->
+	
+		<java classname="com.shs.hl.generator.HlCodeGen" fork="true" dir="${projects.folder}/${project.name}" failonerror="true">
+			<arg line="-model=${model.path} -platform='${stdlib.version}'"/>
+			<classpath refid="generator.classpath"/>			
+		</java>
+	</target>
+
+</project>

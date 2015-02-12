@@ -1,0 +1,138 @@
+grammar com.shs.common.CommonLanguage with org.eclipse.xtext.common.Terminals
+
+generate commonLanguage "http://www.shs.com/common/CommonLanguage"
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+// ---------------------------------------------------
+// Parameter Definition rules
+// ---------------------------------------------------
+	
+		
+// top level element - a cl file contains parameters
+ParamDefinitions:
+	(enums+=Parameter)*;
+	
+// Parameters can be of various kinds
+// all parameters
+//   - can be const, i.e. they cannot be assigned
+//   - have a scope (hi, pat, ...) which acts as a 
+//     kind of parameter namespace and is used 
+//     mainly for code completion 
+Parameter returns SymbolDeclaration:
+	EnumParameter | IntegerParameter | DoubleParameter | CrvParameter |  ChannelParameter;
+
+// represents audiologic curves; these have special support
+// via builtins
+CrvParameter:
+	{CrvParameter} (doc=DOC)? (readonly?="const")? scope=ParameterScope name=ID ";"; 
+
+// int parameter; in addition to const and scope, they have 
+//   - a parameter range
+//   - as well as optionally a unit for the values
+//   - and they can be an array, in which case they 
+//     can also specify a unit for the index
+//   - they can also have a list of init values
+IntegerParameter:
+	{IntegerParameter} (doc=DOC)? (readonly?="const")? scope=ParameterScope "int" name=ID kind=ParamKind 	
+	("{" minimum=DECIMAL_NUMBER "," maximum=DECIMAL_NUMBER "}")? 
+	("init" "{" (values+=DECIMAL_NUMBER ","? )* "}")?";";
+
+
+DoubleParameter:
+	{DoubleParameter} (doc=DOC)? (readonly?="const")? scope=ParameterScope "double" (precSpec=PrecSpec)? name=ID kind=ParamKind 
+	("{" minimum=DECIMAL_NUMBER "," maximum=DECIMAL_NUMBER "}")?";"; 
+
+PrecSpec:
+	"#" vorPunkt=DECIMAL_NUMBER "," nachPunkt=DECIMAL_NUMBER;
+		
+// enum parameter, 
+//   - they can also be arrays
+//   - they may be ordered
+//   - and they specify one of there literals to mean undefined: undefElement
+EnumParameter returns SymbolDeclaration:
+	{EnumParameter} (doc=DOC)? (readonly?="const")? scope=ParameterScope (ordered?="ordered")? "enum" name=ID kind=ParamKind ("undefElement" "=" undefinedElement=[EnumLiteral])? 
+	"{"
+		(literals+=EnumLiteral)*
+	"}" ";";
+
+// channel parameter, they can also be arrays
+// They can also have initialization values (ChannelBoundary)
+ChannelParameter returns SymbolDeclaration:
+	{ChannelParameter} (doc=DOC)? (readonly?="const")? scope=ParameterScope "channelset" name=ID kind=ParamKind 
+	"{"
+		(channelBoundaries+=ChannelBoundary)*
+	"}" ";";
+
+// Every channel has a no, mid and high value	
+ChannelBoundary:
+	"(" low=DECIMAL_NUMBER "," mid=DECIMAL_NUMBER "," high=DECIMAL_NUMBER ")" ","?;
+
+// enum literals...
+EnumLiteral returns SymbolDeclaration:
+	{EnumLiteral} name=ID "=" pos=DECIMAL_NUMBER (",")?;	
+
+
+
+// is it a single parameter or an array?	
+ParamKind:
+	SingleKind | ArrayKind;
+	
+// single: we simply specify the control ID
+SingleKind:
+	controlId=DECIMAL_NUMBER;
+	
+// array: we specify a list of controlIDs in square brackets
+ArrayKind:
+	{ArrayKind} "[" (controlIds+=DECIMAL_NUMBER ","?)* "]";
+	
+// The scope of the parameter:
+// ATTENTION! These names are hardcoded in HearingLanguageProposalProvider
+// and needs to be adapted if new ones are added here
+enum ParameterScope:
+	hi = "hi" | pat = "pat" | env = "env" | crv = "crv" | lvlcrv = "levelcrv" |
+	cap = "cap" | std = "std" | plf="plf"| fit = "fit";
+	
+	
+// ---------------------------------------------------
+// Rules used in this language, as well as in HL
+// ---------------------------------------------------
+
+// anything that can be referenced
+// the two dummies exist to make sure the name
+// attribute is pulled up to SymbolDeclaration,
+// while still keeping SymbolDeclaration abstract
+SymbolDeclaration:
+	DummySymbol | DummySymbol2;
+	
+DummySymbol:
+	name="__DUMMY__";
+
+DummySymbol2:
+	name="__DUMMY2__";
+	
+// a qualified ID (i.e. separated with dots)
+QID:
+	ID ("." ID)*;
+	
+	
+	
+// numbers. We use the type system to distinguish ints from floats etc.
+terminal DECIMAL_NUMBER:
+	("-")? ('0'..'9')* ('.' ('0'..'9')+)?;
+
+terminal DOUBLE_NUMBER:
+	("-")? ('0'..'9')* ('.' ('0'..'9')*)?;
+
+terminal BINARY_NUMBER:
+	'0b' ('0'..'1')+;
+
+terminal HEX_NUMBER:
+	'0x' ( ('0'..'9') | ('a' .. 'f') | ('A' .. 'F')  )+;
+
+terminal INT returns ecore::EInt:
+	'$$$$$$$this one has been deactivated$$$$$$$';		
+	
+	
+terminal DOC:
+	 '/$' -> '$/';

@@ -1,0 +1,45 @@
+namespace h2 {
+
+	using builtins.*;
+
+	protected function int dummy() {
+	
+		// == for bool
+		bool x; 
+		bool y = x == true;    
+		bool z = true == false;
+		 
+		// == for ints
+		int a;
+		bool b = 1 == a;  
+		 
+		// == for doubles 
+		double f;
+		bool c = 1.2 == 2.4;
+		
+	
+		// + for int
+		int zz = 1 + 2;
+		zz = zz - 1;
+		
+		// + for double 
+		double ff = 1 + 2.2; 
+		ff = zz - 1.2;
+		
+		return 0;
+		
+
+	}   
+	
+	protected function void more() {
+		int i; 
+		++i;
+		--i;
+		
+		if ( !(i>2) ) {
+		}  
+	
+	
+	}
+	 
+}

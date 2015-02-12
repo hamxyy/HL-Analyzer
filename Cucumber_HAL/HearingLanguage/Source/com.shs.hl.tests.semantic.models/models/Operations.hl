@@ -1,0 +1,107 @@
+namespace testing
+{
+	package Lib AsssignmentOps
+	{
+
+	//7.3.1	
+		test function void assignementOps ()
+		{
+			int a = 10;
+			string str = "HAL is good";
+			assertEquals (normalAssingment) a <=> 10;
+			assertEquals (stringAssignements) "HAL is good" <=> str;
+		}
+		
+		
+		test function void composedOperators ()
+		{
+			int a = 10;
+			a += 10;
+			assertEquals (shortIncrement) a <=> 20;
+			int c = 10;
+			c -= 5;
+			assertEquals (shortDecrement) c <=> 5;
+			//TODO ops not in current language
+			int j = 7;
+			j *= 3;
+			assertEquals (multiplicationThnAssignement) j <=> 21;
+			int b = 0x3;
+			b &= 0x1;
+			assertEquals (BitwiseAndThnAssignement) b <=> 0x1;
+			//end new assignment
+		}
+		
+		
+		test function void dataAccessOperators ()
+		{
+			fail (not_implementd_test);
+		}
+		
+		
+		test function void comparisonOperators ()
+		{
+			string str1 = "Hallo HAL";
+			string str2 = "Bye HAL";
+			int a = 10;
+			int b = 3;
+			assertEquals (stringEquals) "Bye HAL" <=> str2;
+			//implicit IF-statement test
+			if (a != b)
+			{
+				assertEquals (notEqual) 1 <=> 1;
+			}
+			if (b < a)
+			{
+				assertEquals (lessOp) 1 <=> 1;
+			}
+			if (b <= 3)
+			{
+				assertEquals (lessEqualOp) 1 <=> 1;
+			}
+			if (11 > a)
+			{
+				assertEquals (greaterOp) 1 <=> 1;
+			}
+			if (10 >= a)
+			{
+				assertEquals (greaterEqualOp) 1 <=> 1;
+			}
+		}
+		
+		
+		test function void logicalOps ()
+		{
+			bool value = false;
+			if (! value)
+			{
+				assertEquals (logicalNegationOp) 1 <=> 1;
+			}
+			if (true &&
+					value)
+			{
+				fail (logicalAndOp);
+			}
+			if (value ||
+					true)
+			{
+				assertEquals (logicalOrOp) 1 <=> 1;
+			}
+			if (true &&
+					value ||
+					true)
+			{
+				assertEquals (combinedLogicalAndOrOp) 1 <=> 1;
+			}
+		}
+		
+		test function void bitOperations ()
+		{
+			int m = 6 &
+			3;
+			int c = 6 |
+			3;
+			assertEquals (bitAndOp) 2 <=> m;
+			assertEquals (bitAndOp) 7 <=> c;
+		}
+	}
+}

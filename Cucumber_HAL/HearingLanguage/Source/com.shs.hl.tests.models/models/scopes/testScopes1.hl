@@ -1,0 +1,12 @@
+namespace testScopes1 {
+
+	protected function int f1(int x, int y) {
+		int j = y;
+		return 0;
+	}   
+   
+	protected function int f2(int y) {
+		return 0;
+	} 
+
+}

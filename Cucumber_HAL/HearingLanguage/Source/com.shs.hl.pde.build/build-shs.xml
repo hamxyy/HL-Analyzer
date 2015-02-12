@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Build HAL-Workbench" default="build_product_developer" basedir=".">
+
+	
+	
+	<!-- For local builds it might be useful to enable local copy of a specific FittingHIDBInterface version
+	     as long this is not enabled only that elements will be copied to Output folder which belong to the project setup
+	     -->
+	<property name="root.dir" location="./.." />
+	
+	
+	<property name="interfaces.doCopyExternalStdlib" value="false" />
+	<property name="interfaces.dir" location="./../../../FittingHIDBInterfaces7.3.0/output/models" />
+	<property name="interfaces.D8" location="${interfaces.dir}/D8" />
+	<property name="interfaces.D9" location="${interfaces.dir}/D9" />
+	<property name="interfaces.common" location="${interfaces.dir}" />
+	<path id="CommonInterfaceFiles">
+		<fileset dir="${interfaces.common}">
+			<exclude name="D8/" />
+			<exclude name="D9/" />
+		</fileset>
+	</path>
+
+
+	<property name="builder" location="." />
+	<property name="baseLocation" location="${eclipse.home}" />
+	<property name="base" location="${baseLocation}/.." />
+
+
+	<import file="${eclipse.pdebuild.scripts}/productBuild/productBuild.xml" />
+
+
+	<!-- ================================= 
+	          target: build_product              
+	     ================================= -->
+	<target name="build_product" depends="main" description="Creates the HAL Workbench on build machine, requires StarTeamCheckout via ABS">
+	</target>
+
+	<!-- ================================= 
+          target: build_product_developer              
+         ================================= -->
+	<target name="build_product_developer" depends="copyProjects, main, updateZip" description="Creates the HAL Workbench on developer machine, no StarTeamCheckout via ABS required">
+
+	</target>
+
+
+	<!-- 
+		  developer targets (without starteamcheckout)
+	-->
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: copyProjects                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="copyProjects" depends="clean, prepareTypeSystemDsl, copyPlugins,  copyFeatures, copyExternalStdlib">
+
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: clean                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="clean">
+		<delete dir="${buildDirectory}" />
+		<mkdir dir="${buildDirectory}" />
+	</target>
+
+
+	<target name="prepareTypeSystemDsl">
+		<!--
+		<unzip src="${eclipse.home}/plugins/de.itemis.xtext.typesystem.dsl_1.0.0.jar"
+		       dest="${buildDirectory}/DslGenerator">
+		    <patternset>
+		        <include name="**"/>
+		    </patternset>
+		</unzip>
+			-->
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: copyPlugins                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="copyPlugins">
+		<mkdir dir="${buildDirectory}/plugins" />
+
+		<mkdir dir="${buildDirectory}/plugins/com.shs.common" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.common/src-gen" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.common.ui" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl/xtend-gen" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl/src-gen" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl.ui" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl.debug" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl.debug.ui" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl.product" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl.stdlib.D8" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl.stdlib.D9" />
+		<mkdir dir="${buildDirectory}/plugins/com.shs.hl.postprocessing" />
+
+		<copy todir="${buildDirectory}/plugins/com.shs.common">
+			<fileset dir="${root.dir}/com.shs.common" />
+		</copy>
+		<copy todir="${buildDirectory}/plugins/com.shs.common.ui">
+			<fileset dir="${root.dir}/com.shs.common.ui" />
+		</copy>
+		<copy todir="${buildDirectory}/plugins/com.shs.hl">
+			<fileset dir="${root.dir}/com.shs.hl" />
+		</copy>
+
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.ui">
+			<fileset dir="${root.dir}/com.shs.hl.ui" />
+		</copy>
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.debug.core">
+			<fileset dir="${root.dir}/com.shs.hl.debug.core" />
+		</copy>
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.debug.ui">
+			<fileset dir="${root.dir}/com.shs.hl.debug.ui" />
+		</copy>
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.product">
+			<fileset dir="${root.dir}/com.shs.hl.product" />
+		</copy>
+
+		<!-- ################################################################################## -->
+		<!-- Copy stlib files -->
+		<!-- ################################################################################## -->
+
+		<!-- local stdlib -->
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.stdlib.D8">
+			<fileset dir="${root.dir}/com.shs.hl.stdlib.D8" />
+		</copy>
+
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.stdlib.D9">
+			<fileset dir="${root.dir}/com.shs.hl.stdlib.D9" />
+		</copy>
+	
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.postprocessing">
+			<fileset dir="${root.dir}/com.shs.hl.postprocessing" />
+		</copy>
+	</target>
+	
+	
+	<condition property="INTERN_COPY_STDLIB">
+		<istrue value="${interfaces.doCopyExternalStdlib}"/>
+	</condition>
+
+	<target name="copyExternalStdlib" if="INTERN_COPY_STDLIB">
+		<echo message="Copying external stdlib files from precompiled component"/>
+		
+		<!-- ################################################################################## -->
+		<!-- precompiled version stdlib -->
+		
+		<!--  D8 +++++++++++++++++++++ -->
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.stdlib.D8/models/params">
+			<fileset dir="${interfaces.D8}" />
+		</copy>
+
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.stdlib.D8/models/params">
+			<fileset refid="CommonInterfaceFiles" />
+		</copy>
+
+
+		<!--  D9 +++++++++++++++++++++ -->
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.stdlib.D9/models/params">
+			<fileset dir="${interfaces.D9}" />
+		</copy>
+
+		<copy todir="${buildDirectory}/plugins/com.shs.hl.stdlib.D8/models/params">
+			<fileset dir="${interfaces.common}" />
+		</copy>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: copyFeatures                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="copyFeatures">
+		<mkdir dir="${buildDirectory}/features" />
+
+		<mkdir dir="${buildDirectory}/features/com.shs.base.feature" />
+		<mkdir dir="${buildDirectory}/features/com.shs.hl.stdlib.feature" />
+		<mkdir dir="${buildDirectory}/features/com.shs.hl.feature" />
+
+		<copy todir="${buildDirectory}/features/com.shs.base.feature">
+			<fileset dir="${root.dir}/com.shs.base.feature" />
+		</copy>
+
+		<copy todir="${buildDirectory}/features/com.shs.hl.stdlib.feature">
+			<fileset dir="${root.dir}/com.shs.hl.stdlib.feature" />
+		</copy>
+		<copy todir="${buildDirectory}/features/com.shs.hl.feature">
+			<fileset dir="${root.dir}/com.shs.hl.feature" />
+		</copy>
+
+
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: updateZip                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="updateZip">
+		<zip destfile="${buildDirectory}/${buildLabel}/${buildLabel}-${baseos}.${basews}.${basearch}.zip" update="true">
+			<zipfileset dir="${basedir}/../com.shs.assembly.generator" prefix="HAL_Workbench/AssemblyGenerator">
+				<exclude name=".project" />
+			</zipfileset>
+		</zip>
+	</target>
+
+</project>

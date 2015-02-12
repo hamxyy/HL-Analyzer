@@ -1,0 +1,25 @@
+namespace bitops  {
+
+	protected function void f() {
+	
+		int i1;
+		int i2;
+		
+		int r1 = i1 | i2; // works
+		int r2 = i1 & i2; // works
+		int r3 = i1 ^ i2; // works
+		int r4 = ~i1; // works
+		
+		double r6 = i1 & i2; // works, int is subtype of doubles
+		
+		double r7 = ~r6;  // error: complement cannot be used with doubles
+		
+		double r8 = r6 & r7;  // error: bitops cannot be used with doubles
+		
+		if ( 10 # 0b0110) {}   
+		if ( r1 # 10 ) {}
+		if ( r1 # 12.3 ) {}  // error: only ints can be bitmasked
+			
+	}
+
+}

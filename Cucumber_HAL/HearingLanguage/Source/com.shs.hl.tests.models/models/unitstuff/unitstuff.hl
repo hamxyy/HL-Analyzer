@@ -1,0 +1,59 @@
+namespace ns1 {
+
+	namespace m2 {
+	
+	}  
+
+	namespace unitstuff {
+
+// TODO: Claus
+/*	 
+		application function void f1() { 
+			int/Hz x1 = 200 Hz;   // ok       
+			double/Hz x2 = 200 Hz;   // ok (int is a subtypeof double!)     
+			int y = 200 ms; // error: unit vs. non-unit
+		}   
+		   
+		protected function void f2() { 
+			int/Hz x6 = 200 Hz;   // ok     
+			int/Hz yy = x6; // this must work too, type of x1 should be propagated correctly
+			int/Hz res1 = x6 + yy; // adding two types with units should also work.
+			int/Hz res2 = x6 + 10; // works now, because of coercion
+			int/Hz res3 = x6 + 10 Hz; // ok
+			int/Hz res4 = x6 + 10 ms; // error: wrong units
+		}
+		 	
+		
+		protected function void f3() {	
+			int/dB  v1       = 45;  // works, because of coercion  
+			int/dB  v2       = 45 dB; // ok
+	   
+			gain v3 = 43.0;       // error: gain is base type int  
+			gain v3b = 43;       // ok  
+			gain v4 = 43 dB;    // ok
+	
+			freq f1 = 10;		// works, coercion 
+			freq f2 = 10 Hz;    // ok
+	 
+			time t1 = 10;		// works, coercion
+			time t2 = 10 ms;	// ok
+	
+			pc p1 = 3;		// ok, coercion
+			pc p2 = 20%;		// ok
+		}
+		  
+		protected function void f5() {
+			// all of these should work
+			gain g = 10 dB; 
+			if ( g == 10 dB) {}
+			if ( g > 10 dB) {}
+			if ( g <= 10 dB) {}
+		
+			
+		}
+*/		
+	
+	
+	}
+	
+}

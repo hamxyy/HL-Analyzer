@@ -1,0 +1,15 @@
+namespace hexAndBin {
+
+	protected function void f() {
+	
+		int a = 0;	// dec 0
+		int i = 10; // decimal value
+		int j = 0x0; // hex 0  
+		int k = 0xad0e; // a hex number
+		int l = 0xAF0; // a hex number with caps
+		
+		int b = 0b01101; // a binary number		
+		int x = 0b0;      // this is binary 0	
+	
+	}	 
+}

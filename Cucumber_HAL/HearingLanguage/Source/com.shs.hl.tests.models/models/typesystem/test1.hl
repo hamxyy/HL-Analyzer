@@ -1,0 +1,31 @@
+namespace m1 {
+	package Lib testpackage{
+		protected function int plus2(int x, int y) {
+			return plus1(plus1(x,2));  // error: cannot call void with 2
+									   // error: called plus1 with only one arg 
+		}    
+		 
+		// Kommentare gehen auch! 
+		protected function int plus1( int x, void y ) {  // error: cannot use void as arg type 
+			return 1 + y;  // error: cannot add void  
+		}  
+		   
+		protected function void f3() { //error void function can not return a value
+			return 1+2.2;    // error: cannot return double
+		}    
+		   
+		protected function double f5() { 
+			return 1; // should work, subtype    
+		}    
+		   
+		protected function void f4(int xxx, int xxx) {  // error: duplicate names
+			plus1(1,2);   // error: again called with int where void is expected
+			return 12; // can't return int from a void protected function
+		}
+	 
+		protected function int test2() {
+			return 0;
+		}
+	}
+}
+

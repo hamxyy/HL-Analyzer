@@ -1,0 +1,30 @@
+namespace weighting {
+
+	protected function void dummy() {
+
+// TODO: Claus
+/*
+		// simple weighted assigment	
+		int gg = wf<10;2>;
+		int hh = max<10;2>;
+
+		// ... with an int expression as the weight
+		int x;	 
+		double f;
+		gg = wf<10;x>;
+		// ... with expressions everywhere
+		gg = wf<x;f>; 
+		gg = max<x;f>;  
+
+		// max works the same way
+		fun1(max<10;2>);
+*/
+	}
+	
+	protected function void fun1( int y ) {
+
+	} 
+	
+	  
+	 
+}

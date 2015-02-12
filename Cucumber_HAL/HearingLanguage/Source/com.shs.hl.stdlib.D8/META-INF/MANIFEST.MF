@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Stdlib
+Bundle-SymbolicName: com.shs.hl.stdlib.D8
+Bundle-Version: 8.0.0.qualifier
+Bundle-Vendor: SHS
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: params;version="8.0.0",
+ stdlib;version="8.0.0"

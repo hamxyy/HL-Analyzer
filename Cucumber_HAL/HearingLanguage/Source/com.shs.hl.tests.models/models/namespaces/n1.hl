@@ -1,0 +1,34 @@
+namespace n1  {
+
+	using n3.*;
+
+	protected function void n1f1() {
+		n1f2();  // ok: protected function in the same namespace		
+		n2.publicn2f1(); // ok: called protected function is public
+		n2.n2f1(); // error: the called protected function is not public
+		n3f1();   // error: imported via using, but not public
+		publicn3f1(); // ok: imported via using and public
+	}      
+  
+	protected function void n1f2() {
+		n1n2f3();	   // error: not qualified, and not visible
+	}  
+ 
+	protected function void n1f3() {
+		n1n2.n1n2f3(); // error: calling a protected function does not work
+	}  
+ 
+ 
+	namespace n1n2 {
+	  
+		protected function void n1n2f3() {
+			n1f1();  // ok: protected function in outer namespace
+			publicn3f1();   // ok: imported via using in parent namespace
+		}
+	
+	}
+	
+	
+
+}
+

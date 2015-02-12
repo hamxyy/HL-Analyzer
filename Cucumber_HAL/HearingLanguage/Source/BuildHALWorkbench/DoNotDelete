@@ -1,0 +1,8 @@
+﻿/* Minimal class file to fake a compiled output */
+namespace fake
+{
+class fakeClass
+{
+static void Main(string[] args){}
+}
+}

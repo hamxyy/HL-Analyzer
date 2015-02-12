@@ -1,0 +1,24 @@
+namespace testAssignment {
+
+	protected function void assign(int x, int y) {
+		// int values can be assigned to double values
+		double t = y; 
+		
+		x = t; // error, this way it does not work
+		       // and also: we cannot assign to parameters!
+		             
+
+		foreach ( int k in 0 .. 10 ) {     
+			int l = k; 
+		} 
+		   
+		int g;
+		g += 1;
+		g -= 10; 
+		
+		gain yy;
+		yy += 20;
+		 
+	}
+
+}

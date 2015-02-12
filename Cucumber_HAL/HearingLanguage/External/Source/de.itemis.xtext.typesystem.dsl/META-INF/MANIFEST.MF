@@ -1,0 +1,39 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: de.itemis.xtext.typesystem.dsl
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0
+Bundle-SymbolicName: de.itemis.xtext.typesystem.dsl; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext;bundle-version="2.0.0";visibility:=reexport,
+ org.apache.log4j;bundle-version="1.2.15";visibility:=reexport,
+ org.apache.commons.logging;bundle-version="1.0.4";resolution:=optional;visibility:=reexport,
+ org.eclipse.xtext.generator;resolution:=optional,
+ org.eclipse.emf.codegen.ecore;resolution:=optional,
+ org.eclipse.emf.mwe.utils;resolution:=optional,
+ org.eclipse.emf.mwe2.launch;resolution:=optional,
+ org.eclipse.xtext.ui.codetemplates;resolution:=optional,
+ org.eclipse.xtext.util,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common,
+ org.antlr.runtime,
+ org.eclipse.xtext.common.types,
+ org.eclipse.xtext.xbase.lib,
+ org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional
+Import-Package: org.apache.log4j,
+ org.apache.commons.logging,
+ org.eclipse.xtext.xbase.lib
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: de.itemis.xtext.typesystem.dsl,
+ de.itemis.xtext.typesystem.dsl.generator,
+ de.itemis.xtext.typesystem.dsl.parseTreeConstruction,
+ de.itemis.xtext.typesystem.dsl.parser.antlr,
+ de.itemis.xtext.typesystem.dsl.parser.antlr.internal,
+ de.itemis.xtext.typesystem.dsl.services,
+ de.itemis.xtext.typesystem.dsl.tsDsl,
+ de.itemis.xtext.typesystem.dsl.tsDsl.impl,
+ de.itemis.xtext.typesystem.dsl.tsDsl.util,
+ de.itemis.xtext.typesystem.dsl.validation,
+ de.itemis.xtext.typesystem.dsl.scoping,
+ de.itemis.xtext.typesystem.dsl.formatting
+

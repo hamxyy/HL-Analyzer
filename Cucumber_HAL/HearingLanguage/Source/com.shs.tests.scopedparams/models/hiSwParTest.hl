@@ -1,0 +1,14 @@
+namespace testing
+{
+	using testing.*;
+	
+	/* 1 instance in this file to assert, that hiSwCombPar.cl is taken into concern */
+	package Lib hiSwParTest
+	{
+		test function void d8SwWlsClsEnTest ()
+		{
+		   //TODO constant values tests?
+			assertEquals(d8SwWlsClsEnTest) true <=>(hi:d8SwWlsClsEn !=null);
+		}
+	}
+}

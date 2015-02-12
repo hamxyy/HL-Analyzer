@@ -1,0 +1,42 @@
+/*
+  These are the built-in functions for the hearing language.
+  Do not change, or add new ones (they won't be generated
+  correctly!)
+*/
+namespace builtins {
+	 
+	// --------------------------------------------------
+	// Channels
+	builtin channels::Count => int 
+	builtin channels::MinIx => int    
+	builtin channels::MaxIx => int
+	
+	builtin channel::ix => int
+	builtin channel::MinFreq => int
+	builtin channel::MidFreq => int
+	builtin channel::MaxFreq => int
+	builtin channel::arr => channels 
+
+
+	// --------------------------------------------------
+	// Curves
+	builtin curve::Count => int
+	builtin curve::MinIx => int
+	builtin curve::MaxIx => int
+	
+	builtin curvepoint::f => int
+	builtin curvepoint::g => int
+
+
+	// --------------------------------------------------
+	// Levelcurves
+	builtin levelcurves::Count => int
+	builtin levelcurves::MinIx => int
+	builtin levelcurves::MaxIx => int
+
+	builtin levelcurvepoint::f => int
+	builtin levelcurvepoint::g_low => int writable
+	builtin levelcurvepoint::g_med => int writable
+	builtin levelcurvepoint::g_high => int writable
+	
+}

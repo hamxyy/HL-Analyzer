@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<plugin>
+  <extension id="product" point="org.eclipse.core.runtime.products">
+    <product application="org.eclipse.ui.ide.workbench" name="Siemens HAL Workbench">
+      <property name="aboutText" value="HAL Workbench&#xA;&#xA;&#xA;Version &#xA;Date 2015-01-22">
+      </property>
+      <property name="startupForegroundColor" value="000000">
+      </property>
+      <property name="startupProgressRect" value="8,460,642,15">
+      </property>
+      <property name="startupMessageRect" value="8,440,642,15">
+      </property>
+      <property name="appName" value="Siemens HAL Workbench">
+      </property>
+      <property name="preferenceCustomization" value="plugin_customization.ini">
+      </property>
+      <property name="aboutImage" value="About.png">
+      </property>
+      <property name="windowImages" value="icons/Hi_16x16.png,icons/Hi_32x32.png,icons/Hi_48x48.png">
+      </property>
+    </product>
+  </extension>
+</plugin>

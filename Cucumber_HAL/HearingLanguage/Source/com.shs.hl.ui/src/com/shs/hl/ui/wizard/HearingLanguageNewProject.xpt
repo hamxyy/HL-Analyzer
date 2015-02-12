@@ -1,0 +1,137 @@
+«IMPORT com::shs::hl::ui::wizard»
+
+«DEFINE main FOR HearingLanguageProjectInfo»
+«EXPAND model FOR this»
+«EXPAND workflow FOR this»
+«EXPAND dotProject FOR this»
+«EXPAND dotClasspath FOR this»
+«EXPAND manifest FOR this»
+«ENDDEFINE»
+
+
+«REM»
+Project File
+
+Hearing language projects are done on projects because
+we used the classpath. They are also Xtext projects,
+obviously.
+«ENDREM»
+«DEFINE dotProject FOR HearingLanguageProjectInfo»
+«FILE ".project"-»
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>«projectName»</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.ManifestBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.SchemaBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.xtext.ui.shared.xtextBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.pde.PluginNature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
+	</natures>
+</projectDescription>
+«ENDFILE»
+«ENDDEFINE»
+
+
+«REM»
+Classpath File
+
+By default, a hearing language application projects expect
+the models  to be stored in a Java source folder "models".
+Also, application projects reference the parameters and built-ins
+projects.
+«ENDREM»
+«DEFINE dotClasspath FOR HearingLanguageProjectInfo»
+«FILE ".classpath"-»
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="models"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
+«ENDFILE»
+«ENDDEFINE»
+
+«REM»
+Manifest File. 
+«ENDREM»
+«DEFINE manifest FOR HearingLanguageProjectInfo»
+«FILE "META-INF/MANIFEST.MF"-»
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: «projectName»
+Bundle-SymbolicName: «projectName»
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Siemens Hearing Systems (SHS)
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.emf.mwe2.launch,
+ org.apache.log4j;bundle-version="1.2.15",
+ org.apache.commons.logging,
+ com.shs.common;bundle-version="1.0.0",
+ com.shs.hl.stdlib.D9,
+ de.itemis.xtext.typesystem;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+«ENDFILE»
+«ENDDEFINE»
+
+
+«REM»
+This is an example model. As you can see, it accesses
+parameters and buildings in all to verify that this works.
+«ENDREM»
+«DEFINE model FOR HearingLanguageProjectInfo»
+«FILE "models/exampleModel.hl"-»
+namespace shs_sat {
+	
+	package Lib example uselib builtins {
+		application function void Example() {
+			// create a simple string
+			string s = "Hello, World";
+			// access built-ins
+			channels chs; 
+			int c = chs->MinIx;
+			// access parameters
+			if ( pat:Age > 10 ) {}
+		}
+	}
+}
+«ENDFILE»
+«ENDDEFINE»
+
+
+
+«DEFINE workflow FOR HearingLanguageProjectInfo»
+«FILE "models/generate_"+projectName.replaceAll('\\.','_')+".mwe2"-»
+module «projectName»
+
+import org.eclipse.xtext.mwe.*
+
+@workflow.HearingLanguageGenerator {}
+«ENDFILE»
+«ENDDEFINE»

@@ -1,0 +1,16 @@
+namespace testing
+{
+	using testing.*;
+	package Lib MacroTargetSyncBase
+	{
+		application function void SyncTargetFormula ()
+		{
+			assertSet (SyncTargetFormula, 100);
+		}
+		
+		test function void SyncTargetFormulaTest() {
+	                SyncTargetFormula();
+	           assertEquals (SyncTargetFormulaMethodExists) assertGet (SyncTargetFormula) <=> 100; 	 		  	 		
+	 	}
+	}
+}

@@ -1,0 +1,216 @@
+<!-- ===================================================================== -->
+<!-- Custom targets called from a project's generated build.xml            -->
+<!-- Set customBuildCallbacks=<path/to/this/file> in your build.properties.-->
+<!-- ===================================================================== -->
+<project name="Build specific targets and properties" default="noDefault">
+
+	<property name="src.dir" location="src"/>
+	<property name="EclipseHome" value="${eclipse.home}" />
+	<!-- ===================================================================== -->
+	<!-- Default target                                                        -->
+	<!-- ===================================================================== -->
+	<target name="noDefault">
+		<echo message="This file must be called with explicit targets" />
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the target build.jars                              -->
+	<!-- Available parameters :                                                -->
+	<!--   build.result.folder - folder to contain the build results           -->
+	<!-- ===================================================================== -->
+	<target name="pre.build.jars">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do after the target build.jars                               -->
+	<!-- Available parameters :                                                -->
+	<!--   build.result.folder - folder to contain the build results           -->
+	<!-- ===================================================================== -->
+	<target name="post.build.jars">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the target build.sources                           -->
+	<!-- Available parameters :                                                -->
+	<!--   build.result.folder - folder to contain the build results           -->
+	<!-- ===================================================================== -->
+	<target name="pre.build.sources">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do after the target build.sources                            -->
+	<!-- Available parameters :                                                -->
+	<!--   build.result.folder - folder to contain the build results           -->
+	<!-- ===================================================================== -->
+	<target name="post.build.sources">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the compilation target <name>                      -->
+	<!-- Substitute "name" with the name of the compilation target, eg @dot    -->
+	<!-- Available parameters :                                                -->
+	<!--   source.foldern : n = 1 ... N, the source folders                    -->
+	<!--   target.folder  : where the results of the compilation go            -->
+	<!--   <name>.classpath : name = name of the compilation target. A         -->
+	<!--                      reference to the classpath structure.            -->
+	<!-- ===================================================================== -->
+	<target name="pre.name">
+	</target>
+
+	<!-- here modified by T.B. -->
+	<target name="pre.@dot">
+		<mkdir dir="bin" />
+		
+		<copy todir="bin">
+			<fileset dir="${src.dir}">
+				<include name="**/*.properties" />
+				<include name="**/*.xtext" />
+			</fileset>
+		</copy>
+		
+		
+		<!-- calling a MWE2 Workflow requieres a special set of jars -->
+		<!-- using @dot.classpath  leads to an unecpected exception due to too long path and overlapping jars
+			 it is better to configure it manually --> 
+		<echo message="Currently we're using eclipse location ${EclipseHome}" level="info"/>
+		<path id="common.mwe.classpath">
+			<pathelement location="${src.dir}" />
+			<fileset dir="${EclipseHome}/plugins">
+				<patternset>
+					<include name="org.eclipse.emf*.jar" />
+					<include name="org.eclipse.xtext*.jar" />
+					<include name="org.eclipse.xtend*.jar" />
+					<include name="org.eclipse.xpand*.jar" />
+					<include name="org.eclipse.jdt.*.jar" />
+					<include name="org.apache.commons*.jar" />
+					<include name="org.apache.log4j*.jar" />
+					<include name="org.antlr.runtime*.jar" />
+					<include name="javax.inject*.jar" />
+					<include name="com.ibm.icu*.jar" />
+					<include name="com.google.inject*.jar" />
+					<include name="com.google.guava*.jar" />
+					<exclude name="*ui*.jar" />
+					<exclude name="*source*.jar" />
+				</patternset>
+			</fileset>
+			<!-- <path refid="@dot.classpath" />--> <!-- do not use here"-->
+			<pathelement location="src"/>
+			<pathelement location="src-gen"/>
+			<fileset dir="." includes=".antlr-generator-3.2.0.jar" />
+			<!--<pathelement location="${basedir}" /> -->
+		</path>
+		
+		<java classname="org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher" fork="true" classpathref="common.mwe.classpath">
+			<arg value="src/com/shs/common/GenerateCommonLanguage.mwe2"/>
+		</java>
+		
+		<echo message="Cass path variables given by PDE build ------------------------>>>" level="info"/>
+        <pathconvert pathsep="${path.separator}" property="classpath-string" refid="@dot.classpath"/>
+		<echo message="${classpath-string}"/>
+		
+		<echo message="============== Internally using private path definition for =======================" level="info"/>
+		<echo message="-----> MWE-workflow  " level="info"/>
+        <pathconvert pathsep="${path.separator}"  property="classpathMWE-string" refid="common.mwe.classpath"/>
+		<echo message="${classpathMWE-string}"/>
+		
+		<echo message="===================================================================================" level="info"/>
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do during the compilation target <name>, after the compile   -->
+	<!-- but before jaring.  Substitute "name" with the name of the compilation-->
+	<!-- target, eg @dot                                                       -->
+	<!-- Available parameters :                                                -->
+	<!--   source.foldern : n = 1 ... N, the source folders                    -->
+	<!--   target.folder  : where the results of the compilation go            -->
+	<!--   <name>.classpath : name = name of the compilation target. A         -->
+	<!--                      reference to the classpath structure.            -->
+	<!-- ===================================================================== -->
+	<target name="post.compile.name">
+	</target>
+
+	<target name="post.compile.@dot">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do after the compilation target <name>                       -->
+	<!-- Substitute "name" with the name of the compilation target, eg @dot    -->
+	<!-- Available parameters :                                                -->
+	<!--   jar.Location - the location of the compilation results              -->
+	<!--   <name>.classpath : name = name of the compilation target. A         -->
+	<!--                      reference to the classpath structure.            -->
+	<!-- ===================================================================== -->
+	<target name="post.name">
+	</target>
+
+	<target name="post.@dot">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the target gather.bin.parts                         -->
+	<!-- Available parameters :                                                -->
+	<!--   build.result.folder - folder containing the build results           -->
+	<!--   target.folder - destination folder                                  -->
+	<!-- ===================================================================== -->
+	<target name="pre.gather.bin.parts">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do after the target gather.bin.parts                         -->
+	<!-- Available parameters :                                                -->
+	<!--   build.result.folder - folder containing the build results           -->
+	<!--   target.folder - destination folder                                  -->
+	<!-- ===================================================================== -->
+	<target name="post.gather.bin.parts">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the target gather.sources                          -->
+	<!-- Available parameters :                                                -->
+	<!--   destination.temp.folder - destination folder                        -->
+	<!-- ===================================================================== -->
+	<target name="pre.gather.sources">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do after the target gather.sources                           -->
+	<!-- Available parameters :                                                -->
+	<!--   destination.temp.folder - destination folder                        -->
+	<!-- ===================================================================== -->
+	<target name="post.gather.sources">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the target gather.logs                             -->
+	<!-- Available parameters :                                                -->
+	<!--   destination.temp.folder - destination folder                        -->
+	<!-- ===================================================================== -->
+	<target name="pre.gather.logs">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do after the target gather.logs                              -->
+	<!-- Available parameters :                                                -->
+	<!--   destination.temp.folder - destination folder                        -->
+	<!-- ===================================================================== -->
+	<target name="post.gather.logs">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the target clean                                   -->
+	<!-- Available parameters :                                                -->
+	<!--   destination.temp.folder - destination folder                        -->
+	<!-- ===================================================================== -->
+	<target name="pre.clean">
+	</target>
+
+	<!-- ===================================================================== -->
+	<!-- Steps to do after the target clean                                    -->
+	<!-- Available parameters :                                                -->
+	<!--   plugin.destination - final destination of the build                 -->
+	<!--   build.result.folder - results of the compilation                    -->
+	<!--   temp.folder - temporary folder                                      -->
+	<!-- ===================================================================== -->
+	<target name="post.clean">
+	</target>
+</project>

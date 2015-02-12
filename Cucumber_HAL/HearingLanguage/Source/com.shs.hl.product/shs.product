@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?pde version="3.5"?>
+<product name="Siemens HAL Workbench" uid="shs-product" id="com.shs.hl.product.product" application="org.eclipse.ui.ide.workbench" version="1.0.0" useFeatures="true" includeLaunchers="true">
+  <aboutInfo>
+    <image path="/com.shs.hl.product/About.png" />
+    <text>
+HAL Workbench
+
+
+Version 
+Date 2015-01-22
+</text>
+  </aboutInfo>
+  <configIni use="default">
+  </configIni>
+  <launcherArgs>
+    <programArgs>-nl "en_EN_EURO" -showlocation</programArgs>
+    <vmArgs>-Xmx512m -Xms128m -XX:MaxPermSize=256M
+-DAssemblyPath=SI
+-DAssemblyNamespace=SHS.SAT.Fitting.Business.HearingLanguageRuntime</vmArgs>
+    <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
+  </launcherArgs>
+  <windowImages i16="/com.shs.hl.product/icons/Hi_16x16.png" i32="/com.shs.hl.product/icons/Hi_32x32.png" i48="/com.shs.hl.product/icons/Hi_48x48.png" />
+  <splash location="com.shs.hl.product" startupProgressRect="8,460,642,15" startupMessageRect="8,440,642,15" startupForegroundColor="000000" />
+  <launcher name="HAL_Workbench">
+    <solaris />
+    <win useIco="true">
+      <ico path="/com.shs.hl.product/icons/HalWorkbench.ico" />
+      <bmp />
+    </win>
+  </launcher>
+  <vm>
+  </vm>
+  <plugins>
+  </plugins>
+  <features>
+    <feature id="com.shs.base.feature" version="1.0.0.qualifier" />
+    <feature id="com.shs.hl.feature" version="1.0.0.qualifier" />
+  </features>
+</product>

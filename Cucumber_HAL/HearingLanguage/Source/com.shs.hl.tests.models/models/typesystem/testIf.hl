@@ -1,0 +1,15 @@
+namespace testif {
+
+	protected function int calcMax(int a, int b) {
+		if ( a * b ) {         
+			if ( 1>2) {    
+				return a;  
+			} else if (1>3) {} 
+		} else if ( b + a ) {  
+			return b;
+		} else { 
+			return a; 
+		}
+	}
+	
+} 

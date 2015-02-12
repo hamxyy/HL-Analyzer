@@ -1,0 +1,5 @@
+* I guess you might want to start with a the content assist
+* The ShowTypeDeclarationActionHandler is not very interesting
+* You may want to take a look at the GeneratorAction
+* and then the AssemblyAction
+
