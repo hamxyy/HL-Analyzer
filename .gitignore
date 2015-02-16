@@ -1,7 +1,7 @@
 # Output
 bin/
-src-gen
-xtend-gen
+#src-gen/
+#xtend-gen/
 
 # Windows image file caches
 Thumbs.db
