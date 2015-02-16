@@ -1,0 +1,81 @@
+/*---------------------------------------------------------------------------------------------------------------*
+// CXX UI:                        Basic Tuning: BasicTuning_LoudSoundsDownBu
+// Initial Version                						     						:2011-08-18 Chuah LayYuan
+// Updated SetPos and IsEnable														:2011-11-21	Frauke Schall
+// Updated SetPos (3dB broadband, partial: for test purposes)						:2012-01-13 Frauke Schall
+// Updated SetPos (3dB broadband, complete: for test purposes)						:2012-01-18 Frauke Schall
+// Updated IsEnabled (grey out if curve cannot be applied)							:2012-02-01 Frauke Schall
+// Added println in IsEnabled														:2012-02-10	Frauke Schall
+// *********************************************CODE FREEZE*******************************************************
+// FR68941 to disable Basic Tuning Button when tinnitus is ON and Pure				:2014-09-02 Mang Yew
+// Peer Review of Changes during 7.4                                                 :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package MixedMode BasicTuning_LoudSoundsDownBu
+	{
+		application function void SetPos (int pos)
+		{
+			if (pos == 1)
+			{
+				if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.off)
+				{
+					hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on;
+				}
+				else if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.on)
+				{
+					hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off;
+				}
+			}
+		}
+		application function int GetPos ()
+		{
+			if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.off)
+			{
+				return 0;
+			}
+			else if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.on)
+			{
+				return 1;
+			}
+			return -1;
+		}
+
+		//		application function bool SetPos (int pos)
+		//		{
+		//			int x = 0;
+		//			x = 1;
+		//			if (x == 1)
+		//			{
+		//				hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on;
+		//			}
+		//			else
+		//			{
+		//				return false;
+		//			}
+		//			int result = -1;
+		//			if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.on)
+		//			{
+		//				result = Test_Library.map (1);
+		//			}
+		//			else
+		//			{
+		//				return false;
+		//			}
+		//			switch (result)
+		//			{
+		//				case 1:{ // Automatic MicMode + CarFocus checkbox = ON
+		//					hi:d8SwMacroAutoSpeechFocusEnHP = d8SwMacroAutoSpeechFocusEnHP.on;
+		//				}
+		//				default:{ // Automatic MicMode + CarFocus checkbox = OFF
+		//					hi:d8SwMacroAutoSpeechFocusEnHP = d8SwMacroAutoSpeechFocusEnHP.off;
+		//				}
+		//			}
+		//			return hi:d8SwMacroAutoSpeechFocusEnHP == d8SwMacroAutoSpeechFocusEnHP.on;
+		//		} // closes MixedMode BasicTuning_LoudSoundsDownBu
+
+	}
+} //namespace shs.sat
+// end of file

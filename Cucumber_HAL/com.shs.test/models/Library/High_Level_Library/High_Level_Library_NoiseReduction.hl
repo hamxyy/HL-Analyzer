@@ -1,0 +1,1106 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL PRICEPOINT LIBRARY : Noise Reduction
+// Initial Version 										      						    : 2013-11-05 Mang Yew
+// Updated Set_ProgramSelection															: 2013-12-17 Sonia
+// Removed settings of Snm,SS,SPASS default settings in NR default function. 			: 2013-12-30 Mang Yew
+// Clean up commented out codes															: 2013-12-30 Mang Yew
+// Updated NoiseReduction_Set_FirstFit ()												: 2013-12-31 Mang Yew
+// Updated  NoiseReductionView_Spass_Set () for Advanced View							: 2014-01-03 Mang Yew
+// Updated  NoiseReductionView_Spass_Set () && NoiseReductionView_SoundSmoothing_Set () 
+// for Advanced View 																	: 2014-01-03 Mang Yew
+// Update for NR SL setpos and default for FF											: 2014-01-10 Mang Yew
+// Updated ProgramSelection for Noise Reduction	and Noise Reduction functions			: 2014-01-14 Mang Yew
+// Update Structure for NR and SPASS and Ss interaction									: 2014-02-26 Mang Yew
+// Added new programs Telecoil MT and Telecoil T for Set_ProgramSelection (FR64541)		: 2014-03-18 Sonia & Jeline
+// Added Ss,Snm,Spass to NR FF default													: 2014-03-24 Mang Yew
+// Update for Sifit 7.3 Peer Review														: 2014-04-23 Mang Yew
+// PEER REVIEWED CXX7.3 FOR PROGRAM SELECTION											: 2014-05-07 Sonia, Mie Mie, Jenny
+// FR66756 - Default after First fit for Noise Reduction is changed to Expanded view.
+// Therefore need update default function for NR										: 2014-05-06 Mang Yew
+// Added new Induction Loop (T) program													: 2014-07-30 Sonia
+// Peer Review of Changes during 7.4  		   			                           	 :2014-12-09 Sonia,Judith
+*/
+/*----------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib High_Level_Library_NoiseReduction
+	{
+		/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionSL_Get
+//   Input      :  None
+//   Ouput      :  <int> Actual slider position with respect to Current Device 
+//   Description:  Gets the Noise Reduction Slider position via a SW Var 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int NoiseReductionSL_Get ()
+		{
+			return BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ();
+		} //Closing High_Level_Library_NoiseReduction.NoiseReductionSL_Get
+		
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionSL_Set
+//   Input      :  <int> Slider position from Cxx sliders
+//   Ouput      :  <int> Actual slider position with respect to BasicLib
+//   Description:  Sets Noise Reduction Slider Sw Macro controls. Calls to individual Noise Management features 
+					to set the slider strength and  
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReductionSL_Set (int pos)
+		{
+			BasicLibrary_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (pos);
+			// Set the actual HI settings using basic library functions	
+			High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SpeechNoiseMgmnt (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SoundSmoothing (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionSL_Set_Spass (pos);
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionSL_Set
+
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionSL_Set_SpeechNoiseMgmnt
+//   Input      :  <int> Slider position from Cxx sliders
+//   Ouput      :  <int> Actual slider position with respect to BasicLib
+//   Description:  Sets Speech and Noise Management strength by remapping Slider positions;  
+					Price point and Family resolving via Mid_level_Lib.        
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReductionSL_Set_SpeechNoiseMgmnt (int Cxxpos)
+		{	
+			BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntSL_Set_Strength 
+			(Mid_Level_Library_NoiseReduction.NoiseReductionSL_SpeechNoiseMgmnt_Remapping (Cxxpos));
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SpeechNoiseMgmnt
+		
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionSL_Set_SoundSmoothing
+//   Input      :  <int> Slider position from Cxx sliders
+//   Ouput      :  <int> Actual slider position with respect to BasicLib
+//   Description:  Sets SoundSmoothing strength by remapping  Slider positions;  
+					Price point and Family resolving via Mid_level_Lib.        
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReductionSL_Set_SoundSmoothing (int Cxxpos)
+		{
+			 BasicLibrary_SoundSmoothing.SoundSmoothingSL_Set_Strength
+			 (Mid_Level_Library_NoiseReduction.NoiseReductionSL_SoundSmoothing_Remapping (Cxxpos));
+
+			High_Level_Library_NoiseReduction.NoiseReduction_Check_NrSl_For_Ss ();
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SoundSmoothing
+		
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionSL_Set_Spass
+//   Input      :  <int> Slider position from Cxx sliders
+//   Ouput      :  <int> Actual slider position with respect to BasicLib
+//   Description:  Sets SPASS strength by remapping  Slider positions;  Price point and Family resolving via Mid_level_Lib.     
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReductionSL_Set_Spass (int Cxxpos)
+		{
+			BasicLibrary_Spass.SpassSL_Set 
+			(Mid_Level_Library_NoiseReduction.NoiseReductionSL_Spass_Remapping (Cxxpos));
+			
+			High_Level_Library_NoiseReduction.NoiseReduction_Check_NrSl_For_SPASS ();
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionSL_Set_Spass
+
+/*---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    NoiseReductionSL_IsVisiblePhysicalPos
+//   Input		:  <int> Position (Physical/global) in the list that needs to be checked for visibility
+//   Ouput      :  <bool> Whether the position is Visible or not ( Invisible -> False ) 
+//   Description:   Decides the visibility of the individual entries in the list
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool NoiseReductionSL_IsVisiblePhysicalPos (int physicalPos)
+		{
+			return Mid_Level_Library_NoiseReduction.NoiseReductionSL_IsVisiblePhysicalPos (physicalPos);
+		} // Closes High_Level_Library_NoiseReduction.NoiseReductionSL_IsVisiblePhysicalPos	
+	
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionEn_Set
+//   Input      :  <int> Position from Cxx checkbox
+//   Ouput      :  <int> Actual checkbox position with respect to BasicLib
+//   Description:  Activate/Deactivate Noise Reduction checkbox and its respective features. 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReductionEn_Set (int pos)
+		{
+			BasicLibrary_NoiseReduction.NoiseReductionEn_Set (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionEn_Set_Spass_Snm_Ss (pos); // consist of SPASS, SnM and SS
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionEn_Set
+
+/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionEn_Set_Spass_Snm_Ss
+//   Input      :  <int> Position from Cxx checkbox
+//   Ouput      :  none
+//   Description:  Activates/Deactivates SPASS, SnM and SS based on checkbox position.   
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReductionEn_Set_Spass_Snm_Ss (int pos)
+		{
+			High_Level_Library_NoiseReduction.NoiseReductionEn_Set_SoundSmoothing (pos);
+			BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Set (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionEn_Set_Spass (pos);
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionEn_Set_Spass_Snm_Ss
+		
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionEn_Set_SoundSmoothing
+//   Input      :  <int> checkbox position from Cxx
+//   Ouput      :  none
+//   Description:  Cxx position of Noise Reduction Checkbox to set SoundSmoothing.   
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void NoiseReductionEn_Set_SoundSmoothing (int pos)
+		{		
+		// Set the actual HI settings using basic library functions
+			if (pos == 1)
+			{
+				High_Level_Library_NoiseReduction.NoiseReduction_Check_NrSl_For_Ss ();
+			}
+			else
+			{
+				BasicLibrary_SoundSmoothing.SoundSmoothingEn_Set (0);
+			}
+					
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionEn_Set_SoundSmoothing
+		
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionEn_Set_Spass
+//   Input      :  <int> Position of the Noise Reduction Checkbox
+//   Ouput      :  <void>
+//   Description:  Sets the Spass setting depending on Noise Reduction checkbox and MicMode.   
+-----------------------------------------------------------------------------------------------------------------$*/	
+		public function void NoiseReductionEn_Set_Spass(int pos){
+			
+			if (pos == 1)
+			{
+				High_Level_Library_NoiseReduction.NoiseReduction_Check_NrSl_For_SPASS ();
+			}
+			else
+			{
+				BasicLibrary_Spass.SpassEn_Set(0);
+			}
+			
+		}//High_Level_Library_NoiseReduction.NoiseReductionEn_Set_Spass
+		
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReductionView_Set
+//   Input      :  <int> Position from Cxx checkbox
+//   Ouput      :  <int> Actual checkbox position with respect to BasicLib
+//   Description:  Sets Noise Reduction view and sets the respective features accordingly with respect to the view set.       
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReductionView_Set (int pos)
+		{
+			BasicLibrary_NoiseReduction.NoiseReductionView_Set (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionView_SoundSmoothing_Set (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionView_SpeechNoiseMgmnt_BroadbandRB_Set (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionView_SpeechNoiseMgmnt_Set (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionView_SpeechNoiseMgmnt_SpeechInNoiseEn_Set (pos);
+			High_Level_Library_NoiseReduction.NoiseReductionView_Spass_Set (pos);
+		} // Closing High_Level_Library_NoiseReduction.NoiseReductionView_Set
+
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReduction_Check_NrSl_For_Ss
+//   Input      :  none 
+//   Ouput      :  none
+//   Description:  Activate/Deactivate SoundSmoothing based on Noise Reduction Slider position and pricepoint
+//					dependency
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReduction_Check_NrSl_For_Ss ()
+		{
+			//int slpos = Mid_Level_Library_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ();
+			int slpos = BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ();
+				
+			if (Mid_Level_Library_SoundSmoothing.SoundSmoothingEn_IsVisible () == true && 
+				Mid_Level_Library_NoiseReduction.NoiseReductionSL_Check_SoundSmoothing(slpos) == true)
+			{
+				BasicLibrary_SoundSmoothing.SoundSmoothingEn_Set (1);
+			}
+			else
+			{
+				BasicLibrary_SoundSmoothing.SoundSmoothingEn_Set (0);
+			}
+		} // Closing High_Level_Library_NoiseReduction.NoiseReduction_Check_NrSl_For_Ss
+		
+/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReduction_Check_NrSl_For_SPASS
+//   Input      :  none 
+//   Ouput      :  none
+//   Description:  Activate/Deactivate SPASS based on Noise Reduction Slider position and pricepoint and Mic
+//					dependency
+-----------------------------------------------------------------------------------------------------------------*/	
+		public function void NoiseReduction_Check_NrSl_For_SPASS ()
+		{
+			if (Mid_Level_Library_Spass.SpassEn_IsVisible() == true &&
+					(BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie() < 90))
+			{
+				//int slpos = Mid_Level_Library_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ();
+				int slpos = BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ();
+						
+				if (Mid_Level_Library_NoiseReduction.NoiseReductionSL_Check_Spass(slpos) == false)
+				{
+					BasicLibrary_Spass.SpassEn_Set(0);
+				}
+				else
+				{
+					BasicLibrary_Spass.SpassEn_Set(1);
+				}
+			}
+			else
+			{
+				BasicLibrary_Spass.SpassEn_Set(0);
+			}
+		} // Closing High_Level_Library_NoiseReduction.NoiseReduction_Check_NrSl_For_SPASS
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReduction_Set_Default
+//   Input      :  none
+//   Ouput      :  <int> Actual checkbox position with respect to BasicLib
+//   Description:  Default position set for First Fit    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReduction_Set_Default ()
+		{	
+			// Call default function for Speech and Noise Management
+			High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_Set_Default ();
+			println ("[HAL]: FirstFit - Speech & Noise Management is set");
+			
+			// Call default function for SoundSmoothing		
+			High_Level_Library_SoundSmoothing.SoundSmoothing_Set_Default ();
+			println ("[HAL]: FirstFit - SoundSmoothing is set");
+
+			// Call default function for SPASS			
+			High_Level_Library_Spass.Spass_Set_Default ();
+			println ("[HAL]: FirstFit - SPASS is set");
+			
+			// Get the default NR settings and set the NR settings.
+			High_Level_Library_NoiseReduction.NoiseReduction_Set_FirstFit ();
+			
+		} // Closing High_Level_Library_NoiseReduction.NoiseReduction_Set_Default
+
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReduction_Set_Default_Terzofit
+//   Input      :  none
+//   Ouput      :  <int> Actual checkbox position with respect to BasicLib
+//   Description:  Default position set for First Fit    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReduction_Set_Default_Terzofit ()
+		{		
+			//Deactivate Speech and Noise Management
+			High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Set (0);
+			High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Set (0); //sifit 7.3 to set SW var also.
+			println ("[HAL]: FirstFit - SelectableFormula.Gain3, Speech and Noise Mgmnt - OFF");
+
+			//Deactivate SoundSmoothing
+			High_Level_Library_SoundSmoothing.SoundSmoothingEn_Set (0);
+			println ("[HAL]: FirstFit - SelectableFormula.Gain3, SoundSmoothing - OFF");
+			
+			//Deactivate Spass
+			High_Level_Library_Spass.SpassEnSet (0);
+			println ("[HAL]: FirstFit - SelectableFormula.Gain3, Spass - OFF");
+			
+			//Deactivate Noise Reduction settings
+			High_Level_Library_NoiseReduction.NoiseReductionEn_Set (0);
+			
+		} // Closing High_Level_Library_NoiseReduction.NoiseReduction_Set_Default_Terzofit
+		
+/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiseReduction_Set_FirstFit ()
+//   Input      :  none
+//   Ouput      :  <int> Actual checkbox position with respect to BasicLib
+//   Description:  Default position for First Fit for Noise Reduction Reduced View
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReduction_Set_FirstFit ()
+		{
+			// Set NR View to Expanded view
+			BasicLibrary_NoiseReduction.NoiseReductionView_Set (1);
+			
+			// Get NR Slider default and Set NR Slider Sw Macro controls only as default after FF is Expanded view
+			BasicLibrary_NoiseReduction.NoiseReductionSL_Set_Strength_Sw 
+			(Mid_Level_Library_NoiseReduction.NoiseReductionSL_DefaultPos ());
+			
+			// Set NR Checkbox Sw Macro controls only as default after FF is Expanded view
+			BasicLibrary_NoiseReduction.NoiseReductionEn_Set (1);
+			
+		} // Closing High_Level_Library_NoiseReduction.NoiseReduction_Set_FirstFit
+//								
+		/*----------------------------------------------------------------------------------------------------------------
+//   Higher Level PP LIBRARY Function:    NoiseReductionView_SoundSmoothing_Set
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Sets the SoundSmoothing based on state of NoiseReductionView and capability dependencies. 
+-----------------------------------------------------------------------------------------------------------------*/ 
+		public function void NoiseReductionView_SoundSmoothing_Set(int pos){
+			if (pos == 0)
+			{
+				// Start of remembering SS checkbox settings from details view
+				High_Level_Library_SoundSmoothing.SoundSmoothing_Check_Hw_Set_Sw ();
+				// End of remembering SnM checkbox settings from details view
+				
+				if (BasicLibrary_NoiseReduction.NoiseReductionEn_Get () == true)
+				{
+					BasicLibrary_SoundSmoothing.SoundSmoothingEn_Set (1);
+    		 	    High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SoundSmoothing 
+    		 	    (BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ());					
+				}
+				else
+				{
+					High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SoundSmoothing 
+					(BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ());
+					BasicLibrary_SoundSmoothing.SoundSmoothingEn_Set (0);
+				}
+				
+				// End of Setting SS based on NR SwMacroVar
+				println ('[HAL]BLIB-NoiseReductionView_SoundSmoothing_Set NoiseReductionView = BASIC    pos=' + pos);
+			} 
+			else
+			{		
+				// start of setting SS based of SS swmacrovar			
+				if (BasicLibrary_SoundSmoothing.SoundSmoothingEn_Get_Sw () == 1)
+				{
+					High_Level_Library_SoundSmoothing.SoundSmoothingEn_Set (1);
+					println ('[HAL]BLIB-NoiseReductionView_SoundSmoothing_Set SoundSmoothing checkbox  pos= 1');
+				}
+				else
+				{
+					High_Level_Library_SoundSmoothing.SoundSmoothingEn_Set (0);
+					println ('[HAL]BLIB-NoiseReductionView_SoundSmoothing_Set SoundSmoothing checkbox  pos= 0');
+				}
+				BasicLibrary_SoundSmoothing.SoundSmoothingSL_Set_Strength 
+				(BasicLibrary_SoundSmoothing.SoundSmoothingSL_Get_Strength_Sw ());
+				println ('[HAL]BLIB-NoiseReductionView_SoundSmoothingSL_Set NoiseReductionView = ADVANCE    pos=' + pos);
+			}
+				
+		}  // Closes  High_Level_Library_NoiseReduction.NoiseReductionView_SoundSmoothing_Set
+		
+	/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    NoiseReductionView_SpeechNoiseMgmnt_Set
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Sets the SpeechNoiseMgmnt based on state of NoiseReductionView and capability dependencies. 
+-----------------------------------------------------------------------------------------------------------------*/ 
+		public function void NoiseReductionView_SpeechNoiseMgmnt_Set(int pos){
+			if (pos == 0)
+			{
+				// Start of remembering SnM checkbox settings from details view
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_En_Sl_Check_Hw_Set_Sw ();
+				// end of remembering SnM checkbox settings from details view
+				
+				// start of setting SnM based of NR swmacrovar
+				if (BasicLibrary_NoiseReduction.NoiseReductionEn_Get () == true)
+				{
+					BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Set (1);
+					High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SpeechNoiseMgmnt 
+					(BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ());
+				}
+				else
+				{	
+					High_Level_Library_NoiseReduction.NoiseReductionSL_Set_SpeechNoiseMgmnt 
+					(BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ());
+					BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Set (0);
+				}
+				// end of setting SnM based of NR swmacrovar
+				println ('[HAL]BLIB-NoiseReductionView_SpeechNoiseMgmnt_Set NoiseReductionView = BASIC  pos=' + pos);
+			}
+			else
+			{
+				// start of setting SnM based of SnM swmacrovar
+				if (BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Get_Sw () == true )
+				{
+					High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Set (1);
+				}
+				else
+				{
+					High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Set (0);
+				}// end of setting SnM based of SnM swmacrovar
+				
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntSL_Set 
+				(BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntSL_Get_Sw ());	
+				println ('[HAL]BLIB-NoiseReductionView_SpeechNoiseMgmnt_Set NoiseReductionView = ADVANCE    pos=' + pos);
+			} 
+		}  // Closes  High_Level_Library_NoiseReduction.NoiseReductionView_SpeechNoiseMgmnt_Set
+
+	/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    NoiseReductionView_Spass_Set
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Sets the SPASS based on state of NoiseReductionView and capability dependencies. 
+-----------------------------------------------------------------------------------------------------------------*/ 
+		public function void NoiseReductionView_Spass_Set(int pos){
+			if (pos == 0)
+			{
+				// Start remembering SPASS settings from details view
+				High_Level_Library_Spass.Spass_Check_Hw_Set_Sw ();
+				// End of setting SPASS based of SPASS swmacrovar
+				
+				// Start of setting NR checkbox settings from NR view
+				if (BasicLibrary_NoiseReduction.NoiseReductionEn_Get () == true)
+				{
+					BasicLibrary_Spass.SpassEn_Set (1);
+					High_Level_Library_NoiseReduction.NoiseReductionSL_Set_Spass 
+					(BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ());
+				}
+				else
+				{
+					High_Level_Library_NoiseReduction.NoiseReductionSL_Set_Spass 
+					(BasicLibrary_NoiseReduction.NoiseReductionSL_Get_Strength_Sw ());
+					BasicLibrary_Spass.SpassEn_Set (0);
+				}// End of setting NR checkbox settings from NR view	
+				println ('[HAL]BLIB-NoiseReductionView_Spass_Set NoiseReductionView = BASIC    pos=' + pos);
+			}
+			else
+			{
+				// Start of setting SPASS based of SPASS swmacrovar
+					if (BasicLibrary_Spass.SpassEn_Get_Sw () == 1)
+					{
+						if (BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie() < 90)
+						{	
+							BasicLibrary_Spass.SpassEn_Set(1);
+						}
+						else
+						{
+							BasicLibrary_Spass.SpassEn_Set(0);
+						}
+					}
+					else
+					{
+						//BasicLibrary_Spass.SpassEn_Set(0);
+						High_Level_Library_Spass.SpassEnSet (0);
+					}
+					// End of setting SPASS based of SPASS swmacrovar
+					
+				BasicLibrary_Spass.SpassSL_Set (BasicLibrary_Spass.SpassSL_Get_Sw ());	
+				
+				println ('[HAL]BLIB-NoiseReductionView_Spass_Set NoiseReductionView = ADVANCE    pos=' + pos);
+			}
+		}  // Closes  High_Level_Library_NoiseReduction.NoiseReductionView_Spass_Set
+
+	/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    NoiseReductionView_SpeechNoiseMgmnt_SpeechInNoiseEn_Set
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Sets the SnMSin based on state of NoiseReductionView and capability dependencies. 
+-----------------------------------------------------------------------------------------------------------------*/ 
+		public function void NoiseReductionView_SpeechNoiseMgmnt_SpeechInNoiseEn_Set(int pos){
+			if (pos == 0)
+			{
+				// Start remembering SnMSin settings from details view
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SiN_Check_Hw_Set_Sw ();
+				// End of setting SnMSin based of SnMSin swmacrovar
+				
+				BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Set (0); // turn off Speech in Noise for Reduced View
+				println ('[HAL]BLIB-NoiseReductionView_SpeechNoiseMgmnt_SpeechInNoiseEn_Set NoiseReductionView = BASIC    pos=' + pos);
+			}
+			else
+			{
+				// Start of setting SnMSin based of SnMSin swmacrovar
+				if (BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Get_Sw () == true)
+				{	
+					BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Set (1);
+				}
+				else
+				{
+					BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Set (0);
+				}// End of setting SnMSin based of SnMSin swmacrovar
+				
+				println ('[HAL]BLIB-NoiseReductionView_SpeechNoiseMgmnt_SpeechInNoiseEn_Set NoiseReductionView = ADVANCE    pos=' + pos);
+			}
+		}  // Closes  High_Level_Library_NoiseReduction.NoiseReductionView_SpeechNoiseMgmnt_SpeechInNoiseEn_Set
+
+	/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    NoiseReductionView_SpeechNoiseMgmnt_BroadbandRB_Set
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Sets the SnMSin based on state of NoiseReductionView and capability dependencies. 
+-----------------------------------------------------------------------------------------------------------------*/ 
+		public function void NoiseReductionView_SpeechNoiseMgmnt_BroadbandRB_Set(int pos){
+			if (pos == 0)
+			{
+				// Start remembering SnMRB settings from details view
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_Rb_Check_Hw_Set_Sw ();
+				// End of setting SnMRB based of SnMRB swmacrovar
+				
+				BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntBroadbandRB_Set_Entry (0); // set to SnM Broadband in Reduced View
+				println ('[HAL]BLIB-NoiseReductionView_SpeechNoiseMgmnt_BroadbandRB_Set NoiseReductionView = BASIC    pos=' + pos);
+			}
+			else
+			{
+				// Start of setting SnMRB based of SnMRB swmacrovar
+				if (BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmntBroadbandRB_Get_Entry_Sw () == 1)
+				{	
+					High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntBroadbandRB_Set (1);
+				}
+				else
+				{
+					High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntBroadbandRB_Set (0);
+				}// End of setting SnMRB based of SnMRB swmacrovar
+				
+				println ('[HAL]BLIB-NoiseReductionView_SpeechNoiseMgmnt_BroadbandRB_Set NoiseReductionView = ADVANCE    pos=' + pos);
+			}
+		}  // Closes  High_Level_Library_NoiseReduction.NoiseReductionView_SpeechNoiseMgmnt_BroadbandRB_Set
+		
+	/*---------------------------------------------------------------------------------------------------------*
+	//	HIGH LEVEL LIBRARY - NoiseReduction_ProgramSelection
+	//	Input		: <enum> hi:d9SwMacroProgramIdHp
+	//	Ouput		:  void
+	//	Description	:  Set Noise Reduction settings for each program based on the Noise Reduction View 
+			// If Noise Reduction basic view selected, set:
+			// - Speech and Noise Management SW controls (to set default of advanced view)
+			// - Sound Smoothing SW controls (to set default of advanced view)
+			// - SPASS (Directional Speech Enhancement) SW controls (to set default of advanced view)
+			// - Noise Reduction HW and SW controls = setting SPASS, SNM and SS controls
+			
+			// If Noise Reduction advanced view selected, set:
+			// - Noise Reduction SW controls (to set default of reduced view)
+			// - Speech and Noise Management HW and SW controls
+			// - Sound Smoothing HW and SW controls
+			// - SPASS (Directional Speech Enhancement) HW and SW controls
+	/*---------------------------------------------------------------------------------------------------------*/
+		public function void NoiseReduction_ProgramSelection (int ID) 
+
+		{
+			println ("[HAL]:HLIB NoiseReduction_ProgramSelection ID = " + ID);
+			
+			if (BasicLibrary_NoiseReduction.NoiseReductionView_Get () == true) // Noise Reduction View = reduced view
+			{
+			// 1) Set SPASS, SNM, Sound Smoothing - SW controls (to set default)
+				// Speech and Noise Management	
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_Set_ProgramSelection_Sw_Controls(ID);
+				
+				// Sound Smoothing
+				High_Level_Library_SoundSmoothing.SoundSmoothing_Set_ProgramSelection_Sw_Controls(ID);  
+				
+				// SPASS
+				High_Level_Library_Spass.Spass_Set_ProgramSelection_Sw_Controls(ID);
+				
+			// 2) Set Noise Reduction, SW & HW controls
+				High_Level_Library_NoiseReduction.NoiseReduction_Set_ProgramSelection(ID);
+			}
+			else // Noise Reduction View = advanced view
+			{
+			// Sets the SwMacro for Snm, Ss, SPASS. Necessary for previous released D8 devices
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_En_Sl_Check_Hw_Set_Sw ();
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SiN_Check_Hw_Set_Sw ();
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_Rb_Check_Hw_Set_Sw ();
+				
+				High_Level_Library_SoundSmoothing.SoundSmoothing_Check_Hw_Set_Sw ();
+				
+				High_Level_Library_Spass.Spass_Check_Hw_Set_Sw ();
+				
+			// 1) Set Noise Reduction - SW controls (to set default)
+				High_Level_Library_NoiseReduction.NoiseReduction_Set_ProgramSelection_Sw_Controls(ID);
+				
+			// 2) Set SNM, SPASS and Sound Smoothing, SW & HW controls
+				// Speech and Noise Management
+				High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_Set_ProgramSelection(ID);
+				
+				// Sound Smoothing
+				High_Level_Library_SoundSmoothing.SoundSmoothing_Set_ProgramSelection(ID);
+				
+				// SPASS  
+				High_Level_Library_Spass.Spass_Set_ProgramSelection(ID);
+			}
+
+		} // Closes High_Level_Library_NoiseReduction.NoiseReduction_ProgramSelection
+
+/*$---------------------------------------------------------------------------------------------------------------*
+	//   Higher Level PP LIBRARY Function:    NoiseReduction_Set_ProgramSelection
+	//   Input      :  <int> ID
+	//   Ouput      :  <void>
+	//   Description:  Sets the Noise Reduction settings for each program  
+	//				:	2 = Noisy Environment		7 = TV						12 = Tek/miniTek		20 = Phone T
+	//				:	3 = Phone(Acoustically)		8 = Outdoor/Sport			13 = miniTek FM			21 = Induction Loop (T)		
+	//				:	4 = Phone mT				9 = Privacy					14 = miniTek Telecoil
+	//				:	5 = Bluetooth Phone			10 = Tinnitus				15 = Audio Input
+	//				:	6 = Music					11 = Induction Loop (mT)	19 = Phone MT
+	//	Comments	:	Variable int (ID) starts with ID 2, respectively to ID of each program.						   
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void NoiseReduction_Set_ProgramSelection (int ID) //PEER REVIEWED CXX7.3
+
+		{
+			println ("[HAL]:HLIB NoiseReduction_Set_ProgramSelection ID = " + ID);
+			
+			// TO BE OPTIMIZED!!!
+			string pricepoint = Mid_Level_Library_NoiseReduction.NoiseReduction_Check_PricePoints();
+			
+			if (ID != 10) // Tinnitus
+			{
+				High_Level_Library_NoiseReduction.NoiseReductionEn_Set(1);
+				switch (ID)
+				{
+					case 2:{ // Noisy Enviroment
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 3:{ // Phone (Acoustically) 
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 4:{ // Phone mT
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 5:{ // Bluetooth Phone
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(1);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 6:{ // Music
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 7:{ // TV
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(1);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 8:{ // Outdoor Sport;
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(1);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 9:{ // Privacy
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(1);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 11:{ // Induction Loop (mT)
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(4);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 12:{ // Tek/miniTek
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(1);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 13:{ // miniTek FM
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(1);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 14:{ // miniTek Telecoil
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 15:{ // Audio Input
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(1);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 19:{ // Phone MT
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 20:{ // Phone T
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					case 21:{ // Induction Loop (T)
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(4);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(2);
+						}
+						else 
+						{
+							High_Level_Library_NoiseReduction.NoiseReductionSL_Set(0);
+						}
+					}
+					default:{
+					//For Program ID ... Noise Reduction do nothing
+	
+					}
+
+				} // closes switch (ID)
+			
+			} // closes if
+//			}	// cLoses else case
+
+		} // closes High_Level_Library_NoiseReduction.NoiseReduction_Set_ProgramSelection
+						
+/*$---------------------------------------------------------------------------------------------------------------*
+	//   Higher Level PP LIBRARY Function:    NoiseReduction_Set_ProgramSelection_Sw_Controls
+	//   Input      :  <int> ID
+	//   Ouput      :  <void>
+	//   Description:  Sets the Noise Reduction settings for each program  
+	//				:	2 = Noisy Environment		7 = TV						12 = Tek/miniTek		20 = Phone T
+	//				:	3 = Phone(Acoustically)		8 = Outdoor/Sport			13 = miniTek FM			21 = Induction Loop (T)		
+	//				:	4 = Phone mT				9 = Privacy					14 = miniTek Telecoil
+	//				:	5 = Bluetooth Phone			10 = Tinnitus				15 = Audio Input
+	//				:	6 = Music					11 = Induction Loop (mT)	19 = Phone MT
+	//	Comments	:	Variable int (ID) starts with ID 2, respectively to ID of each program.						   
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void NoiseReduction_Set_ProgramSelection_Sw_Controls (int ID) //PEER REVIEWED CXX7.3
+
+		{
+			println ("[HAL]:HLIB NoiseReduction_Set_ProgramSelection_Sw_Controls ID = " + ID);
+			
+			string pricepoint = Mid_Level_Library_NoiseReduction.NoiseReduction_Check_PricePoints();
+			
+			if (ID != 10) // Tinnitus
+			{
+				BasicLibrary_NoiseReduction.NoiseReductionEn_Set (1);
+				switch (ID)
+				{
+					case 2:{ // Noisy Enviroment
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 3:{ // Phone (Acoustically) 
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 4:{ // Phone mT
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 5:{ // Bluetooth Phone
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (1);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 6:{ // Music
+						Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);	
+					}
+					case 7:{ // TV
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (1);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 8:{ // Outdoor Sport;
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (1);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 9:{ // Privacy
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (1);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 11:{ // Induction Loop (mT)
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (4);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 12:{ // Tek/miniTek
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (1);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 13:{ // miniTek FM
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (1);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 14:{ // miniTek Telecoil
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 15:{ // Audio Input
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (1);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 19:{ // Phone MT
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 20:{ // Phone T
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (3);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					case 21:{ // Induction Loop (T)
+						if (pricepoint == "PP700" || pricepoint == "PP500")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (4);
+						}
+						else if(pricepoint == "PP300" || pricepoint == "PP100")
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (2);
+						}
+						else 
+						{
+							Mid_Level_Library_NoiseReduction.NoiseReductionSL_Set_Strength_Sw (0);
+						}
+					}
+					default:{
+					//For Program ID ... Noise Reduction do nothing
+	
+					}
+
+				} // closes switch (ID)
+			
+			} // closes if
+//			}	// cLoses else case
+
+		} // closes High_Level_Library_NoiseReduction.NoiseReduction_Set_ProgramSelection_Sw_Controls
+		
+		/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of HIGH LEVEL LIBRARY   Noise Reduction 
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package High_Level_Library_NoiseReduction
+
+} //namespace shs.sat

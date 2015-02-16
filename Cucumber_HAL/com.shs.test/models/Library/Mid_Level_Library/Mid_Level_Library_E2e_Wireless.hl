@@ -1,0 +1,134 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                            MID LEVEL PRICEPOINT LIBRARY  :  E2e Wireless  
+// Initial Version											:  2011-11-18   Cecil Wilson
+// Added Binaural E2E capability check function				:  2011-12-19   Cecil Wilson
+// Added remapping for E2E checkbox	& updated OPP command	:  2012-03-01   Cecil Wilson
+// Updated remapping for E2E checkbox						:  2012-04-19   Cecil Wilson
+// Peer review changes										:  2012-06-22   Cecil,Jenny,MangYew
+// Fixed ER57554: Migu: Soundlearning does not work 
+// in monaural fitted devices								:  2012-09-21   Cecil Wilson
+// Fixed New request from ER57554. This Checkbox is enabled for all cases.: 2012-09-28 Cecil Wilson
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat {
+	
+	package  Lib Mid_Level_Library_E2e_Wireless{
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    E2e_WirelessEn_IsVisible
+//   Input		:  none
+//   Ouput      :  <bool> Returns True if visible; False if Not Visible 
+//   Description:  decides the visibility of the E2e_WirelessEn based on the cap:WlsUserControl.
+//				   if there is no e2e capability available, greyed out this function. 
+-----------------------------------------------------------------------------------------------------------------$*/ 	
+
+		public function bool E2e_WirelessEn_IsVisible(){ //Reviewed 7.2.
+			bool retval = false;
+			if( cap:WlsUserControl == WlsUserControl.e2e || 
+			    cap:WlsUserControl == WlsUserControl.e2eRCU 
+			    ){
+				retval = true;								
+			}
+			else{
+				retval = false;
+			}
+			return retval;
+		} //Closes Mid_Level_Library_E2e_Wireless.E2e_WirelessEn_IsVisible
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    E2e_WirelessEn_IsEnable
+//   Input		:  none
+//   Ouput      :  <bool> Returns True if Enabled; False if Not enabled(Greyed out) 
+//   Description:  decides the Greyout of the E2e_WirelessEn. It shall be greyed out when Remote control is connected.
+-----------------------------------------------------------------------------------------------------------------$*/ 	
+
+		public function bool E2e_WirelessEn_IsEnable(){ //Reviewed 7.2.
+			bool retval = true;
+			// Checkbox should be greyed out if any of the 4 RCU are available for the Binaural case.
+			// Checkbox will not be greyed out if Monoaural (ER57554)
+			// New request from ER57554. This Checkbox is enabled for all cases.
+			
+			return retval;
+		} //Closes Mid_Level_Library_E2e_Wireless.E2e_WirelessEn_IsEnable
+		
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    E2e_WirelessEn_IsBinauralCapable
+//   Input		:  none
+//   Ouput      :  <bool> Returns Firstfit option to on/off e2e wireless based on cap on both hi 
+//   Description:  decides the instrument is e2e capable. 
+-----------------------------------------------------------------------------------------------------------------$*/ 	
+
+		public function bool E2e_WirelessEn_IsBinauralCapable(){ //Reviewed 7.2.
+		
+			bool retval = false;
+			
+			// Checks the capability of Device on current side
+			if( cap:WlsUserControl == WlsUserControl.e2e || 
+			    cap:WlsUserControl == WlsUserControl.e2eRCU ){
+
+					// Checks the capability of "Other side" device if it is Binaural
+					if(env:DetHi==DetHi.BothSides){
+						// This is a Binaural case
+						if(opp(cap:WlsUserControl)==WlsUserControl.e2e ||
+						   opp(cap:WlsUserControl)==WlsUserControl.e2eRCU ){
+							retval = true;
+						}
+					}
+					else{
+							retval = false;
+					}	
+			}
+			else{
+							retval = false;
+			}
+			
+			return retval;
+		} //Closes Mid_Level_Library_E2e_Wireless.E2e_WirelessEn_IsBinauralCapable
+
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    E2e_WirelessEn_Remapping
+//   Input      :  <int> Checkbox position from Cxx
+//   Ouput      :  <int> Position with respect to Basic Function .i.e. Hi Control value set ID number
+//   Description:  remapping checkbox positions based on wireless programming capability.    
+Case	cap:WlsUserControl	cap:WlsProgramming	deactivated (pos=0)	Activated (pos=1)	remapped_pos
+Case1	none 				no					off					on					10
+Case2	none 				yes					e2eOff_WlpOn		on					30
+Case3	RCU					no					e2eOff_WlpOff		on					20
+Case4	RCU					yes					e2eOff_WlpOn		on					30
+Case5	e2e					no					e2eOff_WlpOff		on					20
+Case6	e2e					yes					e2eOff_WlpOn		on					30
+Case7	e2eRCU				no					e2eOff_WlpOff		on					20
+Case8	e2eRCU				yes					e2eOff_WlpOn		on					30
+-----------------------------------------------------------------------------------------------------------------$*/
+    public function int E2e_WirelessEn_Remapping(int pos){ //Reviewed 7.2.
+   	
+		int remapped_pos     =  -1;    // Initilizing the var
+		switch(pos){
+			case 0:{  // Case Unchecking 
+				if(cap:WlsProgramming ==WlsProgramming.no){ 
+				  if(cap:WlsUserControl == WlsUserControl.none){
+				    remapped_pos = 10;   // Whole Wireless is disabled (OFF)
+				  }
+				  else{        
+				  	remapped_pos = 20;   // there is Wireless devices so, switchOff E2e and Wireless Programming (e2eOff_WlpOff)
+				  }				  
+				}
+				else{                    // Wireless Programming exist so should only switch Off E2E 
+				    remapped_pos = 30;   // E2e alone is disabled  (e2eOff_WlpOn)
+				}
+			}
+			case 1:{
+				    remapped_pos = 40;	 // Enabled wireless + e2e + WLP also enabled as there is only one ON state (ON)
+			}	
+		}
+		return remapped_pos;
+	}//Closes Mid_Level_Library_E2e_Wireless.E2e_WirelessEn_Remapping
+
+    	
+/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Middle Level PP LIBRARY    E2e Wireless 
+-----------------------------------------------------------------------------------------------------------------*/		   	
+	}	//package Mid_Level_Library_E2e_Wireless
+}	//namespace shs.sat

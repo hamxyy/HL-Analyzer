@@ -1,0 +1,92 @@
+//---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL PRICEPOINT LIBRARY 		 : 
+// Initial Version                						  		 :  2011-04-01   Nadine Seubert
+// update calling get function from MicMode                      :  2011-05-12   Nadine Seubert
+// Disable SpeechFocus-button when microphone modes are grey out :  2011-08-05   Ma Mie Mie Thein
+// Peer review changes									   		 :  2012-06-20   Nadine and Frauke
+// Peer review changes (FirstFit)								 :  2012-06-20   Nadia and Judith
+// *********************************************CODE FREEZE*******************************************************
+// ER56075 AutoFix added for PP100 Automatic Micmode 			 : 2012-08-15    Cecil Wilson
+// Added SpeechFocusEn_SetPos to call BasicLibrary_SpeechFocusEn : 2012-10-18	Mang Yew
+// updated the setpos to call MicMode lib 						 : 2012-11-19 Jenny
+// updated SpeechFocusEn_SetPos to check if in Automatic mic mode before re-setting the 
+// microphone mode.												 : 2012-12-07 Jenny
+// Added SpeechFocusCar_Set_Default function for FR61555		 : 2013-07-10 Mie Mie
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat {
+    using shs_sat.*;
+    
+	package  Lib High_Level_Library_SpeechFocusEn{
+
+/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    SpeechFocusEn_Is_Enabled
+//   Input      :  none 
+//   Ouput      :  <bool> 
+//   Description:  Checks if the Automatic Mic is enabled or not   
+-----------------------------------------------------------------------------------------------------------------*/
+	public function bool SpeechFocusEn_Is_Enabled(){
+		bool is_enabled = true;	
+		// if Automatic Mic is selected
+		if ((BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie() <= 20
+			) &&// and if microphones mode are not grey out
+			(High_Level_Library_Mic_Mode.Mic_Mode_Is_Enabled()== true)){
+				is_enabled = true;
+		}
+		else{
+			is_enabled = false;
+		}
+
+		return is_enabled;
+	}	// Closing High_Level_Library_SpeechFocusEn.SpeechFocusEn_Is_Enabled()
+	
+/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    SpeechFocusEn_SetPos
+//   Input      :  <int> Desired state of the checkbox. 
+//   Ouput      :  <bool> 
+//   Description:  Calls the BasicLibrary SpeechFocusEn to set the desired settings. 1 = ON, 2 = Off.   
+-----------------------------------------------------------------------------------------------------------------*/
+	public function void SpeechFocusEn_SetPos(int Cxxpos){
+		int MicModePos = -1;
+		// sets the SW variable first		
+		BasicLibrary_SpeechFocusEn.SpeechFocusEn_SetSW(Cxxpos);
+		
+		if(BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie() <= 20){
+			// if Microphone mode is at Automatic, update the SwMicMode.
+			MicModePos = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic();
+			BasicLibrary_Mic_Mode.Mic_Mode_Set_RadioButton_Entrie(MicModePos);
+		}
+		else{
+			// if Microphone mode is not at Automatic, update ONLY the CarFocus EN controls.
+			BasicLibrary_SpeechFocusEn.SpeechFocusEn_Set(Cxxpos);
+		}
+	}	// Closing High_Level_Library_SpeechFocusEn.SpeechFocusEn_SetPos
+
+/*----------------------------------------------------------------------------------------------------------------
+//   Higher Level PP LIBRARY Function:    SpeechFocusCar_Set_Default	  
+//   Input      :  none 
+//   Ouput      :  default setting of SpeechFocus (Car) check box
+//   Description:  SpeechFocus (Car) check box will be on by default after FF only if fitting is binaural fitting 
+//                 and E2e is on. Otherwise it will be off.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void SpeechFocusCar_Set_Default ()
+		{
+			bool E2e_available_for_bothSides = Mid_Level_Library_E2e_Wireless.E2e_WirelessEn_IsBinauralCapable ();
+			int retval = High_Level_Library_E2e_Wireless.E2e_WirelessEn_Get ();// check whether the e2e is on or not
+			
+			if (E2e_available_for_bothSides == true &&	retval == 1 &&  Mid_Level_Library_SpeechFocusEn.SpeechFocusEn_IsVisible()==true)
+			{
+				High_Level_Library_SpeechFocusEn.SpeechFocusEn_SetPos (1);
+			}
+			else
+			{
+				High_Level_Library_SpeechFocusEn.SpeechFocusEn_SetPos (0);
+			}			
+		}
+		
+		
+/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Higher Level PP LIBRARY    SpeechFocusEn
+-----------------------------------------------------------------------------------------------------------------*/		
+	}	//package High_Level_Library_SpeechFocusEn
+}	//namespace shs.sat

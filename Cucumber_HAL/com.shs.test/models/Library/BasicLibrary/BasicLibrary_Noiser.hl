@@ -1,0 +1,225 @@
+/*----------------------------------------------------------------------------------------------------------------
+//                                 BASIC FUNCTION LIBRARY  Noiser
+// Initial Version                                         :  2011-03-17   Meike Doose
+// Add functions for Tinnitus preset (Pink, White, Speech, HighTone) functions   		:  2011-11-02 Ma Mie Mie Thein
+// Change println for d8PTinGain[0] under NoiserRB_Set_Entry(int remapped_pos)			:  2011-11-18 Ma Mie Mie Thein
+// Shorten Offset curves name 															:  2012-01-30 Ma Mie Mie Thein
+// Added NoiserEn_Set_Entry and NoiserEn_Get_Entry for Noiser checkbox					:  2012-03-22 Ma Mie Mie Thein 
+// Modified NoiserPreset functions														:  2012-05-14 Nadia Neugeborn
+// Peer review comments implemented														:  2012-06-19 MieMie/Cecil/Nadia
+// FR60546: Added NoiserDefault_Offset function to reduce firstfit & program selection default whitenoise level: 2013-05-16 Mie Mie 
+// *********************************************CODE FREEZE*******************************************************
+// Added assertion for error messages													:  2012-12-14 Ma Mie Mie Thein
+// Sifit 7.2 Peer Review																: 2013-08-01 Alastair, Raymond
+// ------------------------------------------------------------- SIFIT7.3 -----------------------------------------
+// Update for Sifit7.3: updated for the MPV changes.								: 2014-01-16 Jenny
+// Sifit7.3 Peer review																: 2014-04-14 Jenny, Sonia
+// ------------------------------------------------------------- SIFIT7.4 -----------------------------------------
+// Implementation of MixMic checkbox and delete radiobutton							:  2014-07-21  Meike Steinbuss
+// d8SwTinnitusNoisePreset included in default function but uncommented until writeable in macros				: 2014-07-22 Meike Steinbuss 
+// uncommented d8SwTinnitusNoisePreset												: 2014-08-26 Meike Steinbuss
+// Peer Review of Changes during 7.4  			                    	            :2014-12-10 Alastair,Judith 
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib BasicLibrary_Noiser
+	{
+
+	/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    Noiser_MixMicrophoneEn_Get_Entry
+//   Input      :  None
+//   Output      :  <int> Actual position of Noiser_MixMicrophone checkbox.
+//   Description:  Compares the HI settings and returns the checkbox positions   
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Noiser_MixMicrophoneEn_Get_Entry () 
+		{ 
+			
+			if ( hi:d8PTinMode == d8PTinMode.mixed) // if tinnitus mixed 
+			{
+				println ("[HAL]:BLIB.Noiser_MixMicrophoneEn_Get_Entry = ON (pos=1)");
+				return 1;
+			}
+			else
+			{
+				println ("[HAL]:BLIB.Noiser_MixMicrophoneEn_Get_Entry = OFF (pos=0)");
+				return 0;
+			}
+		} // Closes	BasicLibrary_Noiser_MixMicrophoneEn_Get_Entry		
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    Noiser_MixMicrophoneEn_Set_Entry
+//   Input      :  <int> Desired checkbox based on CxxPos 
+//   Output      :  <void>  
+//   Description:  mute of microphone path    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void Noiser_MixMicrophoneEn_Set_Entry (int CxxPos)
+		{	
+			println("[HAL]:BLIB.Noiser_MixMicrophoneEn_Set_Entry CxxPos=" + CxxPos);			
+			if (CxxPos == 1)
+			{
+				// Tinnitus mode: Mixed with Mic Noise
+				hi:d8PTinMode = d8PTinMode.mixed;
+				println ('[HAL]BLIB-NoiserRB_Set_Entry >> MIXED >> pos=' + CxxPos);
+			}
+			else
+			{
+				// Tinnitus mode: Pure Noise
+				hi:d8PTinMode = d8PTinMode.pure;
+				println ('[HAL]BLIB-NoiserRB_Set_Entry >> PURE >> pos=' + CxxPos);
+			}
+		} // Closes	BasicLibrary_Noiser.Noiser_MixMicrophoneEn_Set_Entry	
+		
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    Noiser_IsOnAndPure
+//   Input      :  None
+//   Output      :  <bool> true when Noiser ON & PURE, else false 
+//   Description:  Compares the HI settings and returns the noiser state. 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool Noiser_IsOnAndPure () //SIFIT7.3PEERREVIEWED
+		{ 
+			if (hi:d8PTinEn == d8PTinEn.on &&
+				hi:d8PTinMode == d8PTinMode.pure)
+			{
+				println ('[HAL]BLIB-Noiser_IsOnAndPure  >> TRUE');
+				return true;
+			}
+			else 
+			{
+				println ('[HAL]BLIB-Noiser_IsOnAndPure  >> FALSE');
+				return false;
+			}
+		} // Closes	BasicLibrary_Noiser.Noiser_IsOnAndPure
+
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    NoiserEn_Get_Entry
+//   Input      :  None
+//   Output      :  <int> Actual position of Noiser checkbox.
+//   Description:  Compares the HI settings and returns the Slider positions wrt 70x PP    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int NoiserEn_Get_Entry () //SIFIT7.3PEERREVIEWED
+		{ 
+			if (hi:d8PTinEn == d8PTinEn.on)
+			{
+				println ("[HAL]:BLIB.NoiserEn_Get_Entry = ON (pos=1)");
+				return 1;
+			}
+			else
+			{
+				println ("[HAL]:BLIB.NoiserEn_Get_Entry = OFF (pos=0)");
+				return 0;
+			}
+		} // Closes	BasicLibrary_Noiser.NoiserEn_Get_Entry		
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    NoiserEn_Set_Entry
+//   Input      :  <int> Desired checkbox based on CxxPos 
+//   Output      :  <void>  
+//   Description:  set d8PTinEn based on CxxPos    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserEn_Set_Entry (int CxxPos) //SIFIT7.3PEERREVIEWED
+		{	
+			println("[HAL]:BLIB.NoiserEn_Set_Entry CxxPos=" + CxxPos);			
+			if (CxxPos == 1)
+			{
+				hi:d8PTinEn = d8PTinEn.on;
+			}
+			else
+			{
+				hi:d8PTinEn = d8PTinEn.off;
+			}
+		} // Closes	BasicLibrary_Noiser.NoiserEn_Set_Entry	
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    NoiserPreset_PinkNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus Pink Noise preset 
+//   Description:  For pink noise only need to apply the pink noise offset 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_PinkNoise () //SIFIT7.3PEERREVIEWED
+		{
+		// Apply Pink Noise offset
+
+			// Maximum slider position is equal to Pink noise.
+			applyOffset ("VeryHighOffsetCrv", ToSubject.SwTinnitus, Apply.Complete);
+
+			// Bring down all the slider by 18dB to get the default position (pink noise) 
+			applyOffset ("MtendBOffsetCrv", ToSubject.SwTinnitus, Apply.Complete);
+			println ('[HAL]BLIB - NoiserPreset_PinkNoise apply offset executed');
+		}// Closes BasicLibrary_Noiser.NoiserPreset_PinkNoise
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    NoiserPreset_WhiteNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus White Noise preset 
+//   Description:  In order to apply correct offsets (1) apply pink noise offset, (2) apply desired offset on top  
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_WhiteNoise ()//SIFIT7.3PEERREVIEWED
+		{ 
+		// Apply Pink Noise offset
+			NoiserPreset_PinkNoise ();
+
+			// Apply White Noise offset
+			applyOffset ("WNPresetWrtPNCrv", ToSubject.SwTinnitus, Apply.Complete);
+			println ('[HAL]BLIB - NoiserPreset_WhiteNoise apply offset executed');
+		}// Closes BasicLibrary_Noiser.NoiserPreset_WhiteNoise
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    NoiserPreset_SpeechNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus Speech Noise preset 
+//   Description:  In order to apply correct offsets (1) apply pink noise offset, (2) apply desired offset on top 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_SpeechNoise () //SIFIT7.3PEERREVIEWED
+		{
+		// Apply Pink Noise offset
+			NoiserPreset_PinkNoise ();
+
+			// Apply Speech Noise offset
+			applyOffset ("SNpresetWrtPNCrv", ToSubject.SwTinnitus, Apply.Complete);
+			println ('[HAL]BLIB - NoiserPreset_SpeechNoise apply offset executed');
+		}// Closes BasicLibrary_Noiser.NoiserPreset_SpeechNoise
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    NoiserPreset_HighToneNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus High Tone Noise preset 
+//   Description:  In order to apply correct offsets (1) apply pink noise offset, (2) apply desired offset on top 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_HighToneNoise () //SIFIT7.3PEERREVIEWED
+		{ 
+		// Apply Pink Noise offset
+			NoiserPreset_PinkNoise ();
+
+			// Apply High Tone Noise offset
+			applyOffset ("HTPresetWrtPNCrv", ToSubject.SwTinnitus, Apply.Complete);
+			println ('[HAL]BLIB - NoiserPreset_HighToneNoise apply offset executed');
+		}// Closes BasicLibrary_Noiser.NoiserPreset_HighToneNoise
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    NoiserDefault_Offset
+//   Input      :  None
+//   Output      :  None
+//   Description: Add additional offset to Tinnitus default level  FR60546
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserDefault_Offset () 
+		{
+
+		// Apply additional -6dB offset to White Noise preset for the first fit default only
+			applyOffset ("OffsetToTinDef", ToSubject.SwTinnitus, Apply.Complete);
+			println ('[HAL]BLIB - NoiserDefault_Offset apply offset executed');
+			
+			// this SW control needs to be set for showing the correct preset in the combo box since the macro getter for all presets always returns 0.  
+			hi:d8SwTinnitusNoisePreset = d8SwTinnitusNoisePreset.Static_White;
+		}// Closes BasicLibrary_Noiser.NoiserDefault_Offset
+
+		/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION  LIBRARY     
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package BasicLibrary_Noiser
+
+} //namespace shs.sat
+

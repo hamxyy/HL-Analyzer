@@ -1,0 +1,44 @@
+//---------------------------------------------------------------------------------------------------------------
+//                           MID LEVEL PRICEPOINT LIBRARY 		 : MicModeSpeechInNoiseEn
+// Initial Version                						  		 :  2013-03-14 Al
+// Added new function, MicModeSpeechInNoiseEn_IsVisible() for PP75.     : 2013-03-14 Al
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+//------------------------------------------------------------------------------------------------------------------
+namespace shs_sat {
+    using shs_sat.*;
+	
+	package  Lib Mid_Level_Library_MicModeSpeechInNoiseEn{
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    MicModeSpeechInNoiseEn_IsVisible
+//   Input		:  none
+//   Ouput      :  <bool> Returns True if visible; False if Not Visible (PP75 and below)
+//   Description:  decides the visibility of the MicModeSpeechInNoiseEn
+-----------------------------------------------------------------------------------------------------------------$*/ 	
+	public function bool MicModeSpeechInNoiseEn_IsVisible(){
+		bool retval = false;
+		switch(cap:PricePoint){
+			case PricePoint.PP700:{          
+				retval = true;
+			}
+			case PricePoint.PP500:{          
+				retval = true;
+			}
+			case PricePoint.PP300:{          
+				retval = true;
+			}
+			case PricePoint.PP100:{          
+				retval = true;
+			}
+			default:{          // false for PP75 and below).
+				retval =  false;	
+			}
+		}
+		return retval;
+	} //Closes Mid_Level_Library_MicModeSpeechInNoiseEn.MicModeSpeechInNoiseEn_IsVisible
+			
+/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Mid Level LIBRARY    MicModeSpeechInNoiseEn
+-----------------------------------------------------------------------------------------------------------------*/		
+	}	//package Mid_Level_Library_MicModeSpeechInNoiseEn
+}	//namespace shs.sat

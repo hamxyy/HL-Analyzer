@@ -1,0 +1,78 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL PRICEPOINT LIBRARY   : E2e Wireless 
+// Initial Version                						     :  2011-11-16   Cecil Wilson
+// Added Default after FirstFit function					 :  2011-12-19   Cecil Wilson
+// Updated the Get function and macro clean up				 :  2012-02-14   Cecil Wilson
+// Added remapping for E2E checkbox							 :  2012-03-01   Cecil Wilson
+// Post fit to default to call HLIB							 :  2012-04-19   Cecil Wilson
+// FirstFit peer review: update E2e_WirelessEn_Set_Default() :	2012-07-20	 Nadia & Judith
+*******************************************CODE FREEZE***********************************************************
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Frauke,Judith
+----------------------------------------------------------------------------------------------------------------*/
+
+namespace shs_sat {
+	
+    using shs_sat.*;
+    
+	package  Lib High_Level_Library_E2e_Wireless{
+
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    E2e_WirelessEn_Set
+//   Input      :  <int> Check box position from Cxx
+//   Ouput      :  <void>
+//   Description:  calls Basiclib function    
+-----------------------------------------------------------------------------------------------------------------$*/
+	public function void E2e_WirelessEn_Set(int pos){			
+			                        
+		int remapped_pos = Mid_Level_Library_E2e_Wireless.E2e_WirelessEn_Remapping(pos);
+		BasicLibrary_E2e_Wireless.E2e_WirelessEn_Set(remapped_pos);		
+			
+	}// Closing High_Level_Library_E2e_Wireless.E2e_WirelessEn_Set
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    E2e_WirelessEn_Get
+//   Input      :  <void> 
+//   Ouput      :  <int> Check box position from Cxx 1=> Checked  0=> UnChecked
+//   Description:  calls Basiclib function    
+-----------------------------------------------------------------------------------------------------------------$*/
+	public function int E2e_WirelessEn_Get(){			//Reviewed 7.2.
+			                        
+		int retval = -1;
+		if(BasicLibrary_E2e_Wireless.E2e_WirelessEn_Get()==true){
+			retval = 1;
+		}
+		else{
+			retval = 0;
+		}		
+		return retval;	
+	}// Closing High_Level_Library_E2e_Wireless.E2e_WirelessEn_Get
+		    
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    E2e_WirelessEn_Set_Default	
+//   Input      :  <void> 
+//   Ouput      :  <bool> Sets the default position after FIRST FIT based on the Caps
+//   Description:  calls Basiclib function    
+-----------------------------------------------------------------------------------------------------------------$*/
+
+	public function void E2e_WirelessEn_Set_Default(){ //Reviewed 7.2.
+		
+		// Check if the devices is Binaural Capable
+		bool E2e_available_for_bothSides = Mid_Level_Library_E2e_Wireless.E2e_WirelessEn_IsBinauralCapable();
+		
+		// Set the position based on the result.
+		if(E2e_available_for_bothSides == true){				
+		 	High_Level_Library_E2e_Wireless.E2e_WirelessEn_Set(1);	
+		}
+		else{
+			High_Level_Library_E2e_Wireless.E2e_WirelessEn_Set(0);
+		}			
+				                        					
+	}//Closing High_Level_Library_E2e_Wireless.E2e_WirelessEn_Set_Default	
+/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Higher Level PP LIBRARY    E2e Wireless
+-----------------------------------------------------------------------------------------------------------------*/		
+
+	}	//package High_Level_Library_E2e_Wireless
+}	//namespace shs.sat

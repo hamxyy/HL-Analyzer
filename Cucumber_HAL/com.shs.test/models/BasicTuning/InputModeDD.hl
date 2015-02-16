@@ -1,0 +1,45 @@
+/*---------------------------------------------------------------------------------------------------------------*
+// CXX UI:                        Input Mode Drop Down Menu
+// Initial Version(in work) 				                						    :  2011-02-21   Cecil Wilson
+// Updated all functions															    :  2011-02-28   Cecil Wilson
+// Added Tinnitus greyout														        :  2011-03-23   Cecil Wilson  
+// Updated header and added println													    :  2011-06-27   Cecil Wilson	
+// Added Workaround for ComboBox/ DropDown menu issue								    :  2011-07-07   Cecil Wilson
+// Removed workaround for the DropDown menu issue & added the new application function	:  2011-07-27	Jenny Lin 	
+// Add println for MPV testing												 			:  2011-09-22   Jenny Lin
+// Removed MaxPhysicalPos application funciton due to  ER53490							:  2012-02-09   Cecil Wilson
+// Macro code Cleanup																	:  2012-02-14   Cecil Wilson
+// Updated Getpos to allow return of -1 from macros										:  2012-03-23   Cecil Wilson	 
+// Deleted comments above application functions that descibe what the functions do  :  Alastair Manders 2012-06-5 
+// Peer review comments implemented														:  2012-06-19   Cecil/Jenny/MangYew
+// *********************************************CODE FREEZE*******************************************************  
+// SIFIT7.2_PEERREVIEWED: 
+// 1) Call MLIB.InputModeDD_IsVisiblePhysicalPos instead of HLIB.						:  2013-07-30 Jenny & Judith
+// refractor: Optimize code									: 2013-12-02 Jenny
+// Updated IsEnabledPos for InputMode.								: 2013-12-10 Jenny
+// updated println statement for debugging.											: 2014-01-15 Jenny
+// Sifit7.3 Peer review																: 2014-04-15 Jenny, Judith
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Alastair,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------$$*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package MixedMode InputModeDD
+	{
+		
+ 		application function int GetPos ()
+		{
+			println ('[HAL]MM - InputModeDD - GetPos');
+			return High_Level_Library_InputMode.InputModeDD_Get ();
+		} // Closes InputModeDD.GetPos
+ 
+// 		application function void SetPos (int pos)
+//		{
+//			println ('[HAL]MM - InputModeDD - SetPos = ' + pos);
+//			High_Level_Library_InputMode.InputModeDD_Set (pos);
+//		} // Closes InputModeDD.SetPos
+
+	} //package MixedMode.InputModeDD
+
+} //namespace shs.sat

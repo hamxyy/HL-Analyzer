@@ -1,0 +1,194 @@
+//----------------------------------------------------------------------------------------------------------------
+//                                 BASIC FUNCTION LIBRARY  Mic_Mode
+// Initial Version                                         : 2011-03-11		Nadine Seubert
+// reworked Get and Set for SelDir settings                : 2011-04-05		Nadine Seubert
+// update for Hicoss R3                                    : 2011-05-20		Nadine Seubert
+// include missing hi:d8PCtrlSelEnable					   : 2011-06-29		Meike Doose
+// change of HiVar1 to hi:d8SwMacroAutoSpeechFocusEnHP     : 2011-06-29		Meike Doose
+// Updated the Mic_Mode_Set_RadioButton_Entrie after review the control settings with Jens and updated 
+// the "d8PCtrlMicEnable" under AutoAdap MicMode to be "enabled". Outstanding to confirm 
+// the settings of the "d8PSelOmniThr".						: 2012-02-22	Jenny Lin 
+// Rework the SetPos and GetPos to be independent off the SwMacro variable, Cxx/Hicoss
+// or TestSettings.											: 2012-03-22	Jenny Lin
+// Updated macros to the state on 2012-02-29   				: 2012-04-13	Jenny Lin
+// Added OmniDual case as 90								: 2012-05-02	Cecil Wilson
+// Added DirStaticHp for PP100 (Fitting) remapped_pos = 55	: 2012-06-29	Jenny and Frauke
+// *********************************************CODE FREEZE*******************************************************
+// Fixed ER56075 AutoFix added for PP100					: 2012-08-15    Cecil Wilson
+// Fixed ER57296 macro controlled e2e coupling for SpeechFocus:2012-09-04   Cecil Wilson
+// UPdated the pos_remapped for BLIB Micmode, and call the BLIB.CarFocus to set the state 
+// of the CarFocus controls and added OmniOpt and changes the Omnidirectional to above 90.	2012-11-19 Jenny Lin
+// Added assertion message									: 2012-12-14 Jenny Lin
+// Macro Peer review implementation. Removed the else return -1 and replace with the return of 
+// pos_remapped=20 for Mic_Mode_Get_RadioButton_Entrie().	  		: 2012-12-28 Jenny
+// FR55137 The FBC needs to be switched to dual/single mode depending on the mic-mode : 09.01.2013 Judith
+// ER58883: Listening situation is not correct realized				: 2013-02-12 Frauke
+// ER63029: Updated Mic_Mode_Set_RadioButton_Entrie to include the remapped_pos 70 & 75. 	: 2013-08-20 MieMie
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+
+//---------------------------------------------------------------------------------------------------------------
+namespace shs_sat {	
+	using shs_sat.*;
+	package  Lib BasicLibrary_Mic_Mode{
+
+/*----------------------------------------------------------------------------------------------------------------
+   Basic LIBRARY Function:    Mic_Mode_Set_RadioButton_Entrie
+   Input      :  <int> Desired Radion Button entrie with respect to 70x Price point 
+   Ouput      :  <int> Actual Radio Button position with respect to Current Price point which was set 
+   Description:  Compares the HI settings and returns the Radion Button positions wrt 70x PP    
+-----------------------------------------------------------------------------------------------------------------*/   		
+	public function int Mic_Mode_Set_RadioButton_Entrie(int pos_remapped){
+		// POS -->  should specify the absolute slider step (with respect to the HI asic controls) 
+		int retval = pos_remapped;
+		println('[HAL]BLIB-Mic_Mode_Set_RadioButton_Entrie  pos_remapped'+pos_remapped);
+		switch (pos_remapped){	
+			case 100:{ // Omnidirectional Radiobutton selected
+			//*** NEW in Sifit 7.1 ***
+				hi:d8SwMicMode = d8SwMicMode.OmniOpt;
+			}
+			case 95:{ // Omnidirectional Radiobutton selected
+			//*** Sifit 7.0 = original 70 ***
+				hi:d8SwMicMode = d8SwMicMode.OmniSingle;	
+			}
+			case 90:{ // Omnidirectional Radiobutton selected
+				hi:d8SwMicMode = d8SwMicMode.OmniDual;	
+			}
+			case 80:{ // Directional Static Radiobutton selected for Hicoss/Test Settings in Cxx
+				hi:d8SwMicMode = d8SwMicMode.TestDir; 
+			}
+			case 75:{ // For PP100/PP75 and Gmax>=80 Directional Radiobutton
+				hi:d8SwMicMode = d8SwMicMode.DirStaticFlat;	
+			}
+			case 70:{ // For PP500/PP500/PP300 and Gmax>=80 Directional Radiobutton
+				hi:d8SwMicMode = d8SwMicMode.DirAdapFlat; 
+			}
+			case 55:{ // Directional (static) Radiobutton selected for PP100 & PP75 in Fitting mode!!!
+	        	hi:d8SwMicMode = d8SwMicMode.DirStaticHP;   	   
+			}
+			case 50:{ // Directional Radiobutton selected
+	        	hi:d8SwMicMode = d8SwMicMode.DirAdapHP;  
+			}
+			case 30:{ // SpeechFocus Radio button selected 
+				hi:d8SwMicMode = d8SwMicMode.SelDir;
+				//*** Call BLIB.CarFocus checkbox to set the controls ***
+			}
+			case 20:{ // Automatic/TruEar Radio button selected + CarFocus checkbox ON
+	        	hi:d8SwMicMode = d8SwMicMode.SelDir;	        
+				//*** Call BLIB.CarFocus checkbox to set the controls ***
+			}
+			case 10:{ // Automatic/TruEar Radio button selected + CarFocus checkbox OFF
+				hi:d8SwMicMode = d8SwMicMode.AutoAdap;
+				//*** Call BLIB.CarFocus checkbox to set the controls ***
+			}
+			case 5:{ // Automatic Radio button selected For 100PP with Static Microphones+ CarFocus checkbox OFF(CarFocus is not available)
+				hi:d8SwMicMode = d8SwMicMode.AutoFix;
+				//*** Call BLIB.CarFocus checkbox to set the controls ***
+			}		
+			
+			default:{
+				// no defined valid state for pos_remapped
+				retval=-1;		
+			}// default closes
+			 
+		} // switch pos closes
+		
+		//Fbc needs switch depending on MicMode
+		if 	(pos_remapped > 90){ //For OmniOpt and OmniSingle
+		      BasicLibrary_FeedbackStopper.FBCSwitchdepMicMode_Set(0);  
+				}
+		else { //For all other MicModi
+		     BasicLibrary_FeedbackStopper.FBCSwitchdepMicMode_Set(1);
+		     }
+				
+		//*** Call BLIB.CarFocus checkbox to set the controls ***
+		if (pos_remapped == 30){
+			// Speech Focus Option.
+			BasicLibrary_SpeechFocusEn.SpeechFocusEn_Set(2);
+		}
+		else if(pos_remapped == 20){
+			// CarFocus checkbox = On
+			BasicLibrary_SpeechFocusEn.SpeechFocusEn_Set(1);
+		}
+		else{	// for all the other mic mode, CarFocus checkbox shall be OFF.
+			// CarFocus checkbox = Off
+			BasicLibrary_SpeechFocusEn.SpeechFocusEn_Set(0);
+		}	
+		
+		assertion(retval >= 0, "[MacroError] Undefined state of Microphone Mode Radiobutton! pos_remapped not defined.");
+		
+		return retval;		
+	} // Closes  BasicLibrary_Mic_Mode.Mic_Mode_Set_RadioButton_Entrie
+
+/*----------------------------------------------------------------------------------------------------------------
+   Basic LIBRARY Function:    Mic_Mode_Get_RadioButton_Entrie
+   Input      :  None
+   Ouput      :  <int> Actual slider position with respect to 70x Price point 
+   Description:  Compares the HI settings and returns the Slider positions wrt 70x PP    
+-----------------------------------------------------------------------------------------------------------------*/  
+		public function int Mic_Mode_Get_RadioButton_Entrie(){
+		// POS -->  should specify the absolute slider step (with respect to the HI asic controls) 
+		int pos_remapped = -1;
+
+		println('[HAL]BLIB-Mic_Mode_Get_RadioButton_Entrie  started');
+		if(hi:d8SwMicMode == d8SwMicMode.OmniOpt){ 
+			// for OMNI-DIRECTIONAL MICROPHONE OPTION SELECTED
+					pos_remapped = 100;
+			}
+		else if(hi:d8SwMicMode == d8SwMicMode.OmniSingle){
+					pos_remapped = 95;
+			}
+		else if(hi:d8SwMicMode == d8SwMicMode.OmniDual){
+					pos_remapped = 90;
+			}
+			// for TESTSETTINGS.DIRECTIONAL (DIRECTIONAL STATIC in HICOSS) OPTION SELECTED
+		else if(hi:d8SwMicMode == d8SwMicMode.TestDir){
+					pos_remapped = 80;
+			}
+			// for HICOSS.Getter If user selected DirStaticFlat, Hicoss shall display the Dir radiobutton
+		else if(hi:d8SwMicMode == d8SwMicMode.DirStaticFlat){
+					pos_remapped = 75; //ER58883 //should only be used for the Getter, in Hicoss mode, unless new CR
+			}
+			// for HICOSS.Getter If user selected DirAdapFlat, Hicoss shall display the Dir radiobutton
+		else if(hi:d8SwMicMode == d8SwMicMode.DirAdapFlat){
+					pos_remapped = 70; //ER58883 //should only be used for the Getter, in Hicoss mode, unless new CR
+			}
+			// for DIRECTIONAL MICROPHONE OPTION SELECTED
+		else if(hi:d8SwMicMode == d8SwMicMode.DirStaticHP){
+					pos_remapped = 55;
+			}
+		else if(hi:d8SwMicMode == d8SwMicMode.DirAdapHP){
+					pos_remapped = 50;
+			}
+			// for SPEECHFOCUS MICROPHONE OPTION SELECTED
+		else if(hi:d8SwMicMode == d8SwMicMode.SelDir){
+				if(hi:d8PCtrlSelEnable == d8PCtrlSelEnable.disabled){	
+					// Speech Focus microphone mode (RB selection)
+					pos_remapped = 30;
+				}
+				else{
+					// Automatic microphone mode + CarFocus checkbox enabled
+					pos_remapped = 20;
+				}
+			}
+			// for AUTOMATIC / TRUEAR MICROPHONE OPTION SELECTED
+		else if(hi:d8SwMicMode == d8SwMicMode.AutoAdap){
+					pos_remapped = 10;
+			}
+		else if(hi:d8SwMicMode == d8SwMicMode.AutoFix){
+					pos_remapped = 5;
+			}
+		else{
+			// no defined valid state for d8SwMicMode
+					pos_remapped = -1;
+			}//	close if-else(hi:d8SwMicMode)
+		
+		println('[HAL]BLIB-Mic_Mode_Get_RadioButton_Entrie  pos_remapped'+pos_remapped);
+		
+		assertion(pos_remapped >= 0, "[MacroError] Undefined state of Microphone Mode Radiobutton! No defined valid state for d8SwMicMode in the instrument.");
+		return pos_remapped;		
+	} // Closes	BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie	
+			
+	}	//package BasicLibrary_Mic_Mode
+}	//namespace shs.sat
+
+//************************************ END Of Basic Level Library Mic_Mode ****************************************	

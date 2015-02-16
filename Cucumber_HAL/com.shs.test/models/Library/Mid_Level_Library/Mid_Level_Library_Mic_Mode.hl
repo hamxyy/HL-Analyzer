@@ -1,0 +1,849 @@
+//---------------------------------------------------------------------------------------------------------------*
+//                                 MID LEVEL PRICEPOINT LIBRARY  
+// Initial Version                						   					: 2011-02-11	Nadine Seubert
+// add dependencies for Hicoss                             					: 2011-04-13	Nadine Seubert
+// put in cap:PricePoint and cap:DirMicAvailable		   					: 2011-06-28	Nadia Neugeborn
+// added new function Mic_Mode_Get_MPVPos				   					: 2011-11-29	Cecil Wilson
+// Add case20 in Mic_Mode_Is_Enabled_Pos(), Mic_Mode_Remapping				: 2012-03-22	Jenny Lin
+// Added Mic_Mode_Is_Visible_Physical_Pos									: 2012-04-03	Jenny Lin
+// Updated structure of remapping and added new functions 
+// for each Microphone mode RB 					  		   					: 2012-05-02	Cecil/Jenny 
+// Updated Mic_Mode_Is_Enabled_Pos to take another string input. Mic Mode from Cxx, e.g. 0,1,2 "MPVPos" 
+// and from HLIB, e.g 10,20,30 "BLIBPos"									: 2012-05-04	Jenny Lin
+// Mic_Mode_Omnidirectional() chanced bec. dual/single omni                 : 2012-06-14	Judith/ Cecil
+// Peer review changes from eWindScreen										: 2012-06-15	Judith, Nadine and Frauke
+// Peer review changes														: 2012-06-18	Frauke and everyonelse
+// Peer review changes: Split the Remapping function to Hicoss & Fitting    : 2012-06-26    Cecil Wilson							
+// Added DirStaticHP for PP100 functionality								: 2012-06-29	Jenny and Frauke
+// Macro Peer review implementation	(MicMode default)						: 2012-07-10	Nadia & Judith
+// *********************************************CODE FREEZE*******************************************************
+// CR56304: updated Mic_Mode_Omnidirectional to check for OpenOptimizerEn_GetHw		: 2012-07-21	Frauke
+// ER56075 AutoFix added for PP100 											: 2012-08-15    Cecil Wilson
+// Updated the omnidirectional to (remapped_pos >= 90), and added omniopt.	: 2012-11-19 Jenny
+// Updated the sequence for setting MicMode for omni to check for twin mic with either WNC or OO on, it 
+// shall default to Omni_dual, after that then check for Omni_Opt. 			: 2012-12-07 Jenny
+// Added assertion message									: 2012-12-14 Jenny Lin
+// Macro Peer review implementation. Change Mic_Mode_Is_Enabled_Pos() switch cap:DirMicAvailable to 
+// if-else statement since there is only two state for this cap.			: 2012-12-28 Jenny
+// FR59240: OpenOptimizer to be disabled for devices >=Gmax 75				: 2013-01-25 Frauke
+// ER58883: Listening situation is not correct realized						: 2013-02-12 Frauke
+// ER60575: TestService can't perform FirstFit for ITE with single microphone : 2013-02-13 Frauke & Nadine
+// Updated Default_Pos for Nitro devices - twin mic devices always go to Omni : 2013-03-01 Sonia Stasiak
+// Added PP75 code to Mic_Mode_Is_Visible_Physical_Pos                      : 2013-03-18 Al
+// Added PP75 code to Mic_Mode_Remapping_Fitting() and Mic_Mode_Remapping_Hicoss()  : 2013-03-21 Al
+// Added PP75 code to Mic_Mode_MaxPos()                                     : 2013-03-21 Al
+// Updated Default_Pos with new SuperPowerHi capability						  : 2013-04-08 Sonia
+// In Default_Pos replaced cap:SuperPowerHi with cap:GMax (Nitro BTE set to Omni after FF) : 2013-04-11 Sonia
+// Added PP75 code to Mic_Mode_Directional ()- PP75 also returns 55         : 2013-04-11 Al
+// Altered MicMode_DefaultPos () so that for PP75 omni mode is the default. : 2013-04-16 Al
+// ER63029: Updated Mic_Mode_Directional() to checks for Gmax, include the remapped_pos 70 & 75. 	: 2013-08-20 Mie Mie
+// FR63137: Gmax >=80 devices now default to Automatic mic mode after FF, as before.  : 2013-08-21 Al
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+//---------------------------------------------------------------------------------------------------------------
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib Mid_Level_Library_Mic_Mode
+	{
+
+	/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Max_Pos
+   Input      :  none
+   Ouput      :  <int> Mic Mode with respect to Connexx/HiCoss and price point 
+   Description:  finds maximum position based on price point  
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_MaxPos ()
+		{
+			int retval = -1;
+			if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+			{
+				switch (cap:PricePoint)
+				{
+					case PricePoint.PP700:{ // For 700 price point, No of Mic Modes is 4 (SpeechFocus included)
+						retval = 3;
+					}
+					case PricePoint.PP500:{ // For 500 price point, No of Mic Modes is 4 (SpeechFocus included)
+						retval = 3;
+					}
+					case PricePoint.PP300:{ // For 300 price point, No of Mic Modes is 3
+						retval = 2;
+					}
+					case PricePoint.PP100:{ // For 100 price point, No of Mic Modes is 3
+						retval = 2;
+					}
+					case PricePoint.PP75:{ // For 75 price point, No of Mic Modes is 2
+						retval = 1;
+					}
+					default:{ //Default is set to -1 to indicate invalid Pricepoint
+						retval = -1;
+					}
+				} //closes switch(pricepoint)
+
+			} //closes if(env:HiDriverWorkMode == HiDriverWorkMode.Fitting)			
+			else
+			{
+				switch (cap:PricePoint)
+				{
+					case PricePoint.PP700:{ // For 700 price point, No of Mic Modes is 4 (SpeechFocus included)
+						retval = 4;
+					}
+					case PricePoint.PP500:{ // For 500 price point, No of Mic Modes is 4 (SpeechFocus included)
+						retval = 4;
+					}
+					case PricePoint.PP300:{ // For 300 price point, No of Mic Modes is 3 
+						retval = 3;
+					}
+					case PricePoint.PP100:{ // For 100 price point, No of Mic Modes is 2 
+						retval = 3;
+					}
+					case PricePoint.PP75:{ // For 75 price point, No of Mic Modes is 2 
+						retval = 2;
+					}
+					default:{ //Default is set to -1 to indicate invalid Pricepoint
+						retval = -1;
+					}
+				} //closes switch(pricepoint)	
+
+			} //closes else (if(env:HiDriverWorkMode == HiDriverWorkMode.Fitting))
+			assertion (retval >= 0,
+				"[MacroError] Undefined state of Microphone Mode Radiobutton! MaxPos undefined for the PricePoint & HiDriverMode.");
+			return retval;
+		} //close function Mid_Level_Library_Mic_Mode.Mic_Mode_MaxPos
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    MicMode_DefaultPos
+   Input	  :  none
+   Ouput      :  <int> Default position of the RadioButton for MicMode
+   Description:  DefaultPosition of the RadioButton for MicMode after FirstFit  
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int MicMode_DefaultPos ()
+		{
+			int retval = -1;
+			if (cap:DirMicAvailable == DirMicAvailable.dir && cap:PricePoint > PricePoint.PP75)
+			{
+				retval = 0; // default for all PP is Automatic, if the device has two mics
+			}
+			else
+			{ // Device has ONLY one mic, OR device is PP75 --> default is Omni
+			// In Fitting (Connexx) use MaxPos for setting Omni Mic 
+				retval = Mid_Level_Library_Mic_Mode.Mic_Mode_MaxPos ();
+				// for Hicoss user and Single Mic devices Mic Mode should be adjusted to Omni ->max Pos is equal to Test Dir; 
+				if (env:HiDriverWorkMode == HiDriverWorkMode.Service)
+				{
+					retval = retval - 1;
+				}
+			}
+			return retval;
+		} //Closes Mid_Level_Library_Mic_Mode.MicMode_DefaultPos
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Is_Enabled_Pos
+   Input      :  <int> <string> Mic Mode from Cxx, e.g. 0,1,2 "MPVPos" and from HLIB, e.g 10,20,30 "BLIBPos" 
+   Ouput      :  <int> Greyed out of position with respect to DirMicAvailable
+   Description: enable/disable Mic Mode based on Dir or Omni mic mode available in HI
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool Mic_Mode_Is_Enabled_Pos (int POS, string PosORRemappedPos)
+		{
+			bool retval = false;
+			int pos_remapped = -1;
+			if (PosORRemappedPos == 'MPVPos')
+			{
+			// if pos comes from MPVPos, (e.g. 0,1,2), need to get the pos_wrt_BLIB from MLIB.Remapping
+				pos_remapped = Mid_Level_Library_Mic_Mode.Mic_Mode_Remapping (POS);
+			}
+			else if (PosORRemappedPos == 'BLIBPos')
+			{
+			// if pos comes from HLIB, "BLIBPos, (e.g. 10,20,30)
+				pos_remapped = POS;
+			}
+			else
+			{
+				println ('[HAL]MLIB:Mic_Mode_Is_Enabled_Pos ERROR -1 >> Not valid LIB call! ');
+			}
+			if (cap:DirMicAvailable == DirMicAvailable.omni)
+			{
+			//if omni mic in HI then only omni Mic Mode should be enabled	
+				if (pos_remapped >= 90)
+				{
+					retval = true;
+				}
+			} //closes case DirMicAvailable.omni
+			else
+			{
+			// if device is equiped with a directional Microphone is enabled Pos is always true
+				retval = true;
+			} //closes case DirMicAvailable.dir
+			return retval;
+		} //close function Mid_Level_Library_Mic_Mode.Mic_Mode_Is_Enabled_Pos
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Is_Visible_Physical_Pos
+   Input      :  <int> Mic Mode from Cxx
+   Ouput      :  <int> Actual Mic Mode with respect to DirMicAvailable
+   Description: enable/disable Mic Mode based on Dir or Omni mic mode available in HI
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool Mic_Mode_Is_Visible_Physical_Pos (int pos)
+		{
+			int error = 0;
+			bool retval = false;
+			switch (cap:PricePoint)
+			{
+				case PricePoint.PP700:{
+					println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Checking for PP700 start');
+					switch (pos)
+					{
+						case 0:{ // Automatic / TruEar Radiobutton option
+							retval = true;
+						}
+						case 1:{ // SpeechFocus Radiobutton option
+							retval = true;
+						}
+						case 2:{ // Directional Radiobutton option
+							retval = true;
+						}
+						case 3:{ // Omnidirectional Radiobutton option
+							retval = true;
+						}
+						case 4:{ // Directional (Static) Radiobutton option
+							if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+							{
+								retval = false;
+							}
+							else
+							{
+								retval = true;
+							}
+						}
+						default:{
+							retval = false;
+							error = -1;
+							println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Error! Invalid pos=' + pos);
+						}
+					} //closes switch(pos)
+
+				} //closes switch(PricePoint.PP700)
+				case PricePoint.PP500:{
+					println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Checking for PP500 start');
+					switch (pos)
+					{
+						case 0:{ // Automatic / TruEar Radiobutton option
+							retval = true;
+						}
+						case 1:{ // SpeechFocus Radiobutton option
+							retval = true;
+						}
+						case 2:{ // Directional Radiobutton option
+							retval = true;
+						}
+						case 3:{ // Omnidirectional Radiobutton option
+							retval = true;
+						}
+						case 4:{ // Directional (Static) Radiobutton option
+							if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+							{
+								retval = false;
+							}
+							else
+							{
+								retval = true;
+							}
+						}
+						default:{
+							retval = false;
+							error = -1;
+							println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Error! Invalid pos=' + pos);
+						}
+					} //closes switch(pos)
+
+				} //closes switch(PricePoint.PP500)
+				case PricePoint.PP300:{
+					println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Checking for PP300 start');
+					switch (pos)
+					{
+						case 0:{ // Automatic / TruEar Radiobutton option
+							retval = true;
+						}
+						case 1:{ // SpeechFocus Radiobutton option
+							retval = false;
+						}
+						case 2:{ // Directional Radiobutton option
+							retval = true;
+						}
+						case 3:{ // Omnidirectional Radiobutton option
+							retval = true;
+						}
+						case 4:{ // Directional (Static) Radiobutton option
+							if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+							{
+								retval = false;
+							}
+							else
+							{
+								retval = true;
+							}
+						}
+						default:{
+							retval = false;
+							error = -1;
+							println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Error! Invalid pos=' + pos);
+						}
+					} //closes switch(pos)
+
+				} //closes switch(PricePoint.PP300)
+				case PricePoint.PP100:{
+					println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Checking for PP100 start');
+					switch (pos)
+					{
+						case 0:{ // Automatic / TruEar Radiobutton option
+							retval = true;
+						}
+						case 1:{ // SpeechFocus Radiobutton option
+							retval = false;
+						}
+						case 2:{ // Directional Radiobutton option
+							retval = true;
+						}
+						case 3:{ // Omnidirectional Radiobutton option
+							retval = true;
+						}
+						case 4:{ // Directional (Static) Radiobutton option
+							if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+							{
+								retval = false;
+							}
+							else
+							{
+								retval = true;
+							}
+						}
+						default:{
+							retval = false;
+							error = -1;
+							println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Error! Invalid pos=' + pos);
+						}
+					} //closes switch(pos)
+
+				} //closes switch(PricePoint.PP100)
+				case PricePoint.PP75:{
+					println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Checking for PP75 start');
+					switch (pos)
+					{
+						case 0:{ // Automatic / TruEar Radiobutton option
+							retval = false; // Not visible for PP75
+						}
+						case 1:{ // SpeechFocus Radiobutton option
+							retval = false; // Not visible for PP75
+						}
+						case 2:{ // Directional Radiobutton option
+							retval = true;
+						}
+						case 3:{ // Omnidirectional Radiobutton option
+							retval = true;
+						}
+						case 4:{ // Directional (Static) Radiobutton option
+							if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+							{
+								retval = false;
+							}
+							else
+							{
+								retval = true;
+							}
+						}
+						default:{
+							retval = false;
+							error = -1;
+							println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Error! Invalid pos=' + pos);
+						}
+					} //closes switch(pos)
+
+				} //closes switch(PricePoint.PP75)
+				default:{
+					retval = false;
+					error = -1;
+					println ('[HAL]MLIB:Mic_Mode_Is_Visible_Physical_Pos >> Error! Invalid PricePoint');
+				} //closes switch(PricePoint default)
+
+			} //closes case PricePoint
+			assertion (error >= 0,
+				"[MacroError] Undefined state of Microphone Mode Radiobutton! IsVisiblePhysicalPos undefined for the PricePoint & HiDriverMode.");
+			return retval;
+		} //close function Mid_Level_Library_Mic_Mode.Mic_Mode_Is_Visible_Physical_Pos
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Remapping
+   Input      :  <int> Mic Mode from Cxx
+   Ouput      :  <int> Actual Mic Mode with respect to Price point and HI
+   Description:  remapping  Mic Mode RBs;  Price point and HiIdentifier resolving function.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Remapping (int pos)
+		{
+			int pos_remapping = -1; // Initilizing the position remapping 
+			if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+			{
+			// Call the remapping function for Fitting
+				pos_remapping = Mic_Mode_Remapping_Fitting (pos);
+			}
+			else
+			{
+			// Call the remapping function for Hicoss
+				pos_remapping = Mic_Mode_Remapping_Hicoss (pos);
+			}
+			return pos_remapping;
+		} // close function Mid_Level_Library_Mic_Mode.Mic_Mode_Remapping
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Remapping_Fitting
+   Input      :  <int> Mic Mode from Cxx
+   Ouput      :  <int> Actual Mic Mode with respect to Price point and HI
+   Description:  remapping  Mic Mode RBs;  Price point and HiIdentifier resolving function for FITTING/Cxx.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Remapping_Fitting (int pos)
+		{
+			int pos_remapping = -1; // Initilizing the position remapping 
+			switch (cap:PricePoint)
+			{ // Switch to the cases based on the Pricepoints                       
+				case PricePoint.PP700:{ // For 700 Price point: remapping of the Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP700 start. IN FITTING MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_SpeechFocus ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 3:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} // close switch pos for case 700
+
+				} // close case 700
+				case PricePoint.PP500:{ // For 500 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP500 start. IN FITTING MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_SpeechFocus ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 3:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} // close switch pos for case 500
+
+				} // close case 500
+				case PricePoint.PP300:{ // For 300 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP300 start. IN FITTING MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} // close switch pos for case 300
+
+				} // close case 300
+				case PricePoint.PP100:{ // For 100 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP100 start. IN FITTING MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} // close switch pos for case 100
+
+				} // close case 100
+				case PricePoint.PP75:{ // For 75 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP75 start. IN FITTING MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} // close switch pos for case 75
+
+				} // close case 75
+				default:{
+					pos_remapping = -1;
+				}
+			} // close switch pricepoint
+			assertion (pos_remapping >= 0,
+				"[MacroError] Undefined state of Microphone Mode Radiobutton! Remapped state undefined for the PricePoint in CONNEXX Mode.");
+			return pos_remapping;
+		} // close function Mid_Level_Library_Mic_Mode.Mic_Mode_Remapping_Fitting
+
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Remapping_Hicoss
+   Input      :  <int> Mic Mode from Cxx
+   Ouput      :  <int> Actual Mic Mode with respect to Price point and HI
+   Description:  remapping  Mic Mode RBs;  Price point and HiIdentifier resolving function for HICOSS.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Remapping_Hicoss (int pos)
+		{
+			int pos_remapping = -1; // Initilizing the position remapping 
+			switch (cap:PricePoint)
+			{ // Switch to the cases based on the Pricepoints and not on Max slider position
+				case PricePoint.PP700:{ // For 700 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP700 start. IN SERVICE MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_SpeechFocus ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 3:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						case 4:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} //close switch pos for case 700
+
+				} // close case 700
+				case PricePoint.PP500:{ // For 500 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP500 start. IN SERVICE MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_SpeechFocus ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 3:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						case 4:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} //close switch pos for case 500
+
+				} // close case 500
+				case PricePoint.PP300:{ // For 300 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP300 start. IN SERVICE MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						case 3:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} //close switch pos for case 300
+
+				} //close case 300
+				case PricePoint.PP100:{ // For 100 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP100 start. IN SERVICE MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						case 3:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} //close switch pos for case 100
+
+				} //close case 100
+				case PricePoint.PP75:{ // For 75 Price point: remapping of Mic Mode RBs
+					println ('[HAL]MLIB:Mic_Mode_Remapping >> Checking for PP75 start. IN SERVICE MODE');
+					switch (pos)
+					{
+						case 0:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional ();
+						}
+						case 1:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+						}
+						case 2:{
+							pos_remapping = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir ();
+						}
+						default:{
+							pos_remapping = -1;
+						}
+					} //close switch pos for case 75
+
+				} //close case 75
+				default:{
+					pos_remapping = -1;
+				}
+			} // close switch pricepoint, for else condition
+			assertion (pos_remapping >= 0,
+				"[MacroError] Undefined state of Microphone Mode Radiobutton! Remapped state undefined for the PricePoint in Hicoss Mode.");
+			return pos_remapping;
+		} // close function Mid_Level_Library_Mic_Mode.Mic_Mode_Remapping_Hicoss	
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Directional_Adaptive
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = Directional_Adaptive based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Directional_Adaptive ()
+		{
+			int pos_remapping = 50; // for PP700, PP500 and PP300 the "Directional" button shall be DirAdapHP
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Adaptive
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Directional_Static_DirStaticHP
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = Directional_Static based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Directional_Static_DirStaticHP ()
+		{
+			int pos_remapping = 55; // for PP100 and PP75 the "Directional (static)" button shall be DirStaticHP  
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_DirStaticHP
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Directional
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = Directional based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Directional ()
+		{
+			int pos_remapping = 0;
+			if (cap:GMax >= 80)
+			{
+				if (cap:PricePoint == PricePoint.PP100 || cap:PricePoint == PricePoint.PP75)
+				{
+					pos_remapping = Mic_Mode_Directional_Static_DirStaticFlat ();
+				}
+				else
+				{
+					pos_remapping = Mic_Mode_Directional_Static_DirAdaptiveFlat();
+				}
+			}
+			else
+			{
+				if (cap:PricePoint == PricePoint.PP100 || cap:PricePoint == PricePoint.PP75)
+				{
+				// for PP100 and PP75 the "Directional (static)" button shall be DirStaticHP
+					pos_remapping = Mic_Mode_Directional_Static_DirStaticHP ();
+				}
+				else
+				{ // for PP700, PP500 and PP300 the "Directional" button shall be DirAdapHP
+					pos_remapping = Mic_Mode_Directional_Adaptive ();
+				}
+			}
+			return pos_remapping;
+
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Directional
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Directional_Static_TestDir
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = Directional_Static based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Directional_Static_TestDir ()
+		{
+			int pos_remapping = 80; //This is the default Directional Static mode BLIB number for all the devices   
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir
+
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Directional_Static_DirAdaptiveFlat only needed for Hicoss: ER58883: Listening situation is not correct realized
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = Directional_Adaptive based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Directional_Static_DirAdaptiveFlat ()
+		{
+			int pos_remapping = 70; // for PP700, PP500 and PP300 the "Directional" button shall be DirAdapFlat
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_DirAdaptiveFlat
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Directional_Static_DirStaticFlat only needed for Hicoss: ER58883: Listening situation is not correct realized
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = Directional_Static based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Directional_Static_DirStaticFlat ()
+		{
+			int pos_remapping = 75; // for PP100 and PP75 the "Directional (static)" button shall be DirStaticFlat  
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_DirStaticFlat
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_SpeechFocus
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = SpeechFocus based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_SpeechFocus ()
+		{
+			int pos_remapping = 30; //This is the default SpeechFocusmode BLIB number for all the devices     
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_SpeechFocus
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Omnidirectional
+   Input      :  <none> 
+   Ouput      :  <int> Returns the remapped position pos_remapping = 70 or 90
+   Description:  Decides if OmniSingle or OmniDual shall be set if MICMODE == Omnidirectional    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Omnidirectional ()
+		{
+			int pos_remapping = -1;
+			int omnidual = 90; // d8SwMicMode set to Omni_Dual
+			int omnisingle = 95; // d8SwMicMode set to Omni_Single
+			int omniopt = 100; // d8SwMicMode set to Omni_Opt
+			if (cap:DirMicAvailable == DirMicAvailable.dir)
+			{
+			// for TWO mic device
+				if (BasicLibrary_EWindScreen.EWindScreenEn_Get_Entry () == true ||
+						BasicLibrary_FeedbackStopper.OpenOptimizerEn_Get_Hw () == true ||
+						hi:d8SwMicModeForOmni == d8SwMicModeForOmni.Omni_Dual)
+				{
+				// Ewindscreen / OpenOptimizer is ON or, so OMNI DUAL is prefered (if 2 mics are available)
+					pos_remapping = omnidual;
+				}
+				else if (hi:d8SwMicModeForOmni == d8SwMicModeForOmni.Omni_Opt)
+				{
+					pos_remapping = omniopt;
+				}
+				else
+				{
+					pos_remapping = omnisingle;
+				}
+			} // closes TWO mic device
+			else
+			{
+			// for ONE mic device
+				if (hi:d8SwMicModeForOmni == d8SwMicModeForOmni.Omni_Opt)
+				{
+					pos_remapping = omniopt;
+				}
+				else if (hi:d8SwMicModeForOmni == d8SwMicModeForOmni.Omni_Single)
+				{
+					pos_remapping = omnisingle;
+				}
+				else
+				{
+				// error since ONE mic device cannot set to Omni_Dual
+					pos_remapping = -1;
+				}
+			} // closes ONE mic device
+			assertion (pos_remapping >= 0,
+				"[MacroError] Undefined state of Microphone Mode Radiobutton! ONE mic instrument should not be able to set the Omni_Dual. >> d8SwMicModeForOmni");
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional
+
+		/*---------------------------------------------------------------------------------------------------------------*
+   Mid Level PP LIBRARY Function:    Mic_Mode_Automatic
+   Input      :  <none> 
+   Ouput      :  <int> Returns the BLIB Position ,i.e  pos_remapping  for eg, 10,20,30,...
+   Description:  Decides BLIB positions for the MICMODE = Automatic based all the capability dependence.    
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int Mic_Mode_Automatic ()
+		{
+			int pos_remapping = -1;
+			if (cap:PricePoint == PricePoint.PP700)
+			{
+				if (hi:d8SwMacroAutoSpeechFocusEnHP == d8SwMacroAutoSpeechFocusEnHP.on)
+				{
+				// Automatic/TruEar Radio button selected + CarFocus checkbox ON
+					pos_remapping = 20; // i.e.  if current position from connexx is "Automatic + CarFocus"
+
+				}
+				else
+				{
+					pos_remapping = 10; // i.e.  if current position from connexx is "Automatic"	
+
+				}
+			}
+			//  For the 100 pricepoints there is NO CarFocus/SpeechFocus checkbox and NO Adatpive microphone
+			else if (cap:PricePoint == PricePoint.PP100)
+			{
+				pos_remapping = 5; // i.e.  if current position from connexx is "Automatic-FIXED"
+
+			}
+			//  For the other pricepoints there is NO CarFocus/SpeechFocus checkbox
+			else
+			{
+				pos_remapping = 10; // i.e.  if current position from connexx is "Automatic"
+
+			}
+			return pos_remapping;
+		} // close Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic
+
+	} // package Mid_Level_Library_Mic_Mode
+
+} // namespace shs.sat
+//************************************ END Of Mic Level Library Mic_Mode ****************************************	

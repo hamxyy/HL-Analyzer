@@ -1,0 +1,230 @@
+/*----------------------------------------------------------------------------------------------------------------
+//                                 BASIC FUNCTION LIBRARY EWindScreen
+// Initial Version                                         	:  	2011-02-17  Meike Doose
+// include EWindScreenEn_Get function 						:	2011-02-18	Meike Doose
+// Renamed Library Package name					            :   2011-02-21  Cecil Wilson
+// Updated Function structure with single Remapping Funct   :   2011-03-02  Meike Doose
+// Removed Package LIB workaround 							:   2011-03-03	Cecil Wilson
+// Change name of EWindScreenSL_Set and Get to Set_Strength and Get_Strength : 2011-03-14 Meike Doose
+// Update preliminary Hi settings of WNC					:	2011-03-17	Meike Doose
+// update file name to ... Entry							:	2011-03-22	Meiek Doose
+// Add println for easy debugging						    :   2011-09-06  Chuah LayYuan
+// Clean up comments										:	2012-02-15  Cecil Wilson
+// Peer review changes										:	2012-06-15 Judith, Nadine and Frauke
+// *********************************************CODE FREEZE*******************************************************
+// Updated library for SWINE implementation					:	2012-12-10 Mang Yew
+// Added assertion message									:   2012-12-14 Jenny Lin
+// Peer review changes										:	2013-01-02 Mang Yew
+// Peer review changes update comments						:	2013-01-08 Jenny Lin
+// *********************************************CODE FREEZE For 7.1**********************************************
+// Implementation for CR61635 (Disable FBC and WNC if input mode is non-mic input)      : 2013-05-27 Mang Yew
+// Updated d8SwMacroVar3Hp to d8SwMacroWncEnHp due to FR61692.	: 2013-06-25 Mang Yew
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib BasicLibrary_EWindScreen
+	{
+
+	/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    EWindScreenSL_Set_Strength
+//   Input      :  <int> Desired UI position
+//   Ouput      :  <int> return value for error handling
+//   Description:  sets d8MWncStart
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int EWindScreenSL_Set_Strength (int remapped_pos)
+		{
+			int retval = remapped_pos;
+			// POS -->  should specify the absolute slider step (with respect to the HI asic controls) 
+			switch (remapped_pos)
+			{
+				case 10:{ // For WNC/SWN min
+					hi:d8MWncStart = 5;
+					retval = 0;
+				}
+				case 20:{ //For WNC med
+					hi:d8MWncStart = 8;
+					retval = 1;
+				}
+				case 21:{ //For SWN med
+					hi:d8MWncStart = 9;
+					retval = 1;
+				}
+				case 30:{ //For WNC/SWN max
+					hi:d8MWncStart = 11;
+					retval = 2;
+				}
+				default:{ // Does not make sense to CXX but for implementation CHECK
+					println ('[HAL]:BLIB.EWindScreenSL_Set_Strength !!ERROR: Slider position out of SPEC/Range!!');
+					retval = -1;
+				}
+			}
+			println ("[HAL]:BLIB.EWindScreenSL_Set_Strength, retval =  " + retval);
+			assertion (retval >= 0, "[MacroError] Undefined state of EWindscreen slider!");
+			return retval;
+		} // Closes  BasicLibrary_EWindScreen.EWindScreenSL_Set_Strength
+
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   Basic LIBRARY Function:    EWindScreenSL_Get_Strength
+//   Input      :  None
+//   Ouput      :  <int> remapped int of UI position
+//   Description:  Compares the HI settings and returns the remapped pos of UI position   
+-----------------------------------------------------------------------------------------------------------------*/
+		public function int EWindScreenSL_Get_Strength ()
+		{
+		// POS -->  should specify the absolute slider step (with respect to the HI asic controls) 
+			int remapped_pos = -1;
+			if (hi:d8MWncStart == 5)
+			{
+				remapped_pos = 10; // For WNC/SWN min
+
+			}
+			else if (hi:d8MWncStart == 8)
+			{
+				remapped_pos = 20; //For WNC med
+
+			}
+			else if (hi:d8MWncStart == 9)
+			{
+				remapped_pos = 21; //For SWN med
+
+			}
+			else if (hi:d8MWncStart == 11)
+			{
+				remapped_pos = 30; //For WNC/SWN max
+
+			}
+			else
+			{
+				println ('[HAL]:BLIB.EWindScreenSL_Get_Strength !!ERROR: Slider position out of SPEC/Range!!');
+				remapped_pos = -1;
+			} // default closes 
+			println ("[HAL]:BLIB.EWindScreenSL_Get_Strength, remapped_pos =  " + remapped_pos);
+			assertion (remapped_pos >= 0, "[MacroError] Undefined state of EWindscreen slider!");
+			return remapped_pos;
+		} // Closes	BasicLibrary_EWindScreen.EWindScreenSL_Get_Strength
+
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    EWindScreenEn_Get_Entry
+//   Input      :  none 
+//   Ouput      :  <bool> Current State of checkbox 
+//   Description:  Compares the HI settings and returns the state of the UI. 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool EWindScreenEn_Get_Entry ()
+		{
+			int error = 0;
+			bool retval = false;
+			if (hi:d8PWncEn == d8PWncEn.on &&
+					hi:d8PSwnEn == d8PSwnEn.off)
+			{
+				println ("[HAL]:BLIB.EWindScreenEn_Get_Entry = true ");
+				retval = true;
+			}
+			else if (hi:d8PWncEn == d8PWncEn.off &&
+				hi:d8PSwnEn == d8PSwnEn.on)
+			{
+				println ("[HAL]:BLIB.EWindScreenEn_Get_Entry = true ");
+				retval = true;
+			}
+			else if (hi:d8PWncEn == d8PWncEn.off &&
+				hi:d8PSwnEn == d8PSwnEn.off)
+			{
+				println ("[HAL]:BLIB.EWindScreenEn_Get_Entry = false ");
+				retval = false;
+			}
+			else
+			{
+				println ("[HAL]:BLIB.EWindScreenEn_Get_Entry = ERROR!!!! ");
+				retval = false;
+				error = -1;
+			}
+			assertion (error >= 0, "[MacroError] Undefined state of EWindscreen checkbox!");
+			return retval;
+		} // close BasicLibrary_EWindScreen.EWindScreenEn_Get_Entry		
+
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    EWindScreenEn_Set_Entry
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Compares the HI settings and returns the UI position   
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void EWindScreenEn_Set_Entry (int remapped_pos)
+		{
+			int pos = -1;
+			switch (remapped_pos)
+			{
+				case 11:{ //For Twin Mic, WNC should be on and SWN should be OFF as eWindScreen uses WNC and not SWINE.
+					hi:d8PWncEn = d8PWncEn.on;
+					hi:d8PSwnEn = d8PSwnEn.off;
+					pos = 1;
+				}
+				case 21:{ //For Single Mic, WNC should be OFF and SWN should be ON as eWindScreen uses SWINE and not WNC.
+					hi:d8PWncEn = d8PWncEn.off;
+					hi:d8PSwnEn = d8PSwnEn.on;
+					pos = 1;
+				}
+				default:{ //Set both controls to OFF.
+					hi:d8PWncEn = d8PWncEn.off;
+					hi:d8PSwnEn = d8PSwnEn.off;
+					pos = 0;
+				}
+			}
+			println ("[HAL]:BLIB.EWindScreenEn_Set_Entry, pos =  " + pos);
+			assertion (pos >= 0, "[MacroError] Undefined state of EWindscreen checkbox!");
+		} // Closes	BasicLibrary_EWindScreen.EWindScreenEn_Set_Entry
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    EWindScreenEn_Set_EntrySw
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Set the State of the checkbox if the software control is enabled.    
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void EWindScreenEn_Set_EntrySw (int pos)
+		{
+			if (pos == 1)
+			{
+				hi:d8SwMacroWncEnHp = d8SwMacroWncEnHp.on;
+				println ('[HAL]BLIB-EWindScreenEn_Set_EntrySw = ON');
+
+			}
+			else
+			{
+				hi:d8SwMacroWncEnHp = d8SwMacroWncEnHp.off;
+				println ('[HAL]BLIB-EWindScreenEn_Set_EntrySw = OFF');
+
+			}
+		} // Closes BasicLibrary_EWindScreen.EWindScreenEn_Set_EntrySw
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    EWindScreenEn_Get_EntrySw
+//   Input      :  none 
+//   Ouput      :  <int> Current State of checkbox 
+//   Description:  Check Software control of EWindScreen checkbox and returns the state    
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function bool EWindScreenEn_Get_EntrySw ()
+		{
+			bool retval = false;
+			if (hi:d8SwMacroWncEnHp == d8SwMacroWncEnHp.on)
+			{
+				println ('[HAL]BLIB-EWindScreenEn_Get_EntrySw = ON');
+				retval = true;
+			}
+			else
+			{
+				println ('[HAL]BLIB-EWindScreenEn_Get_EntrySw = OFF');
+				retval = false;
+			}
+			return retval;
+		} // close BasicLibrary_EWindScreen.EWindScreenEn_Get_EntrySw
+
+		/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION  LIBRARY  EWindScreen
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package BasicLibrary_EWindScreen
+
+} //namespace shs.sat

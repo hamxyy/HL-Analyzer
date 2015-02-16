@@ -1,0 +1,113 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                                 HIGH LEVEL LIBRARY :  AutoPhone Enable
+// Initial Version                						    						    :  2011-03-08 Cecil Wilson
+// Added  env_Prog workaround															:  2011-03-24 Cecil Wilson
+// Removed env:Prog workaround															:  2011-06-09 Cecil Wilson
+// Added println for debug																:  2011-06-23 Cecil Wilson
+// Added Accessible Manually BLIB reuse													:  2011-12-20 Cecil Wilson
+// Added valid program check 															:  2011-12-21 Cecil Wilson
+// Added capability check before Enabling autophone										:  2012-04-13 Cecil Wilson
+// Added the peer review comments														:  2012-06-21 Cecil Wilson
+// ******SIFIT7.2_PEERREVIEWED: 					  :  2013-07-30   Jenny, Judith
+// Added AutoPhoneEn_For_InputModeDD()					: 2013-11-04 Jenny
+// Sifit7.3 Peer review																: 2014-04-15 Jenny, Judith
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------$$*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib High_Level_Library_AutoPhone
+	{
+
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    AutoPhoneEn_For_InputModeDD
+//   Input      :  <int> 1 indicates CheckBox is ticked for current Hearing Program
+//   Output      :  void  
+//   Description:  Resolves the Hearing Program dependencies and sets Autophone. Only 
+                   one HP can have AutoPhone Enabled at any one time.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void AutoPhoneEn_For_InputModeDD (int Autophone_CxxPos) //SIFIT7.3PEERREVIEWED
+		{
+			if (Mid_Level_Library_AutoPhone.AutoPhoneEn_IsVisible () == true)
+			{
+				// If Autophone is visible, sets Autophone to the requested position.
+				High_Level_Library_AutoPhone.AutoPhoneEn_Set (Autophone_CxxPos);
+			}
+			else
+			{
+				// If Autophone is not visible, sets it to OFF.
+				High_Level_Library_AutoPhone.AutoPhoneEn_Set (0); // default off
+			}
+			
+		} // Closing High_Level_Library_AutoPhone.AutoPhoneEn_For_InputModeDD
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    AutoPhoneEn_Set
+//   Input      :  <int> 1 indicates CheckBox is ticked for current Hearing Program
+//   Output      :  void  
+//   Description:  Resolves the Hearing Program dependencies and sets Autophone. Only 
+                   one HP can have AutoPhone Enabled at any one time.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void AutoPhoneEn_Set (int pos) //SIFIT7.3PEERREVIEWED
+		{
+			int env_pgm = env:Prog;
+			//  Get the Hearing Program for which the Autophone is enabled currently (if at all it is Enabled)
+			int Previous_AutophoneEnabled_HP = BasicLibrary_AutoPhone.AutoPhoneEn_Get_HPx ();
+
+			// Autophone can only be enable (Switched ON) if that feature is Available for current HP/InputMode/pricepoint	
+			if (pos == 1)
+			{ // Needs to enable Autophone for Current HP and disable if already selected for other programs
+				if (Mid_Level_Library_AutoPhone.AutoPhoneEn_IsVisible ())
+				{
+					println ('[HAL]HLIB.AutophoneEn_Set to ON for' + env_pgm);
+					if (Previous_AutophoneEnabled_HP >= 0 &&
+							Previous_AutophoneEnabled_HP < 6)
+					{ // Must be a valid HP
+					// Disable autophone for Previous_AutophoneEnabled_HP  (this restores the Accessable manually for that HP)
+						BasicLibrary_AutoPhone.AutoPhoneEn_Set_HPx (Previous_AutophoneEnabled_HP, 0);
+						// Enabled Accessable Manually by RCU & Pushbutton for Previous HP						  
+						BasicLibrary_AccessibleManually.AccessibleManuallyEn_Set_HPx (Previous_AutophoneEnabled_HP, 1);
+					}
+					// Enable autophone for Current HP
+					BasicLibrary_AutoPhone.AutoPhoneEn_Set_HPx (env:Prog, 1);
+				}
+			}
+			else // pos==0
+			{ // Disable Autophone for Current HP if already selected, Inputmode/hp/pricepoint does not matter for Switching Off autophone							
+				BasicLibrary_AutoPhone.AutoPhoneEn_Set_HPx (env:Prog, 0);
+				// Enabled Accessable Manually by RCU & Pushbutton for Current HP
+				BasicLibrary_AccessibleManually.AccessibleManuallyEn_Set_HPx (env:Prog, 1);
+			}
+		} // Closing High_Level_Library_AutoPhone.AutoPhoneEn_Set
+
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    AutoPhoneEn_Get
+//   Input      :  None
+//   Output      :  <int> 1 if the Autophone is enabled for the current Hearing program 
+//   Description:  Checks if the Autophone is enabled for the Current hearing program and returns 1 if enabled.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int AutoPhoneEn_Get () //SIFIT7.3PEERREVIEWED
+		{
+			//  Get the Hearing Program for which the Autophone is enabled currently (if at all it is Enabled)			
+			// If the autophone is enabled for the current HP then return the status 'Checked/ticked/enabled' ie 1
+			if (BasicLibrary_AutoPhone.AutoPhoneEn_Get_HPx () == env:Prog)
+			{ // env_Prog counts from 0 not from 1 ie HP1 == env_Prog=0
+				println ('[HAL]HLIB.AutoPhoneEn_Get - GetPos = 1');
+				return 1;
+			}
+			else
+			{
+				println ('[HAL]HLIB.AutoPhoneEn_Get - GetPos = 0');
+				return 0;
+			}
+		} //Closing High_Level_Library_AutoPhone.AutoPhoneEn_Get
+
+
+		/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of High Level LIBRARY AutoPhone    
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package High_Level_Library_AutoPhone
+
+} //namespace shs.sat

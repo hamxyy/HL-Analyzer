@@ -1,2 +1,0 @@
-W:\Cucumber_HAL\Output\HearingLanguage\product\HearingLanguage_Output.zip
-W:\Cucumber_HAL\HearingLanguage\Source\BuildHALWorkbench\obj\Debug\BuildHALWorkbench.aeprojResolveAssemblyReference.cache

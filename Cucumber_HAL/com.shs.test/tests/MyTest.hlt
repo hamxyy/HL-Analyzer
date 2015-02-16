@@ -1,0 +1,43 @@
+TestCase MyTestCase1 For BasicTuning.BasicTuning_LoudSoundsDownBu->SetPos(1)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+End
+
+TestCase MyTestCase2 For BasicTuning.BasicTuning_LoudSoundsDownBu->SetPos(1)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+End
+
+TestCase MyTestCase3 For BasicTuning.BasicTuning_LoudSoundsDownBu->SetPos(0)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+End
+
+TestCase MyTestCase4 For BasicTuning.BasicTuning_LoudSoundsDownBu->SetPos(0)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+End
+
+TestCase MyTestCase5 For BasicTuning.BasicTuning_LoudSoundsDownBu->GetPos()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then 
+	Return
+		1
+End
+
+TestCase MyTestCase6 For BasicTuning.BasicTuning_LoudSoundsDownBu->GetPos()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then 
+	Return
+		0
+End

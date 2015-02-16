@@ -1,0 +1,34 @@
+//---------------------------------------------------------------------------------------------------------------*
+//                                 MID LEVEL PRICEPOINT LIBRARY  
+// Initial Version                						   :  2011-04-01   Nadine Seubert
+// Removed Cap: workaround								   :  2011-05-26   Cecil Wilson
+// Peer review changes									   :  2012-06-20   Nadine and Frauke
+// *********************************************CODE FREEZE*******************************************************
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+namespace shs_sat {	
+    using shs_sat.*;
+	
+	package  Lib Mid_Level_Library_SpeechFocusEn{
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    SpeechFocusEn_IsVisible
+//   Input      :  <> 
+//   Ouput      :  <bool> if control is visible in dependencie of pricepoints
+//   Description:     
+-----------------------------------------------------------------------------------------------------------------$*/
+	public function bool SpeechFocusEn_IsVisible (){
+        bool retval = true;            
+        if (cap:PricePoint== PricePoint.PP700){
+			retval = true;
+        }
+        else{
+			retval = false;
+		}
+        return retval;
+	}//Mid_Level_Library_SpeechFocusEn.SpeechFocusEn_IsVisible
+	
+
+//************************************END Of Mic Level Library****************************************	
+		
+	}	//package Mid_Level_Library_SpeechFocusEn
+}	//namespace shs.sat

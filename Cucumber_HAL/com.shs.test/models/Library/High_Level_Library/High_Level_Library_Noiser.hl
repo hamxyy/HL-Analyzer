@@ -1,0 +1,210 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                                 HIGH LEVEL LIBRARY Noiser
+// Initial Version                						     							:  2011-03-17 Meike Doose
+// Add functions for Tinnitus preset (Pink, White, Speech, HighTone) functions   		:  2011-11-02 Ma Mie Mie Thein
+// Removed calling NoiserPreset_PinkNoise from other preset functions as it was called in MixedMode: 2012-01-18 Ma Mie Mie Thein
+// Updated println 																		:  2012-05-03 Jenny
+// Added new function Noiser_IsOnAndPure to check settings of noiser.					:  2012-06-11 Alastair 
+// Peer review comments implemented														:  2012-06-19 MieMie/Cecil/Nadia
+// Updated based on peer review (ProgramSelection)										:  2012-06-27 Frauke, Jenny and co
+// FirstFit peer review: added Noiser_Set_Default() 									:  2012-07-18 Nadia & Judith
+// FR60546: Added NoiserDefault_Offset function to reduce firstfit & program selection default whitenoise level:2013-05-16 Mie Mie 
+*/
+// *********************************************CODE FREEZE*******************************************************
+// ER61121 (To deactivate FBC in pure Tinnitus mode)							        : 2012-05-30 Mang Yew   
+// Sifit 7.2 Peer Review																: 2013-08-01 Alastair, Raymond
+// Update ID number in Set_ProgramSelection function									:	2013-10-29 Sonia Stasiak
+// ------------------------------------------------------------- SIFIT7.3 -----------------------------------------
+// Update for Sifit7.3: updated for the MPV changes.								: 2014-01-16 Jenny
+// Comment update for Program Selection													: 2014-03-18 Sonia
+// Sifit7.3 Peer review	: Updated comments.  											: 2014-04-14 Jenny, Sonia
+// Sifit7.3 Peer review	: FF default.													: 2014-04-24 Jenny, Jeline
+// ------------------------------------------------------------- SIFIT7.4 -----------------------------------------
+// Implementation of MixMic checkbox and delete radiobutton							:  2014-07-21  Meike Steinbuss
+// Update comment on Set_Program Selection (added new Induction Loop (T) program)		: 2014-07-30 Sonia Stasiak
+// Peer Review of Changes during 7.4  		   			                           	 :2014-12-09 Sonia,Judith
+/*$$----------------------------------------------------------------------------------------------------------------$$*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib High_Level_Library_Noiser
+	{
+
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiserEn_Set
+//   Input      :  <int> Checkbox set w.r.t CxxPos
+//   Output      :  <void> 
+//   Description:  sets the Noiser checkbox based on CxxPos    
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void NoiserEn_Set (int CxxPos) //SIFIT7.3PEERREVIEWED
+		{
+			// sets the checkbox
+			BasicLibrary_Noiser.NoiserEn_Set_Entry (CxxPos);
+			
+			// takes care of inter-dependence of FBC state when Noiser state change.
+			if (High_Level_Library_FeedbackStopper.FeedbackStopperEN_GetPos () == true)
+			{
+				High_Level_Library_FeedbackStopper.FeedbackStopperEn_Set_For_Microphone_Tinnitus (1);
+			}
+		} // Closing High_Level_Library_Noiser.NoiserEn_Set
+		
+
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    NoiserEn_Get
+//   Input      :  <void>
+//   Output      :  <int> returns the position of the Noiser checkbox. 
+//   Description:  returns the position of the Noiser checkbox.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int NoiserEn_Get () //SIFIT7.3PEERREVIEWED
+		{
+			return BasicLibrary_Noiser.NoiserEn_Get_Entry ();
+		} // Closing High_Level_Library_Noiser.NoiserEn_Get
+
+
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    Noiser_MixMicrophoneEn_Set
+//   Input      :  <int> Checkbox set w.r.t CxxPos
+//   Output      :  <void> 
+//   Description:  sets the Noiser_MixMicrophone checkbox based on CxxPos    
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void Noiser_MixMicrophoneEn_Set (int CxxPos)
+		{
+			// sets the checkbox
+			BasicLibrary_Noiser.Noiser_MixMicrophoneEn_Set_Entry (CxxPos);
+			
+			// takes care of inter-dependence of FBC state when Noiser state change.
+			if (High_Level_Library_FeedbackStopper.FeedbackStopperEN_GetPos () == true)
+			{
+				High_Level_Library_FeedbackStopper.FeedbackStopperEn_Set_For_Microphone_Tinnitus (1);
+			}
+		} // Closing High_Level_Library_Noiser.Noiser_MixMicrophoneEn_Set
+		
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   High Level LIBRARY Function:    NoiserPreset_PinkNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus Pink Noise preset 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_PinkNoise () //SIFIT7.3PEERREVIEWED
+
+		{
+			BasicLibrary_Noiser.NoiserPreset_PinkNoise ();
+		} //close High_Level_Library_Noiser.NoiserPreset_PinkNoise
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   High Level LIBRARY Function:    NoiserPreset_WhiteNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus White Noise preset 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_WhiteNoise () //SIFIT7.3PEERREVIEWED
+
+		{
+			BasicLibrary_Noiser.NoiserPreset_WhiteNoise ();
+		} //close High_Level_Library_Noiser.NoiserPreset_WhiteNoise
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   High Level LIBRARY Function:    NoiserPreset_SpeechNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus Speech Noise Noise preset 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_SpeechNoise () //SIFIT7.3PEERREVIEWED
+
+		{
+			BasicLibrary_Noiser.NoiserPreset_SpeechNoise ();
+		} //close High_Level_Library_Noiser.NoiserPreset_SpeechNoise
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   High Level LIBRARY Function:    NoiserPreset_HighToneNoise
+//   Input      :  None
+//   Output      :  Set Tinnitus High Tone preset 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserPreset_HighToneNoise () //SIFIT7.3PEERREVIEWED
+		{
+			BasicLibrary_Noiser.NoiserPreset_HighToneNoise ();
+		} //close High_Level_Library_Noiser.NoiserPreset_HighToneNoise
+
+		/*---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    Noiser_IsOnAndPure
+//   Input      :  none
+//   Output      :  <bool> true = on & pure. false = any other condition 
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool Noiser_IsOnAndPure () //SIFIT7.3PEERREVIEWED
+		{
+			return BasicLibrary_Noiser.Noiser_IsOnAndPure();
+		} //close High_Level_Library_Noiser.Noiser_IsOnAndPure
+
+
+	/*---------------------------------------------------------------------------------------------------------*
+	//	HIGH LEVEL LIBRARY - Noiser_Set_ProgramSelection
+	//	Input		:	<int> ID 
+	//	Output		:	<void>
+	//	Description	:	Function is setting Noiser Mode for all listening situation.
+	//				:	In Tinnitus Program default white noise level is 6dB lower than the white noise preset (FR60546). 
+	//	ID			:   
+	//	Program ID	:   
+	//				:	2 = Noisy Environment		7 = TV						12 = Tek/miniTek		20 = Phone T
+	//				:	3 = Phone(Acoustically)		8 = Outdoor/Sport			13 = miniTek FM			21 = Induction Loop (T)		
+	//				:	4 = Phone mT				9 = Privacy					14 = miniTek Telecoil
+	//				:	5 = Bluetooth Phone			10 = Tinnitus				15 = Audio Input
+	//				:	6 = Music					11 = Induction Loop (mT)	19 = Phone MT
+	//	Comments	:	Variable int (ID) starts with ID 2, respectively to ID of each program.
+	/*---------------------------------------------------------------------------------------------------------*/
+		public function void Noiser_Set_ProgramSelection (int ID)  
+		{
+			println ('[HAL]:HLIB Noiser_Set_ProgramSelection ID = ' + ID);
+			
+			switch (ID)
+			{
+				case 10 :{ // Tinnitus 
+				// Tinnitus noiser set to ON, PURE NOISE mode, stimulus type WHITE NOISE
+					High_Level_Library_Noiser.NoiserEn_Set(1);
+					High_Level_Library_Noiser.Noiser_MixMicrophoneEn_Set(0);// 0:Pure, 1:Mixed
+					High_Level_Library_Noiser.NoiserPreset_WhiteNoise ();
+					High_Level_Library_Noiser.NoiserDefault_Offset (); // Add offset to tinnitus default (FR60546)
+
+				}
+				default:{
+				// For all programs except Tinnitus, Tinnitus Noiser set to OFF (microphone only mode)
+					High_Level_Library_Noiser.NoiserEn_Set(0); // Tinnitus OFF
+					High_Level_Library_Noiser.Noiser_MixMicrophoneEn_Set(1); // 0:Pure, 1:Mixed
+				}
+			} // closes switch (ID)
+
+		} // closes High_Level_Library_Noiser.Noiser_Set_ProgramSelection		
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   High Level LIBRARY Function:    Noiser_Set_Default
+//   Input      :  None
+//   Output      :  None
+//	 Description:  FirstFit should set Noiser (tinnitus) to off and noiser preset to "white noise". 
+//                 And firstfit default whitenoise level is 6dB lower than the Whitenoise preset. (FR60546)
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void Noiser_Set_Default () 
+		{
+			High_Level_Library_Noiser.NoiserEn_Set(0); // Tinnitus OFF
+			High_Level_Library_Noiser.Noiser_MixMicrophoneEn_Set(1);// 0:Pure, 1:Mixed
+
+			NoiserPreset_WhiteNoise (); // Set preset to "White noise"
+			NoiserDefault_Offset (); // Add additional offset to tinnitus default (FR60546)
+
+		} //close High_Level_Library_Noiser.Noiser_Set_Default()
+
+
+		/*----------------------------------------------------------------------------------------------------------------
+//   High Level LIBRARY Function:    NoiserDefault_Offset
+//   Input      :  None
+//   Output      :  None
+//	 Description:  Add additional offset to Tinnitus default level
+-----------------------------------------------------------------------------------------------------------------*/
+		public function void NoiserDefault_Offset () //SIFIT7.3PEERREVIEWED
+		{
+			BasicLibrary_Noiser.NoiserDefault_Offset ();
+		} //close High_Level_Library_Noiser.NoiserDefault_Offset		
+
+
+		/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of High Level LIBRARY Noiser    
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package High_Level_Library_Noiser
+
+} //namespace shs.sat

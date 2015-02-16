@@ -1,0 +1,61 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL PRICEPOINT LIBRARY : CBFS
+// Initial Version                						                     		: 2012-08-13 Nadia Neugeborn
+// *********************************************CODE FREEZE*******************************************************
+// Sifit 7.2 PEER REVIEW											:2013-07-31 Jenny, Judith, Raymond
+// Sifit 7.3 PEER REVIEW														: 2014-04-14 MieMie, Mang Yew 
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib High_Level_Library_CBFS
+	{
+
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   High Level PP LIBRARY Function:    CBFS_Set()
+//   Input		:  int pos w.r.t. connexx
+//   Ouput      :  set pos
+//   Description:  Set CBFS (on/off) 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void CBFS_Set (int pos)
+		{ // Review 7.3
+			BasicLibrary_CBFS.CBFS_Set (pos);
+		}
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   High Level PP LIBRARY Function:    CBFS_Get()
+//   Input		:  n.a.
+//   Ouput      :  int pos w.r.t. connexx
+//   Description:  Get CBFS (on/off) 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int CBFS_Get ()
+		{ // REVIEW 7.3
+			return BasicLibrary_CBFS.CBFS_Get ();
+		}
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:     CBFS_Set_Default()
+//   Input      :  none     
+//   Ouput      :  void
+//   Description:  Sets CBFS after FirstFit based on PPs      
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void CBFS_Set_Default ()
+		{ // REVIEWED 7.3
+
+		// Get the CBFS default setting 	 
+			int pos = Mid_Level_Library_CBFS.CBFS_Default ();
+
+			// Set CBFS
+			BasicLibrary_CBFS.CBFS_Set (pos);
+		} //Closes High_Level_Library_CBFS.CBFS_Set_Default()	
+
+		/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Higher Level LIBRARY CBFS
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package  High_Level_Library_CBFS
+
+} //namespace shs.sat	
+		
+

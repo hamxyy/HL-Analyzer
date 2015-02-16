@@ -1,0 +1,56 @@
+//----------------------------------------------------------------------------------------------------------------
+//                                 BASIC FUNCTION LIBRARY  MicModeSpeechInNoiseEn
+// Initial Version                                         :  2011-03-25   Nadine Seubert
+// add printlines                                          :  2011-05-12   Nadine Seubert
+// Peer review changes									   :  2012-06-20 Nadine and Frauke
+// *********************************************CODE FREEZE*******************************************************
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+//---------------------------------------------------------------------------------------------------------------
+namespace shs_sat {
+	using shs_sat.*;
+
+	package  Lib BasicLibrary_MicModeSpeechInNoiseEn{
+
+/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    MicModeSpeechInNoiseEn_Get_Checkbox
+//   Input      :  none 
+//   Ouput      :  <int> Current State of checkbox 
+//   Description:  Checks if the MicModeSpeechInNoiseEn is enabled or not, ie the checkbox is ticked or not    
+-----------------------------------------------------------------------------------------------------------------*/		
+    public function bool MicModeSpeechInNoiseEn_Get(){
+		if ( hi:d8FClaDecMicDirOff == 45){
+			println('[HAL]BLIB-BasicLibrary_MicModeSpeechInNoiseEn return TRUE');    
+ 			
+ 			return true;
+ 		}
+		else{
+			println('[HAL]BLIB-BasicLibrary_MicModeSpeechInNoiseEn return FALSE');
+			
+			return false;	
+		} 
+    }// Closes	BasicLibrary_MicModeSpeechInNoiseEn.MicModeSpeechInNoiseEn_Get
+		
+		
+/*----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    MicModeSpeechInNoiseEn_Set
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Sets the MicModeSpeechInNoiseEn feature based on Checkbox selection   
+-----------------------------------------------------------------------------------------------------------------*/    
+    public function void MicModeSpeechInNoiseEn_Set(int pos){
+    	println('[HAL]BLIB-MicModeSpeechInNoiseEn_Set  pos='+pos);    
+        // SiQ = 32, SiN = 16, N = 8, M = 4, C = 2, Q = 1
+        if(pos==1){
+			hi:d8FClaDecMicDirOff = 45;  // 45 means that MicDir is turned off in classes: SiQ + N + M + Q
+		}
+		else{
+			hi:d8FClaDecMicDirOff = 37;	 // 37 means that MicDir is turned off in classes: SiQ + M + Q
+		}
+	} // Closes	BasicLibrary_MicModeSpeechInNoiseEn.MicModeSpeechInNoiseEn_Set
+		
+		
+/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION  LIBRARY     
+-----------------------------------------------------------------------------------------------------------------*/			
+	}	//package BasicLibrary_MicModeSpeechInNoiseEn
+}	//namespace shs.sat

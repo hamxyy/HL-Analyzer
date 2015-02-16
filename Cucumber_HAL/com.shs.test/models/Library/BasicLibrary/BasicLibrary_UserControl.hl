@@ -1,0 +1,168 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                            BASIC LEVEL LIBRARY : User Control
+// Initial version														: 2011-11-09 Jenny Lin
+// Updated the function name to reflect the config cases				: 2012-03-27 Cecil Wilson
+// Updated Program control check using Configurable controls instead	: 2013-01-21 Mang Yew
+// Removed ProgramControlLocal and update IsEnabled() due to ER59269 .  : 2013-01-31 MAng Yew		
+// ******SIFIT7.2_PEERREVIEWED: Partially reviewed related to input mode. Need to be reviewed again by Beeps.  :  2013-07-30   Jenny, Judith
+// added IsRCUConnected()							: 2013-11-04 Jenny
+// refractor: Optimize code									: 2013-12-02 Jenny
+// Sifit7.3 Peer review																: 2014-04-15 Jenny, Judith
+// Sifit7.3 Peer review	(for Beeps)													: 2014-04-28 Jenny, Jeline
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+-----------------------------------------------------------------------------------------------------------------
+*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib BasicLibrary_UserControl
+	{
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Basic Level LIBRARY Function: IsRCUConnected
+//   Input		:  <none>
+//   Output      :  <bool> true = connected, false = not connected 
+//   Description:  
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function bool IsRCUConnected () //SIFIT7.3PEERREVIEWED
+		{
+			return (hi:d8SwWlsRcEn == d8SwWlsRcEn.on); // ||					
+
+			//	hi:d8SwMiniTekConf == d8SwMiniTekConf.Yes || 
+			//	hi:d8SwTekConf == d8SwTekConf.Yes ||
+			//	hi:d8SwProPocketConf == d8SwProPocketConf.Yes ||
+			//	hi:d8SwEPenConf == d8SwEPenConf.Yes
+		} // Close BasicLibrary_UserControl.IsRCUConnected()
+
+		/*---------------------------------------------------------------------------------------------------------------*
+//   Basic Level LIBRARY Function: IsTekORminiTekConnected
+//   Input		:  <none>
+//   Output      :  <bool> true = connected, false = not connected 
+//   Description:  
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function bool IsTekORminiTekConnected () //SIFIT7.3PEERREVIEWED
+		{
+			return (hi:d8SwMiniTekConf == d8SwMiniTekConf.Yes ||
+				hi:d8SwTekConf == d8SwTekConf.Yes);
+		} // Close BasicLibrary_UserControl.IsTekORminiTekConnected()
+
+		/*---------------------------------------------------------------------------------------------------------------*
+//   Basic Level LIBRARY Function: Check_UserControl_ProgramVc
+//   Input		:  <none>
+//   Output      :  <string> "Program" / "Volume" to check if this is available. 
+//   Description:  This function checks the availability of Program and/or VC controls via exchangeable or configurable
+// 					Return the string,
+//					"ProgramOnly"  - If only Program user control available from configurable Usercontrols.
+//					"VolumeOnly"  - If only Volume user control available from configurable Usercontrols.
+//					"ProgramVolume"  - If  Program and Volume user control available from configurable Usercontrols.
+//					"None"  - If no Program and Volume user control available from configurable Usercontrols.
+-----------------------------------------------------------------------------------------------------------------$*/ 	
+	
+		public function string Check_UserControl_ProgramVc_Config(){ //SIFIT7.3PEERREVIEWED
+				println('[HAL] BLIB.Check_UserControl_ProgramVc_Config');
+						
+				if(hi:d8SwConfigurableUserControl == d8SwConfigurableUserControl.NotAvailable ||
+					hi:d8SwConfigurableUserControl == d8SwConfigurableUserControl.FlatCover){
+
+					return "None";
+				}
+				else if(hi:d8SwConfigurableUserControl == d8SwConfigurableUserControl.PushButton){
+
+					return BasicLibrary_UserControl.Check_UserControl_PushButton_Config();
+				} 
+				else{
+				//} if(hi:d8SwConfigurableUserControl == d8SwConfigurableUserControl.RockerSwitch){
+
+					return BasicLibrary_UserControl.Check_UserControl_RockerSwt_Config();
+				}
+		} // Close BasicLibrary_UserControl.Check_UserControl_ProgramVc_Config()
+
+		/*---------------------------------------------------------------------------------------------------------------*
+//   Basic Level LIBRARY Function: Check_UserControl_PushButton_Config
+//   Input		:  <none>
+//   Output      :  <string> "Program" / "Volume" to check if this is available. 
+//   Description:  This function checks the availability of Program and/or VC controls.
+* 
+//					"ProgramOnly"  - If only Program user control available from configurable Usercontrols.
+//					"VolumeOnly"  - If only Volume user control available from configurable Usercontrols.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function string Check_UserControl_PushButton_Config () //SIFIT7.3PEERREVIEWED
+		{
+			if (hi:d8SwConfigurableUserControlShortPressForPushButton == d8SwConfigurableUserControlShortPressForPushButton.Program_Up)
+			{
+					
+				println ('[HAL] BLIB.Check_UserControl_PushButton_Config    return >> ProgramOnly');
+				return "ProgramOnly";
+			}
+			else
+			{
+					
+				println ('[HAL] BLIB.Check_UserControl_PushButton_Config    return >> VolumeOnly');
+				return "VolumeOnly";
+			}
+		} // Close BasicLibrary_UserControl.Check_UserControl_PushButton_Config()
+
+		/*---------------------------------------------------------------------------------------------------------------*
+//   Basic Level LIBRARY Function: Check_UserControl_RockerSwt_Config
+//   Input		:  <none>
+//   Output      :  <string> "Program" / "Volume" / "ProgramVolume" to check if this is available. 
+//   Description:  This function checks the availability of Program and/or VC controls via exchangeable or configurable
+// 					Return the string,
+//					"ProgramOnly"  - If only Program user control available from configurable Usercontrols.
+//					"VolumeOnly"  - If only Volume user control available from configurable Usercontrols.
+//					"ProgramVolume"  - If  Program and Volume user control available from configurable Usercontrols.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function string Check_UserControl_RockerSwt_Config () //SIFIT7.3PEERREVIEWED
+		{
+			if (hi:d8SwConfigurableUserControlShortPressForRockerSwitch == d8SwConfigurableUserControlShortPressForRockerSwitch.Program_Change)
+			{
+
+				println ('[HAL] BLIB.Check_UserControl_RockerSwt_Config    return >> ProgramOnly');
+				return "ProgramOnly";
+
+			}
+			else if (hi:d8SwConfigurableUserControlShortPressForRockerSwitch == d8SwConfigurableUserControlShortPressForRockerSwitch.Volume_Change)
+			{
+
+				println ('[HAL] BLIB.Check_UserControl_RockerSwt_Config    return >> VolumeOnly');
+				return "VolumeOnly";
+
+			}
+			else if (hi:d8SwConfigurableUserControlShortPressForRockerSwitch == d8SwConfigurableUserControlShortPressForRockerSwitch.Volume_And_Program_Change)
+			{
+
+				println ('[HAL] BLIB.Check_UserControl_RockerSwt_Config    return >> ProgramVolume');
+				return "ProgramVolume";
+			}
+			else{
+
+				return "None";
+			}
+		} // Close BasicLibrary_UserControl.Check_UserControl_RockerSwt_Config()
+
+		/*---------------------------------------------------------------------------------------------------------------*
+//   Basic Level LIBRARY Function: Check_UserControl_None_Config
+//   Input		:  <none>
+//   Output      :  <string> "None" to check if this is available. 
+//   Description:  This function checks the availability of Program and/or VC controls via exchangeable or configurable
+// 					Return the string,
+//					"None"  - If no Program and Volume user control available from configurable Usercontrols.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function string Check_UserControl_None_Config () //SIFIT7.3PEERREVIEWED
+		{
+			if (hi:d8SwConfigurableUserControl == d8SwConfigurableUserControl.NotAvailable ||
+					hi:d8SwConfigurableUserControl == d8SwConfigurableUserControl.FlatCover)
+			{
+
+				println ('[HAL] BLIB.Check_UserControl_None_Config    return >> None');
+				return "None";
+				
+			}
+			else{
+			
+				return "Config";
+			}
+		} // Close BasicLibrary_UserControl.Check_UserControl_None_Config()
+
+	} //package BasicLibrary_UserControl
+
+} //namespace shs.sat

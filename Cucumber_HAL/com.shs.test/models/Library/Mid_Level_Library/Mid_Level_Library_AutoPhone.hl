@@ -1,0 +1,72 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                            MID LEVEL LIBRARY : AutoPhone
+// Initial version                                                                      :  2011-03-09  Cecil Wilson
+// Added Cap workaround																	:  2011-03-24  Cecil Wilson
+// Removed Cap workarounds																:  2011-05-19  Cecil Wilson
+// Fixed the visibility for Mic inputmode for HP1										:  2011-08-11  Cecil Wilson
+// Peer review comments added															:  2012-06-15  Cecil Wilson
+// ******SIFIT7.2_PEERREVIEWED: 					  :  2013-07-30   Jenny, Judith
+// Updated AutoPhoneEn_IsVisible()					: 2013-11-04 Jenny
+// updated for Sifit7.3.							: 2013-12-23 Jenny
+// updated println statement for debugging.											: 2014-01-10 Jenny
+// *********************************************CODE FREEZE******************************************************* 
+// Sifit7.3 Peer review																: 2014-04-15 Jenny, Judith
+* // Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib Mid_Level_Library_AutoPhone
+	{
+
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    AutoPhoneEn_IsVisible
+//   Input		:  none
+//   Output      :  <bool> Returns True if visible; False if Not Visible 
+//   Description:  Decides the visibility of the AutoPhone Checkbox
+//	   Visibility is determined based on the current InputMode and availability of Autocoil (Automatic switching of HP due to Magnet/phone receiver)
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool AutoPhoneEn_IsVisible () //SIFIT7.3PEERREVIEWED
+		{
+			// {Same for CXX and Hicoss} Autophone checkbox shall be visible if Autocoil is available AND
+			// For Microphone input, not in HP0 AND
+			// For Telecoil input, shall always be visible.			
+			if (cap:AutocoilAvailable == AutocoilAvailable.exists)
+			{
+				if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Telecoil)
+				{
+					println('[HAL] BLIB.AutoPhoneEn_IsVisible = TRUE for Telecoil input mode.');
+					return true;
+				}
+				else if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Microphone)
+				{
+				// Not visible for Prog 1 if Microphone InputMode
+					if (env:Prog == 0)
+					{
+						println('[HAL] BLIB.AutoPhoneEn_IsVisible = FALSE for Microphone input mode in HP0.');
+						return false;
+					}
+					else
+					{
+						println('[HAL] BLIB.AutoPhoneEn_IsVisible = TRUE for Microphone input mode, not in HP0.');
+						return true;
+					}
+				}
+				else
+				{
+					println('[HAL] BLIB.AutoPhoneEn_IsVisible = FALSE for non-Microphone/Telecoil input mode.');
+					return false;
+				}
+			}
+			else{
+				println('[HAL] BLIB.AutoPhoneEn_IsVisible = FALSE for non-AutocoilAvailable HI.');
+				return false;
+			}
+		} //Closes Mid_Level_Library_AutoPhone.AutoPhoneEn_IsVisible
+
+		/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Middle Level LIBRARY    AutoPhone 
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package Mid_Level_Library_AutoPhone
+
+} //namespace shs.sat

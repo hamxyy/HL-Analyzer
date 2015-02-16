@@ -1,0 +1,652 @@
+/*----------------------------------------------------------------------------------------------------------------
+//                  BASIC FUNCTION LIBRARY  :  InputMode
+// Initial Version(in work)                                  					  :  2011-02-28   Cecil Wilson
+// Removed Package LIB workaround 								  				  :  2011-03-03	  Cecil Wilson
+// Update the Hi controls to actual values										  :  2011-03-07   Cecil Wilson
+// Renamed functions & updated comments											  :  2011-03-09   Cecil Wilson
+// added_workaround for env_Prog												  :  2011-03-24   Cecil Wilson
+// Replaced codes to set Mic Mode=SingleOMNI from		 
+// InputModeDD_Set_Mode function to High level fcn)								  :  2011-05-06   Cecil Wilson	
+// include println															  	  :	 2011-05-18	  Meike Doose
+// Removed env_Prog workaround													  :  2011-06-01   Cecil Wilson
+// Commented out accessible manually by RCU due to ER49502						  :  2011-06-23   Cecil Wilson
+// Updated notvalid to no_hp_change for hp_tmp1/2 adet and tdet					  :  2011-06-23   Cecil Wilson
+// Udpated structure to reuse Blib function										  :  2011-06-27   Cecil Wilson
+// Removed direct setting WNC. Move the setting of WNC to HLIB.InputMode
+// Updated comments																  :  2011-08-01   Jenny Lin
+// Add Muting control for Mic	                                                  :  2011-08-04   Chuah LayYuan
+// Removed comments and added new functions Is_<inputmode>_in_Use() 			  :  2011-12-20   Cecil Wilson
+// Updated SIT commands : checks limited to Active programs alone				  :  2012-02-13   Cecil Wilson
+// New function SetNoiseReductionClassifierControls added due to 
+// ER55460: Classifier controlled noise reduction in aux only & mixed modes		  :  2012-08-27   Cecil Wilson	   
+// Added Greyout functions for Speech in Noise Checkbox due to ER55460			  :  2012-08-28  Cecil Wilson
+// ER60119: MACRO - Deactivate classifier control of swine in aux & mixed modes	  :  2013-02-05 Frauke
+// Removed setting of mixed with mic settings for Microphone mode due to CR61635  : 2013-05-30 mang yew	
+// Sifit7.2 Peer Review: Remove BasicLibrary_InputMode.Is_Tek_in_Use			 : 2013-07-30 Jenny & Judith
+// Update to use Physical position instead of remappedPos		2013-11-04 Jenny
+// refractor: Optimize code									: 2013-12-02 Jenny
+// update assertion to false instead of true.				: 2013-12-12 Jenny
+// updated println statement for debugging.											: 2014-01-10 Jenny
+// Sifit7.3 Peer review																: 2014-04-15 Jenny, Judith
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+*/
+/*-------------------------------------------------------------------------------------------------------------$$*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib BasicLibrary_InputMode
+	{
+	// All the functions we need can be added in here
+
+
+	/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    InputModeDD_Set_Mode
+//   Input      :  physicalPos 
+//   Output      :  none 
+//   Description:  Sets the HI controls based on the selection    
+//
+//	Input Mode	:	0 = Microphone		3 = Bluetooth Phone		6 = Audio Shoe (DAI)
+//	PhysicalPos	:	1 = Telecoil		4 = miniTek FM
+//				:	2 = Tek/miniTek		5 = miniTek Telecoil
+----------------------------------------------------------------------------------------------------------------$*/
+		public function void InputModeDD_Set_Mode(int physicalPos) //SIFIT7.3PEERREVIEWED
+		{
+			//Input Mode physicalPos = 0:Microphone, 1:Telecoil, 2: TekMiniTek, 3: BluetoothPhone, 4: miniTekFM, 5: miniTekTelecoil, 6: DirectAudioInput
+			switch(physicalPos){
+			
+				case 0:{
+					hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Microphone;
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    Microphone InputMode enabled');
+				}
+				case 1:{
+					hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Telecoil;
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    Telecoil InputMode enabled');
+				}
+				case 2:{
+					hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Tek_d_miniTek;
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    Tek_d_miniTek InputMode enabled');
+				}
+				case 3:{
+					hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Bluetooth_Phone;
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    Bluetooth_Phone InputMode enabled');
+				}
+				case 4:{
+					hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.MiniTek_FM;
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    MiniTek_FM InputMode enabled');
+				}
+				case 5:{
+					hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.miniTek_Telecoil;
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    miniTek_Telecoil InputMode enabled');
+				}
+				case 6:{
+					hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Direct_Audio_InputFM;
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    Direct_Audio_InputFM InputMode enabled');
+				}
+				default:{
+					println ('[HAL]BLIB-InputModeDD_Set_Mode    No valid InputMode physicalPos entered');
+					assertion (false, "[MacroError] BLIB.InputModeDD_Set_Mode >> No valid InputMode physicalPos entered!");
+				}
+			} // close switch physicalPos
+		
+		} // Closes	BasicLibrary_InputMode.InputModeDD_Set_Mode
+
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    InputModeDD_Get_Mode
+//   Input      :  none 
+//   Output      :  <int>  Position with respect to the Basic function 
+//   Description:  Checks each HI control and return the matching Position with respect to the Basic function
+//
+//	Input Mode	:	0 = Microphone		3 = Bluetooth Phone		6 = Audio Shoe (DAI)
+//	PhysicalPos	:	1 = Telecoil		4 = miniTek FM
+//				:	2 = Tek/miniTek		5 = miniTek Telecoil
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int InputModeDD_Get_Mode() //SIFIT7.3PEERREVIEWED
+		{
+			if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Microphone){
+				println ("[HAL]BLIB-InputModeDD_Get_Mode    Microphone InputMode selected");
+				return 0;
+			}
+			else if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Telecoil){
+				println ("[HAL]BLIB-InputModeDD_Get_Mode    Telecoil InputMode selected");
+				return 1;
+			}
+			else if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Tek_d_miniTek){
+				println ("[HAL]BLIB-InputModeDD_Get_Mode    Tek_d_miniTek InputMode selected");
+				return 2;
+			}
+			else if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Bluetooth_Phone){
+				println ("[HAL]BLIB-InputModeDD_Get_Mode    Bluetooth_Phone InputMode selected");
+				return 3;
+			}
+			else if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.MiniTek_FM){
+				println ("[HAL]BLIB-InputModeDD_Get_Mode    MiniTek_FM InputMode selected");
+				return 4;
+			}
+			else if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.miniTek_Telecoil){
+				println ("[HAL]BLIB-InputModeDD_Get_Mode    miniTek_Telecoil InputMode selected");
+				return 5;
+			}
+			else if (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Direct_Audio_InputFM){
+				println ("[HAL]BLIB-InputModeDD_Get_Mode    Direct_Audio_InputFM InputMode selected");
+				return 6;
+			}
+			else
+			{
+				assertion (false, "[MacroError] Undefined input mode");
+				return -1;
+			}
+
+		} // Closes	BasicLibrary_InputMode.InputModeDD_Get_Mode
+
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    BluetoothDetection_Get_Mode
+//   Input      :  none 
+//   Output      :  <int>  Hearing Program number to which the Bluetoothphone is Enabled to switch (0 for HP1)
+//   Description:  Checks each HI control and return the matching HP of the Automatic Bluetooth phone detection 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int BluetoothDetection_Get_Mode () //SIFIT7.3PEERREVIEWED
+		{
+			println ('[HAL]BLIB-BluetoothDetection_Get_Mode');
+			
+			if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.no_HP_change &&
+					hi:d8FUctAbsHpTmp2 == d8FUctAbsHpTmp2.no_HP_change)
+			{
+				return 7;
+			}
+			else if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP1 &&
+				hi:d8FUctAbsHpTmp2 == d8FUctAbsHpTmp2.HP1)
+			{
+				return 0;
+			}
+			else if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP2 &&
+				hi:d8FUctAbsHpTmp2 == d8FUctAbsHpTmp2.HP2)
+			{
+				return 1;
+			}
+			else if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP3 &&
+				hi:d8FUctAbsHpTmp2 == d8FUctAbsHpTmp2.HP3)
+			{
+				return 2;
+			}
+			else if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP4 &&
+				hi:d8FUctAbsHpTmp2 == d8FUctAbsHpTmp2.HP4)
+			{
+				return 3;
+			}
+			else if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP5 &&
+				hi:d8FUctAbsHpTmp2 == d8FUctAbsHpTmp2.HP5)
+			{
+				return 4;
+			}
+			else if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP6 &&
+				hi:d8FUctAbsHpTmp2 == d8FUctAbsHpTmp2.HP6)
+			{
+				return 5;
+			}
+			else
+			{
+				println ('[HAL]BLIB-BluetoothDetection_Get_Mode  Bluetooth phone switching set to invalid');
+				return -1;
+			}
+		} // Closes	BasicLibrary_InputMode.BluetoothDetection_Get_Mode
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    BluetoothDetection_Set_Mode
+//   Input      :  <int> Hearing Program 0,1,2,3,4,5 for Switching,  <int> pos 1-> on 0 -> off
+//   Output      :  <void>
+//   Description:  Sets HI control for specified HP for the Automatic Bluetooth phone detection 
+				   or Disables Automatic Bluetooth phone detection in specified HP    
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void BluetoothDetection_Set_Mode (int hp, int pos) //SIFIT7.3PEERREVIEWED
+		{
+			println ('[HAL]BLIB-BluetoothDetection_Set_Mode: Bluetooth phone = HP'+hp+' in pos='+pos);
+			if (pos == 1)
+			{ // Switch ON BLuetooth phone
+				switch (hp)
+				{
+					case 0:{ // Switch on to HP1
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.HP1;
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.HP1;
+					}
+					case 1:{ // Switch on to HP2
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.HP2;
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.HP2;
+					}
+					case 2:{ // Switch on to HP3
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.HP3;
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.HP3;
+					}
+					case 3:{ // Switch on to HP4
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.HP4;
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.HP4;
+					}
+					case 4:{ // Switch on to HP5
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.HP5;
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.HP5;
+					}
+					case 5:{ // Switch on to HP6
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.HP6;
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.HP6;
+					}
+					default:{ // Switch on to no hp change
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change;
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change;
+						println ('[HAL]BLIB-BluetoothDetection_Set_Mode: Bluetooth phone switching out of range, set to invalid');
+					}
+				}
+			}
+			else
+			{ // Switch OFF BLuetooth phone if already selected in designated HP =hp
+				switch (hp)
+				{
+					case 0:{ // Switch off Bluetooth phone if it is already on in HP1
+						if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP1)
+						{
+							hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change;
+							hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change;
+						}
+					}
+					case 1:{ // Switch off Bluetooth phone if it is already on in HP2
+						if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP2)
+						{
+							hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change;
+							hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change;
+						}
+					}
+					case 2:{ // Switch off Bluetooth phone if it is already on in HP3
+						if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP3)
+						{
+							hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change;
+							hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change;
+						}
+					}
+					case 3:{ // Switch off Bluetooth phone if it is already on in HP4
+						if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP4)
+						{
+							hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change;
+							hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change;
+						}
+					}
+					case 4:{ // Switch off Bluetooth phone if it is already on in HP5
+						if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP5)
+						{
+							hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change;
+							hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change;
+						}
+					}
+					case 5:{ // Switch off Bluetooth phone if it is already on in HP6
+						if (hi:d8FUctAbsHpTmp1 == d8FUctAbsHpTmp1.HP6)
+						{
+							hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change;
+							hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change;
+						}
+					}
+					default:{
+						hi:d8FUctAbsHpTmp1 = d8FUctAbsHpTmp1.no_HP_change; // not necessary
+						hi:d8FUctAbsHpTmp2 = d8FUctAbsHpTmp2.no_HP_change; // not necessary 
+						println ('[HAL]BLIB-BluetoothDetection_Set_Mode: Bluetooth phone already switched off for all HPs');
+					}
+				}
+			}
+		} // Closes	BasicLibrary_InputMode.BluetoothDetection_Set_Mode
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    Is_BluetoothPhone_in_Use
+//   Input      :  none 
+//   Output      :  <int>  Hearing Program number in which the InputMode is Bluetoothphone (0 for HP1)
+//   Description:  Checks each HI control and return the matching HP for which the input modes is Bluetooth phone
+                   Returns -1 if not in use by any HPs  
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int Is_BluetoothPhone_in_Use () //SIFIT7.3PEERREVIEWED
+		{ 
+			int retval = -1;
+			//			Uncomment the following lines when the SIT command works with interger variables CR52750
+			//----------------------------------------------------------------------------------------------------- 	            
+			//            int counter= 0;
+			//            while(counter<6){
+			//	            if(sit(counter,hi:d8SwMacroInputModeHp)==d8SwMacroInputModeHp.Bluetooth_Phone){
+			//	            	retval = counter;
+			//	            	counter= 7;
+			//	            }
+			//	            counter+=1;
+			//			}
+			//-----------------------------------------------------------------------------------------------------//
+			// SIT command should be used ONLY on the active hearing programs !!
+			if (hi:d8Sw_NumberOfActivePrograms == d8Sw_NumberOfActivePrograms.Six)
+			{
+				if (sit (5, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Bluetooth_Phone)
+				{
+					retval = 5;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Five)
+			{
+				if (sit (4, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Bluetooth_Phone)
+				{
+					retval = 4;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Four)
+			{
+				if (sit (3, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Bluetooth_Phone)
+				{
+					retval = 3;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Three)
+			{
+				if (sit (2, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Bluetooth_Phone)
+				{
+					retval = 2;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Two)
+			{
+				if (sit (1, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Bluetooth_Phone)
+				{
+					retval = 1;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.One)
+			{
+				if (sit (0, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Bluetooth_Phone)
+				{
+					retval = 0;
+				}
+			}
+			if (retval == -1)
+			{
+				println ('[HAL]BLIB-Is_BluetoothPhone_in_Use  Bluetooth phone is not in use');
+			}
+			println ('[HAL]BLIB-Is_BluetoothPhone_in_Use  retval=' + retval);
+			return retval;
+		} // Closes	BasicLibrary_InputMode.Is_BluetoothPhone_in_Use
+
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    Is_TekdMTek_in_Use
+//   Input      :  none 
+//   Output      :  <int>  Hearing Program number in which the InputMode is MiniTek (0 for HP1)
+//   Description:  Checks each HI control and return the matching HP for which the input modes is MiniTek
+//                   Returns -1 if not in use by any HPs   
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int Is_TekdMTek_in_Use () //SIFIT7.3PEERREVIEWED
+		{
+			int retval = -1;
+			//			Uncomment the following lines when the SIT command works with interger variables CR52750
+			//----------------------------------------------------------------------------------------------------- 	            
+			//            int counter= 0;
+			//            while(counter<6){
+			//	            if(sit(counter,hi:d8SwMacroInputModeHp)==d8SwMacroInputModeHp.Tek_d_miniTek){
+			//	            	retval = counter;
+			//	            	counter= 7;
+			//	            }
+			//	            counter+=1;
+			//			}
+			//-----------------------------------------------------------------------------------------------------//
+			// 	SIT command should be used ONLY on the active hearing programs !!
+			if (hi:d8Sw_NumberOfActivePrograms == d8Sw_NumberOfActivePrograms.Six)
+			{
+				if (sit (5, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Tek_d_miniTek)
+				{
+					retval = 5;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Five)
+			{
+				if (sit (4, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Tek_d_miniTek)
+				{
+					retval = 4;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Four)
+			{
+				if (sit (3, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Tek_d_miniTek)
+				{
+					retval = 3;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Three)
+			{
+				if (sit (2, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Tek_d_miniTek)
+				{
+					retval = 2;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Two)
+			{
+				if (sit (1, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Tek_d_miniTek)
+				{
+					retval = 1;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.One)
+			{
+				if (sit (0, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.Tek_d_miniTek)
+				{
+					retval = 0;
+				}
+			}
+			// D8: If the Devices is Tek, able to support more than one Hearing Program, therefore reset the retval to -1;	
+			if (hi:d8SwTekConf == d8SwTekConf.Yes)
+			{
+				retval = -1;
+			}
+			
+			if (retval == -1)
+			{
+				println ('[HAL]BLIB-Is_TekdMTek_in_Use: MiniTek is not in use');
+			}
+			println ('[HAL]BLIB-Is_TekdMTek_in_Use: retval =' + retval);
+			return retval;
+		} // Closes	BasicLibrary_InputMode.Is_TekdMTek_in_Use
+
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    Is_MiniTek_FM_in_Use
+//   Input      :  none 
+//   Output      :  <int>  Hearing Program number in which the InputMode is MiniTek_FM(0 for HP1)
+//   Description:  Checks each HI control and return the matching HP for which the input modes is MiniTek_FM
+                   Returns -1 if not in use by any HPs
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int Is_MiniTek_FM_in_Use () //SIFIT7.3PEERREVIEWED
+		{
+			int retval = -1;
+			//			Uncomment the following lines when the SIT command works with interger variables CR52750
+			//----------------------------------------------------------------------------------------------------- 	            
+			//            int counter= 0;
+			//            while(counter<6){
+			//	            if(sit(counter,hi:d8SwMacroInputModeHp)==d8SwMacroInputModeHp.MiniTek_FM){
+			//	            	retval = counter;
+			//	            	counter= 7;
+			//	            }
+			//	            counter+=1;
+			//			}  MiniTek_FM
+			//-----------------------------------------------------------------------------------------------------//
+			// 	SIT command should be used ONLY on the active hearing programs !!
+			if (hi:d8Sw_NumberOfActivePrograms == d8Sw_NumberOfActivePrograms.Six)
+			{
+				if (sit (5, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.MiniTek_FM)
+				{
+					retval = 5;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Five)
+			{
+				if (sit (4, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.MiniTek_FM)
+				{
+					retval = 4;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Four)
+			{
+				if (sit (3, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.MiniTek_FM)
+				{
+					retval = 3;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Three)
+			{
+				if (sit (2, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.MiniTek_FM)
+				{
+					retval = 2;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Two)
+			{
+				if (sit (1, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.MiniTek_FM)
+				{
+					retval = 1;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.One)
+			{
+				if (sit (0, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.MiniTek_FM)
+				{
+					retval = 0;
+				}
+			}
+
+			if (retval == -1)
+			{
+				println ('[HAL]BLIB-Is_MiniTek_FM_in_Use: MiniTek_FM is not in use');
+			}
+			println ('[HAL]BLIB-Is_MiniTek_FM_in_Use: retval=' + retval);
+			return retval;
+		} // Closes	BasicLibrary_InputMode.Is_MiniTek_FM_in_Use
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    Is_miniTek_Telecoil_in_Use
+//   Input      :  none 
+//   Output      :  <int>  Hearing Program number in which the InputMode is miniTek_Telecoil(0 for HP1)
+//   Description:  Checks each HI control and return the matching HP for which the input modes is miniTek_Telecoil
+                   Returns -1 if not in use by any HPs   
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int Is_miniTek_Telecoil_in_Use () //SIFIT7.3PEERREVIEWED
+		{
+			int retval = -1;
+			//			Uncomment the following lines when the SIT command works with interger variables CR52750
+			//----------------------------------------------------------------------------------------------------- 	            
+			//            int counter= 0;
+			//            while(counter<6){
+			//	            if(sit(counter,hi:d8SwMacroInputModeHp)==d8SwMacroInputModeHp.miniTek_Telecoil){
+			//	            	retval = counter;
+			//	            	counter= 7;
+			//	            }
+			//	            counter+=1;
+			//			}
+			//-----------------------------------------------------------------------------------------------------//
+			// 	SIT command should be used ONLY on the active hearing programs !!
+			if (hi:d8Sw_NumberOfActivePrograms == d8Sw_NumberOfActivePrograms.Six)
+			{
+				if (sit (5, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.miniTek_Telecoil)
+				{
+					retval = 5;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Five)
+			{
+				if (sit (4, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.miniTek_Telecoil)
+				{
+					retval = 4;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Four)
+			{
+				if (sit (3, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.miniTek_Telecoil)
+				{
+					retval = 3;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Three)
+			{
+				if (sit (2, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.miniTek_Telecoil)
+				{
+					retval = 2;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.Two)
+			{
+				if (sit (1, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.miniTek_Telecoil)
+				{
+					retval = 1;
+				}
+			}
+			if (hi:d8Sw_NumberOfActivePrograms >= d8Sw_NumberOfActivePrograms.One)
+			{
+				if (sit (0, hi:d8SwMacroInputModeHp) == d8SwMacroInputModeHp.miniTek_Telecoil)
+				{
+					retval = 0;
+				}
+			}
+
+			if (retval == -1)
+			{
+				println ('[HAL]BLIB-Is_miniTek_Telecoil_in_Use: miniTek_Telecoil is not in use');
+			}
+			println ('[HAL]BLIB-Is_miniTek_Telecoil_in_Use: retval=' + retval);
+			return retval;
+		} // Closes	BasicLibrary_InputMode.Is_miniTek_Telecoil_in_Use
+
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    SetNoiseReductionClassifierControls
+//   Input      :  <String>  On/on  to set the Fancy Vad and Spass Classifier controls to ON. any other string will set these to OFF
+//   Output      :  <none>
+//   Description:  Enables or Disables the Classifier Controls for Noise reduction
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void SetNoiseReductionClassifierControls (string Enable) //SIFIT7.3PEERREVIEWED
+		{
+			if (Enable == 'On' || Enable == 'on' || Enable == 'ON')
+			{
+			// Enabling Noise reduction Classifier controls for MicAlone modes
+				hi:d8PCtrlFnyEnable = d8PCtrlFnyEnable.enabled;
+				hi:d8PCtrlVadEnable = d8PCtrlVadEnable.enabled;
+				hi:d8PCtrlSpassEnable = d8PCtrlSpassEnable.enabled;
+				hi:d8PCtrlSwnEnable = d8PCtrlSwnEnable.enabled;
+			}
+			else
+			{
+			// Disable Noise reduction Classifier controls for Aux and Aux+Mic modes
+				hi:d8PCtrlFnyEnable = d8PCtrlFnyEnable.disabled;
+				hi:d8PCtrlVadEnable = d8PCtrlVadEnable.disabled;
+				hi:d8PCtrlSpassEnable = d8PCtrlSpassEnable.disabled;
+				hi:d8PCtrlSwnEnable = d8PCtrlSwnEnable.disabled;
+			}
+		} // Closes	BasicLibrary_InputMode.SetNoiseReductionClassifierControls
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    GetNoiseReductionClassifierControls
+//   Input      :  <none>
+//   Output      :  <String>  On when the Fancy Vad and Spass Classifier controls are set to ON, Off if the control are off, any other setting will return these to NotValid
+//   Description:  Enables or Disables the Classifier Controls for Noise reduction
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function string GetNoiseReductionClassifierControls ()
+		{
+			string retval = 'NotValid';
+			if (hi:d8PCtrlFnyEnable == d8PCtrlFnyEnable.enabled &&
+				hi:d8PCtrlVadEnable == d8PCtrlVadEnable.enabled && // not asking about d8PCtrlSwnEnable to remain 7.0 vs 7.1 consistent
+				hi:d8PCtrlSpassEnable == d8PCtrlSpassEnable.enabled &&
+				hi:d8PCtrlSwnEnable == d8PCtrlSwnEnable.enabled
+				)
+			{
+				retval = 'On';
+			}
+			else if (hi:d8PCtrlFnyEnable == d8PCtrlFnyEnable.disabled &&
+				hi:d8PCtrlVadEnable == d8PCtrlVadEnable.disabled &&
+				hi:d8PCtrlSpassEnable == d8PCtrlSpassEnable.disabled &&
+				hi:d8PCtrlSwnEnable == d8PCtrlSwnEnable.disabled
+				)
+			{
+				retval = 'Off';
+			}
+			return retval;
+		} // Closes	BasicLibrary_InputMode.GetNoiseReductionClassifierControls		
+		/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION  LIBRARY   InputMode  
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package BasicLibrary_InputMode
+
+} //namespace shs.sat

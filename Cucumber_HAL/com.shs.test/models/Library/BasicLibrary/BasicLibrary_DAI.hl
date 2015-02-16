@@ -1,0 +1,351 @@
+/*----------------------------------------------------------------------------------------------------------------
+//                                 BASIC FUNCTION LIBRARY 	:   Direct Audio Input (DAI)
+// Initial Version                                         			    :  	2011-03-28  Cecil Wilson
+// Set HiControl according for DAI 										:   2011-06-14  Chuah LayYuan
+// Update d8FUctToghpHpEn setting                                       :   2011-06-27  Chuah LayYuan
+// Set Toggle En setting to S->X->M->                                   :   2011-06-27  Chuah LayYuan
+// commented out the d8FUctRcuAbsHpEn[1,2,3,4,5] due to ER49502			:   2011-06-30  Cecil Wilson
+// removed comments for d8FUctRcuAbsHpEn[1,2,3,4,5] as ER49502 is Fixed	:   2011-08-04  Cecil Wilson
+// Modified handling for tick with greyOut							    :   2011-11-08  Chuah LayYuan
+// Reusing Accessible Manually BLIB functions							:   2011-12-20  Cecil Wilson 	
+// Clean up comments													:	2012-02-15  Cecil Wilson
+// Updated based on peer review. Restructured AutoAudioShoeDetectEn_Get_HPx().
+// Renaming AutoAudioShoeDetectEn_Set_HPx_ON and off input arguments to hearingprogram and switch case to
+// default no_hp_change for AutoAudioShoeDetectEn_Set_HPx_ON. Added function DAI_ToggleEn_Get_Mode_By_Hw()
+// to get toggle mode based on Hw controls								: 	2012-06-21	Mang Yew
+// Added default return as -1											:   2012-06-21  Cecil Wilson
+// ******SIFIT7.2_PEERREVIEWED: 					  :  2013-07-30   Jenny, Judith
+// Added new SpeechActivatedFM_En_Get_ModeHW() and AutoAudioShoeDetectEn_Set_HPx().		: 2013-11-04 Jenny
+// refractor: Optimize code									: 2013-12-02 Jenny
+// updated println statement for debugging.											: 2014-01-10 Jenny
+// Sifit7.3 Peer review	: Removed AutoAudioShoeDetectEn_Set_HPx() since not in use.				: 2014-04-15 Jenny, Judith
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------$$*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib BasicLibrary_DAI
+	{
+	/*$---------------------------------------------------------------------------------------------------------------*/
+ 	//   Input      :  none 
+	//   Output      :  <int> Current State of AutoAudioShoeDetect Checkbox   -1  if unticked
+	//   Description:  Compares the HI settings & returns -1 if NOT selected & 0,1,2,3,4,5  if HP1,2,3..6 is selected
+	/*-----------------------------------------------------------------------------------------------------------------$*/
+		public function int AutoAudioShoeDetectEn_Get_HPx (){ //SIFIT7.3PEERREVIEWED
+                 	
+			if(hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP1){
+
+				println('[HAL]BLIB.AutoAudioShoeDetectEn_Get_HPx = HP1, return 0');
+				return 0;
+			}
+			else if(hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP2){
+
+				println('[HAL]BLIB.AutoAudioShoeDetectEn_Get_HPx = HP2, return 1');
+				return 1;
+			}
+			else if(hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP3){
+
+				println('[HAL]BLIB.AutoAudioShoeDetectEn_Get_HPx = HP3, return 2');
+				return 2;
+			}
+			else if(hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP4){
+
+				println('[HAL]BLIB.AutoAudioShoeDetectEn_Get_HPx = HP4, return 3');
+				return 3;
+			}
+			else if(hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP5){
+
+				println('[HAL]BLIB.AutoAudioShoeDetectEn_Get_HPx = HP5, return 4');
+				return 4;
+			}
+			else if(hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP6){
+
+				println('[HAL]BLIB.AutoAudioShoeDetectEn_Get_HPx = HP6, return 5');
+				return 5;
+			}
+			else {
+				println('[HAL]BLIB.AutoAudioShoeDetectEn_Get_HPx = not_valid/no_HP_change, return -1');
+				return -1;
+			}
+
+		} // close BasicLibrary_DAI.AutoAudioShoeDetectEn_Get_HPx	
+
+/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    AutoAudioShoeDetectEn_Set_HPx
+//   Input      :  <int> HP = HearingProgram, <int> CxxPos = Position, 1 = on, 0 = off
+//   Output      :  none 
+//   Description: Sets the AutoAudioShoeDetect for the HearingProgram to ON (0 for HP1 and 1 for HP2 and ....5 for HP6) 
+//		CxxPos = 1 : Sets the AutoAudioShoeDetect for the HearingProgram to ON (0 for HP1 and 1 for HP2 and ....5 for HP6)
+//		CxxPos = 0 : Sets the AutoAudioShoeDetect to no_HP_change if it was ON for the HearingProgram.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void AutoAudioShoeDetectEn_Set_HPx (int HP, int CxxPos) //SIFIT7.3PEERREVIEWED
+		{
+			if (CxxPos == 1)
+			{
+				switch (HP)
+				{
+					case 0:{
+						hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.HP1;
+					}
+					case 1:{
+						hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.HP2;
+						//HP2 not accessible by PushButton and RCU --> Done in HLIB
+
+					}
+					case 2:{
+						hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.HP3;
+						//HP3 not accessible by PushButton and RCU --> Done in HLIB
+
+					}
+					case 3:{
+						hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.HP4;
+						//HP4 not accessible by PushButton and RCU --> Done in HLIB
+
+					}
+					case 4:{
+						hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.HP5;
+						//HP5 not accessible by PushButton and RCU --> Done in HLIB
+
+					}
+					case 5:{
+						hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.HP6;
+						//HP6 not accessible by PushButton and RCU --> Done in HLIB
+
+					}
+					default:{
+						hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.no_HP_change;
+					}
+				}
+				println ('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx_ON, x =  ' + HP);
+			}
+			else
+			{ // pos=0
+				switch (HP)
+				{ 
+					case 0:{
+						if (hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP1){ 
+							// if Autophone was previously enabled then disable it
+						    println('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx_off Switched off HP1');	
+ 			       			hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.no_HP_change;
+	                        // HP1 setting of Accessable by RCU & Pushbutton    --> Done in Hlib                    		        		                     		        		
+		                }	
+					}
+					case 1:{
+						if (hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP2){
+							// if Autophone was previously enabled then disable it
+						    println('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx_off Switched off HP2');	
+ 			       			hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.no_HP_change;
+ 			       		}
+					}
+					case 2:{
+						if (hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP3){             
+							// if Autophone was previously enabled then disable it
+						    println('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx_off Switched off HP3');	
+ 			       			hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.no_HP_change;
+ 			       		}
+					}
+					case 3:{
+						if (hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP4){
+							// if Autophone was previously enabled then disable it
+						    println('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx_off Switched off HP4');	
+ 			       			hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.no_HP_change;
+ 			       		}
+					}
+					case 4:{
+						if (hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP5){
+							// if Autophone was previously enabled then disable it
+						    println('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx_off Switched off HP5');	
+ 			       			hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.no_HP_change;
+ 			       		}
+					}
+					case 5:{
+						if (hi:d8FUctAbsHpAdet == d8FUctAbsHpAdet.HP6){
+							// if Autophone was previously enabled then disable it
+						    println('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx_off Switched off HP6');	
+ 			       			hi:d8FUctAbsHpAdet = d8FUctAbsHpAdet.no_HP_change;
+ 			       		}
+					}
+					default:{
+						     println('[HAL]BLIB-AutoAudioShoeDetectEn_Set_HPx already OFF for all HPs');	
+					}
+					
+				}
+    		}
+	  	} // Closes	BasicLibrary_DAI.AutoAudioShoeDetectEn_Set_HPx
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    DAI_ToggleEn_Set_Mode
+//   Input      :  <int>  Desired mode 1 -> Toggle enabled 0 -> Toggle disabled
+//   Output      :  none 
+//   Description: Enables/disables Toggle mode for DAI
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void DAI_ToggleEn_Set_Mode (int pos) //SIFIT7.3PEERREVIEWED
+		{
+			println ("[HAL]BLIB-DAI_ToggleEn_Set_Mode =  " + pos);
+			if (pos == 1)
+			{
+				hi:d8SwMacroDAIToggleHp = d8SwMacroDAIToggleHp.on;
+				hi:d8FUctAdetSeq = d8FUctAdetSeq.S_M_X_M_M_M;	//In eTemplate, 2 =  S->X->M->, Same as D7.
+			}
+			else
+			{
+				hi:d8SwMacroDAIToggleHp = d8SwMacroDAIToggleHp.off;
+				hi:d8FUctAdetSeq = d8FUctAdetSeq.no_mix_modes;
+			}
+		} //closes BasicLibrary_DAI.DAI_ToggleEn_Set_Mode
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    DAI_ToggleEn_Set_Mode_Only_Hardware
+//   Input      :  <int>  Desired mode 1 -> Toggle enabled 0 -> Toggle disabled
+//   Output      :  none 
+//   Description: Enables/disables Toggle mode for DAI 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void DAI_ToggleEn_Set_Mode_Only_Hardware (int pos) //SIFIT7.3PEERREVIEWED
+		{
+			println ("[HAL]BLIB-DAI_ToggleEn_Set_Mode_Only_Hardware =  " + pos);
+			if (pos == 1)
+			{
+				hi:d8FUctAdetSeq = d8FUctAdetSeq.S_M_X_M_M_M;	//In eTemplate, 2 =  S->X->M->, Same as D7.
+			}
+			else
+			{ 
+ 				hi:d8FUctAdetSeq = d8FUctAdetSeq.no_mix_modes;
+			}
+		} //closes BasicLibrary_DAI.DAI_ToggleEn_Set_Mode_Only_Hardware
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    DAI_ToggleEn_Get_Mode
+//   Input      : none
+//   Output      : <int>  Current mode 1 -> Toggle enabled 0 -> Toggle disabled
+//   Description: Checks the status of Toggle mode for DAI 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int DAI_ToggleEn_Get_Mode () //SIFIT7.3PEERREVIEWED
+		{
+			// If the mode is anything other than No Mix mode,then 'Checked'       	        	
+			if(hi:d8SwMacroDAIToggleHp == d8SwMacroDAIToggleHp.on)
+			{
+				println ('[HAL]BLIB-DAI_ToggleEn_Get_Mode (based on SW) = ON');
+				return 1;
+			}
+			else
+			{
+				println ('[HAL]BLIB-DAI_ToggleEn_Get_Mode (based on SW) = OFF');
+				return 0;
+			}
+		} //closes BasicLibrary_DAI.DAI_ToggleEn_Get_Mode
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    DAI_ToggleEn_Get_Mode_By_Hw
+//   Input      : none
+//   Output      : <int>  Current mode 1 -> Toggle enabled 0 -> Toggle disabled
+//   Description: Checks the status of Toggle mode for DAI 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int DAI_ToggleEn_Get_Mode_By_Hw () //SIFIT7.3PEERREVIEWED
+		{
+			// If the mode is anything other than No Mix mode,then 'Checked'       	        	
+			if(hi:d8FUctAdetSeq != d8FUctAdetSeq.no_mix_modes)
+			{
+				println ('[HAL]BLIB-DAI_ToggleEn_Get_Mode_By_Hw = ON');
+				return 1;
+			}
+			else
+			{
+				println ('[HAL]BLIB-DAI_ToggleEn_Get_Mode_By_Hw = OFF');
+				return 0;
+			}
+		} //closes BasicLibrary_DAI.DAI_ToggleEn_Get_Mode_By_Hw
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    SpeechActivatedFM_En_Set_Mode
+//   Input      :  SpeechActivatedFM: 0 = Uncheck; 1 = Check
+//   Output      :  none 
+//   Description: Enables/disables SpeechActivatedFM for DAI 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void SpeechActivatedFM_En_Set_Mode (int pos) //SIFIT7.3PEERREVIEWED
+		{
+			println ("[HAL]BLIB-SpeechActivatedFM_En_Set_Mode =  " + pos);
+			
+			if (pos == 1)
+			{
+				//Set Speech Activated FM to ON.
+				hi:d8SwMacroDAISpeechActFmHp = d8SwMacroDAISpeechActFmHp.on;
+				hi:d8FSmxLevelEn [ 3 ] = d8FSmxLevelEn.on;
+ 			}
+			else
+			{
+				//Set Speech Activated FM to OFF. The Threshold will set in eTemplate
+				hi:d8SwMacroDAISpeechActFmHp = d8SwMacroDAISpeechActFmHp.off;
+				hi:d8FSmxLevelEn [ 3 ] = d8FSmxLevelEn.off;
+			}
+		} //closes BasicLibrary_DAI.SpeechActivatedFM_En_Set_Mode
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    SpeechActivatedFM_En_Set_Mode_Only_Hardware
+//   Input      :  SpeechActivatedFM: 0 = Uncheck; 1 = Check
+//   Output      :  none 
+//   Description: Enables/disables SpeechActivatedFM for DAI  only the hardware control and retains the software
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void SpeechActivatedFM_En_Set_Mode_Only_Hardware (int pos) //SIFIT7.3PEERREVIEWED
+		{
+			println ("[HAL]BLIB-SpeechActivatedFM_En_Set_Mode_Only_Hardware =  " + pos);
+			
+			if (pos == 1)
+			{ 
+				//Set Speech Activated FM to ON. 
+				hi:d8FSmxLevelEn [ 3 ] = d8FSmxLevelEn.on;
+			}
+			else
+			{ 
+			//Set Speech Activated FM to OFF. The Threshold will set in eTemplate
+ 				hi:d8FSmxLevelEn [ 3 ] = d8FSmxLevelEn.off;
+ 			}
+			
+		} //closes BasicLibrary_DAI.SpeechActivatedFM_En_Set_Mode_Only_Hardware
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    SpeechActivatedFM_En_Get_Mode
+//   Input      : none
+//   Output      : <int>  Current mode 1 -> SpeechActivatedFM enabled 0 -> SpeechActivatedFM disabled
+//   Description: Checks the status of SpeechActivatedFM Enable for DAI
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int SpeechActivatedFM_En_Get_Mode () //SIFIT7.3PEERREVIEWED
+		{
+			if (hi:d8SwMacroDAISpeechActFmHp == d8SwMacroDAISpeechActFmHp.on)
+			{ //The Speech Activated FM is ON   	        	
+ 				println ('[HAL]BLIB-SpeechActivatedFM_En_Get_Mode (based on SW) = ON');
+ 				return 1;
+			}
+			else
+			{ //The Speech Activated FM is OFF
+ 				println ('[HAL]BLIB-SpeechActivatedFM_En_Get_Mode (based on SW) = OFF');
+ 				return 0;
+			}
+		} //closes BasicLibrary_DAI.SpeechActivatedFM_En_Get_Mode    
+
+		/*$---------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    SpeechActivatedFM_En_Get_ModeHW
+//   Input      : none
+//   Output      : <int>  Current mode 1 -> SpeechActivatedFM enabled 0 -> SpeechActivatedFM disabled
+//   Description: Checks the status of SpeechActivatedFM Enable for DAI
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int SpeechActivatedFM_En_Get_ModeHW () //SIFIT7.3PEERREVIEWED
+		{
+			println ('[HAL]BLIB-SpeechActivatedFM_En_Get_ModeHW = d8FSmxLevelEn[3]');
+			
+			if (hi:d8FSmxLevelEn [ 3 ] == d8FSmxLevelEn.on)
+			{ //The Speech Activated FM is ON   	        	
+ 				return 1;
+			}
+			else
+			{ //The Speech Activated FM is OFF
+ 				return 0;
+			}
+		} //closes BasicLibrary_DAI.SpeechActivatedFM_En_Get_ModeHW    
+
+		/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION  LIBRARY  Direct Audio Input (DAI)
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package BasicLibrary_DAI
+
+} //namespace shs.sat

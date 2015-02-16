@@ -1,0 +1,67 @@
+/*----------------------------------------------------------------------------------------------------------------
+//                  BASIC FUNCTION LIBRARY  :  E2e_Wireless
+// Initial Version                                        	 :	2011-11-16  Cecil Wilson
+// Macro code Cleanup										 :	2012-02-14  Cecil Wilson
+// Added remapping for E2E checkbox							 :	2012-03-01  Cecil Wilson
+// Updated remapping for E2E checkbox						 :	2012-04-19  Cecil Wilson
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+//--------------------------------------------------------------------------------------------------------------*/
+
+namespace shs_sat {
+	using builtins.*;
+	using shs_sat.*;
+
+	package  Lib BasicLibrary_E2e_Wireless{
+	   	
+/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    E2e_WirelessEn_Get_Checkbox
+//   Input      :  none 
+//   Ouput      :  <bool> Current State of checkbox 
+//   Description:  Checks if the E2e_Wireless is enabled or not, ie the checkbox is ticked or not    
+-----------------------------------------------------------------------------------------------------------------$*/		
+    public function bool E2e_WirelessEn_Get(){ //Reviewed 7.2.
+    	
+    	bool retval = false;
+    	
+    	if (hi:d8PhlWlsOn==d8PhlWlsOn.on){
+    		retval = true;
+    		println("[HAL]:BLIB.E2e_WirelessEn_Get = true "); 
+ 		}
+		else{
+			retval = false;	
+			println("[HAL]:BLIB.E2e_WirelessEn_Get = false "); 
+		} 
+		return retval;
+    }// Closes	BasicLibrary_E2e_Wireless.E2e_WirelessEn_Get
+
+/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    E2e_WirelessEn_Set
+//   Input      :  <int> Desired State of checkbox 
+//   Ouput      :  none 
+//   Description:  Sets the E2e_Wireless feature based on Checkbox selection   
+-----------------------------------------------------------------------------------------------------------------$*/ 
+        
+        public function void E2e_WirelessEn_Set(int pos){ //Reviewed 7.2.
+        	
+	        if(pos==40){	  // e2e alone is On
+				hi:d8PhlWlsOn = d8PhlWlsOn.on;
+			}
+			else if(pos==30){ // e2e alone is off Wireless programming ON
+				hi:d8PhlWlsOn = d8PhlWlsOn.e2eOff_WlpOn;
+			}
+			else if(pos==20){ // e2e off & Wlp off
+				hi:d8PhlWlsOn = d8PhlWlsOn.e2eOff_WlpOff;
+			}
+			else{ 			  // Any pos other than 40/30/20 will be set to whole wireless off =10  
+				hi:d8PhlWlsOn = d8PhlWlsOn.off;
+			}
+		    println("[HAL]:BLIB.E2e_WirelessEn_Set =  " + pos);
+
+	} // Closes	BasicLibrary_E2e_Wireless.E2e_WirelessEn_Set
+
+
+/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION  LIBRARY  : E2e_Wireless
+-----------------------------------------------------------------------------------------------------------------*/			
+	}	//package BasicLibrary_E2e_Wireless
+}	//namespace shs.sat

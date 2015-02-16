@@ -1,0 +1,53 @@
+/*----------------------------------------------------------------------------------------------------------------
+//                                 BASIC FUNCTION LIBRARY 	:   Program Selection
+// Initial version  	                                       							:  	2011-08-24 Chuah LayYuan
+// Clean up:Removed the capability checks from Blib(not necessary)						:   2012-03-28 Cecil Wilson
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+/*---------------------------------------------------------------------------------------------------------------$$*/
+
+namespace shs_sat {
+	
+	using shs_sat.*;
+
+	package  Lib BasicLibrary_ProgramSelection{
+	   
+
+/*$---------------------------------------------------------------------------------------------------------------*/
+//   BASIC LIBRARY Function:    isMiniTekConnected_Get
+//   Input      :  void
+//   Ouput      :  bool true = miniTek connected; false = miniTek not connect
+//   Description:  Compares the HI settings & returns 0 if Unchecked & 1 if Checked for the selected hearing program HP1 =0 HP2= 1, ...HP6 =5
+/*-----------------------------------------------------------------------------------------------------------------$*/		
+public function bool isMiniTekConnected_Get(){
+	
+	bool isMiniTekConnectd = false;
+			
+	if(hi:d8SwMiniTekConf==d8SwMiniTekConf.Yes){//To be remove to basic LIB
+			isMiniTekConnectd = true;
+			println('[HAL]:BLIB PS-miniTekConnect - IsVisible = True');
+	}	
+	return	isMiniTekConnectd;		
+}
+
+/*$---------------------------------------------------------------------------------------------------------------*/
+//   BASIC LIBRARY Function:    isTekConnected_Get
+//   Input      :  void
+//   Ouput      :  bool true = miniTek connected; false = miniTek not connect
+//   Description:  Compares the HI settings & returns 0 if Unchecked & 1 if Checked for the selected hearing program HP1 =0 HP2= 1, ...HP6 =5
+/*-----------------------------------------------------------------------------------------------------------------$*/		
+public function bool isTekConnected_Get(){
+	
+	bool isTekConnected = false;	
+	if(hi:d8SwTekConf == d8SwTekConf.Yes){
+			isTekConnected = true;
+			println('[HAL]:PS-TekConnect - IsVisible = True');
+	}
+	return isTekConnected;		
+}
+		
+		
+/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION  LIBRARY  Program Selection 
+-----------------------------------------------------------------------------------------------------------------*/			
+	}	//package BasicLibrary_ProgramSelection
+}	//namespace shs.sat

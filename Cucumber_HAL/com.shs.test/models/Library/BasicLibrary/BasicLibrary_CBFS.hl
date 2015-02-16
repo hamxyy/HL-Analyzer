@@ -1,0 +1,69 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                            BASIC LEVEL LIBRARY : CBFS
+// Initial version																	: 2012-08-13 Nadia Neugeborn
+// *********************************************CODE FREEZE*******************************************************
+// ER57873 - SwCbfs is no longer set to Class_1 for case 1 because it freezes CBFS in Connexx
+// for the whole fitting process
+// Sifit 7.2 Peer Review																:2013-07-31 Jenny, Judith, Raymond
+// Sifit 7.3 PEER REVIEW														: 2014-04-14 MieMie, Mang Yew 
+// Peer Review of Changes during 7.4  - no changes   			                                :2014-12-10 Alastair,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib BasicLibrary_CBFS
+	{
+
+	/*---------------------------------------------------------------------------------------------------------------*/
+	//   BASIC LIBRARY Function:    CBFS_Set
+	//   Input      :  <int> Desired State of checkbox 
+	//   Ouput      :  none
+	//   Description:  Enable/disable CBFS feature based on checkbox selection
+	/*-----------------------------------------------------------------------------------------------------------------*/
+		public function void CBFS_Set (int pos)
+		{ // Reviewed 7.2, but need to check for d8SwCbfs for pos = 1 only with feature opt team
+		// Reviewed 7.3
+			switch (pos)
+			{
+				case 0:{
+					hi:d8FCbfsEn = d8FCbfsEn.off;
+					println ('[HAL]BLIB:CBFS_Set = OFF');
+				}
+				case 1:{
+					hi:d8FCbfsEn = d8FCbfsEn.on;
+					println ('[HAL]BLIB:CBFS_Set = ON');
+				}
+				default:{
+					println ('[HAL]:ERROR!! Invalid parameter for BLIB-CBFS_Set pos = ' + pos);
+				}
+			}
+		} //Closes BasicLibrary_CBFS.CBFS_Set(int pos)
+
+
+		/*$----------------------------------------------------------------------------------------------------------------
+//   BASIC LIBRARY Function:    CBFS_Get()
+//   Input      :  none 
+//   Ouput      :  <int> Current State of checkbox 
+//   Description:  Checks if the CBFS is enabled or not, ie the checkbox is ticked or not    
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int CBFS_Get ()
+		{ // REVIEW 7.3
+			if (hi:d8FCbfsEn == d8FCbfsEn.off)
+			{
+				println ('[HAL]BLIB:CBFS_Get = false');
+				return 0;
+			}
+			else
+			{
+				println ('[HAL]BLIB:CBFS_Get = true');
+				return 1;
+			}
+		} //Closes BasicLibrary_CBFS.CBFS_Set(int pos)
+
+		/*----------------------------------------------------------------------------------------------------------------
+// 								  END Of BASIC FUNCTION LIBRARY CBFS
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package BasicLibrary_CBFS
+
+} //namespace shs.sat

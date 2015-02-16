@@ -1,0 +1,250 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL LIBRARY   : TestSettings 
+// Initial Version                						     					:  2012-01-23   Nadine Seubert
+// reworked warnings                                         					:  2012-01-27   Nadine Seubert
+// rework GetPos default pos=0.								 					:  2012-03-22	 Jenny Lin
+// Updated the set adaptive parameters Off to include deactivate FCO and set Compression type to Syllabic. 
+// Added TestSettingsCheckAdaptiveParametersOFF and TestSettingsSetAdaptiveParametersOFF.	: 2012-04-04 Jenny Lin
+// UPdate Ewindscreen to call HLIB							 					:  2012-04-11	Jenny Lin
+// Updated TestSettingsSetAdaptiveParametersOFF				 					:  2012-04-19  Jenny Lin
+// Updated the beeps link from BLIB to HLIB. 	 			 					:  2012-04-20  Jenny Lin
+// Updated the Set/Get for OmniDual (using MidLib)								:  2012-05-02  Cecil/Jenny 
+// Updated to call Mic_Mode_Directional_Static_TestDir		 					:  2012-06-29  Jenny and Frauke
+// only DEACTIVATE SoundBrilliance if it was on before		 					:  2012-07-03  Nadia, Nadine, Frauke
+// Peer review changes															:  2012-07-17  MieMie, Jenny
+// *********************************************CODE FREEZE*******************************************************
+// Remove FBC set on or off in testsettings base on FR56655						:  2012-08-15	Mang Yew
+// Added ER57709 CBFS En in the Testsettings needs to be deactivated.			:  2012-09-12  Jenny 
+// Updated HLib for OpenOptimizer                                               :  2013-01-02  Sonia Stasiak
+// Remove settings of compression in TestSettingsSetAdaptiveParametersOFF		:  2013-07-08  Jenny
+// Sifit 7.2 Peer Review														:2013-07-31 Jenny, Judith, Raymond
+// Sifit 7.3 Updates for Noise Reduction
+----------------------------------------------------------------------------------------------------------------*/
+// ------------------------------------------------------------- SIFIT7.3 -----------------------------------------
+// Update for Sifit7.3: updated Tinnitus for the MPV changes.								: 2014-01-16 Jenny
+// Sifit7.3 Peer review (FCO only)									: 2014-04-21 Jenny, Jeline
+// ------------------------------------------------------------- SIFIT7.4 -----------------------------------------
+// Implementation of MixMic checkbox and delete radiobutton							:  2014-07-21  Meike Steinbuss
+// Peer Review of Changes during 7.4  			                    	            :2014-12-10 Alastair,Judith
+//----------------------------------------------------------------------------------------------------------------*/
+
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib High_Level_Library_TestSettings
+	{
+
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    TestSettingsOmniBu_Set
+//   Input      :  <int> Button position from Cxx (always 1), REMParamOff (2)
+//   Ouput      :  <int> Deactivate all adaptive Parameters + activate Test Settings
+//   Description: Call basic lib and deactivate all adaptive Parameters + activate Test Settings 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void TestSettingsOmniBu_Set (int pos)
+		{
+		// This function is used by the TestSettings Omnidirectional button and REMParam OFF!!!!
+		// to deactivate all adaptive parameter	
+			if (pos >= 1)
+			{
+			// activate TestSettings for Omnidirectional
+				High_Level_Library_Mic_Mode.MicMode_Set_MPVPos_from_String ('Omni');
+				println ('[HAL]:TS-TestSettingsOmniBu_Set: Mic Mode = Omnidirectional');
+
+				// To deactivate all adaptive parameters
+				High_Level_Library_TestSettings.TestSettingsSetAdaptiveParametersOFF ();
+
+				//COMPRESSION >> TestSettings(1: Sets Off), REMOff(2: No change).
+				if (pos == 1)
+				{
+				// Set Compression type to Syllabic ONLY FOR TESTSETTINGS! IGNORE FOR REMPARAMOFF!!!
+					High_Level_Library_Compression.Compression_Set_SyllabicDual (0); // (1 = dual or syllabic = 0)
+					println ('[HAL]:TS-TestSettingsOmniBu_Set: AgcType sets to Syllabic for TestSettings ONLY!');
+				}
+			}
+			else
+			{
+				println ("[HAL]:TestSettingsOmniBu_Set: Pos was 0 -> no Macro action ");
+			}
+		} // Closing High_Level_Library_TestSettings.TestSettingsOmniBu_Set
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    TestSettingsOmniBu_Get
+//   Input      :  None
+//   Ouput      :  <int> Actual slider position with respect to Current Device 
+//   Description:  if all adaptive parameters are deactivated the Button will be shown as pressed    
+-----------------------------------------------------------------------------------------------------------------$*/
+// ===================================== FUNCTION NOT REVIEWED ======================================
+		public function int TestSettingsOmniBu_Get ()
+		{
+			int pos = 0; // return 0 if not all conditions met
+			int pos_wrt_basic_fcn = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional ();
+			if (High_Level_Library_TestSettings.TestSettingsCheckAdaptiveParametersOFF () == true &&
+					BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie () == pos_wrt_basic_fcn)
+			{ // remapped pos of 70/90 return the OmniSingle option.
+				pos = 1;
+			}
+			println ('[HAL]HLIB-TestSettingsOmniBu_Get, ' + pos);
+			return pos;
+		} //Closing High_Level_Library_TestSettings.TestSettingsOmniBu_Get
+
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    TestSettingsDirBu_Set
+//   Input      :  <int> button position from Cxx
+//   Ouput      :  <int> Deactivate all adaptive Parameters + activate Test Settings
+//   Description: Call basic lib and deactivate all adaptive Parameters + activate Test Settings 
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void TestSettingsDirBu_Set (int pos)
+		{
+		// This function is only used by the TestSettings Directional button!
+		// to deactivate all adaptive parameter	
+			if (pos == 1)
+			{
+			// activate TestSettings for TestDir
+				High_Level_Library_Mic_Mode.MicMode_Set_MPVPos_from_String ('Directional_Static_TestDir');
+
+				// To deactivate all adaptive parameters
+				High_Level_Library_TestSettings.TestSettingsSetAdaptiveParametersOFF ();
+
+				// Set Compression type to Syllabic (1 = dual or syllabic = 0)
+				High_Level_Library_Compression.Compression_Set_SyllabicDual (0);
+			}
+			else
+			{
+				println ("[HAL]:TestSettingsDirBu_Set Pos was 0 -> no Macro action ");
+			}
+		} // Closing High_Level_Library_TestSettings.TestSettingsDirBu_Set
+
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    TestSettingsDirBu_Get
+//   Input      :  None
+//   Ouput      :  <int> Actual slider position with respect to Current Device 
+//   Description:  if all adaptive parameters are deactivated the sButton will be shown as pressed    
+-----------------------------------------------------------------------------------------------------------------$*/
+// ===================================== FUNCTION NOT REVIEWED ======================================
+		public function int TestSettingsDirBu_Get ()
+		{
+			int pos = 0; // return 0 if not all conditions met
+			int pos_wrt_basic_fcn = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir ();
+			if (High_Level_Library_TestSettings.TestSettingsCheckAdaptiveParametersOFF () == true &&
+					BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie () == pos_wrt_basic_fcn)
+			{ // remapped pos of 80 return the TestDir option.
+				pos = 1;
+			}
+			println ('[HAL]HLIB-TestSettingsDirBu_Get, ' + pos);
+			return pos;
+		} //Closing High_Level_Library_TestSettings.TestSettingsDirBu_Get
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    TestSettingsSetAdaptiveParametersOFF
+//   Input      :  none
+//   Ouput      :  none
+//   Description: Call High/Basic lib and deactivate all adaptive Parameters
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void TestSettingsSetAdaptiveParametersOFF ()
+		{
+
+		// Sets Tinnitus Noiser OFF - Microphone Only
+			High_Level_Library_Noiser.NoiserEn_Set(0); // Tinnitus OFF
+			High_Level_Library_Noiser.Noiser_MixMicrophoneEn_Set(1);// 0:Pure, 1:Mixed
+
+			// MPO Type == not changed
+
+			// deactivate Frequency Compression HW control ONLY (SW remains unchanged to remember state of FCO)
+			BasicLibrary_FCO.FCOEn_Set (0);
+
+			// deactivate Speech and Noise Management checkbox 
+			High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Set (0);
+
+			// deactivate Speech and Noise Management - Speech in Noise only Checkbox
+			//BasicLibrary_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Set (0);
+			High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Set (0); // Sifit 7.3
+
+			// Microphone mode - Set in the TestSettings HLIB package
+
+			// deactivate SPASS checkbox 
+			High_Level_Library_Spass.SpassEnSet (0);
+
+			// deactivate SoundSmoothing if SoundSmoothing is available 
+			High_Level_Library_SoundSmoothing.SoundSmoothingEn_Set (0);
+			
+			// deactivate Noise Reduction
+			High_Level_Library_NoiseReduction.NoiseReductionEn_Set(0); // Sifit 7.3
+
+			// deactivate eWindscreen
+			High_Level_Library_EWindScreen.eWindScreenEn_Set (0);
+
+			// FBC checkbox will all be set on or off by manually select.
+
+			// deactivate OpenOptimizer.
+			High_Level_Library_FeedbackStopper.OpenOptimizerEn_SetHWSW (0);
+
+			// Set Input Mode = Microphone where (0), SoundBrilliance (off)
+			High_Level_Library_InputMode.InputModeDD_SetAfterRemapping_with_NoAdapt_features (0);
+			// deactivate Autophone
+			High_Level_Library_AutoPhone.AutoPhoneEn_Set (0);
+
+			// deactivate Power on Delay
+			BasicLibrary_PowerOnDelay.PowerOnDelayEn_Set_Entry (0);
+
+			// deactivate Power On/Off beeps
+			High_Level_Library_Beep.BeepPowerOnOffEn_Set (0);
+
+			// Training weights == not changed
+			// Classifier == not changed
+
+			// Set Compression type : REMOVE!! NOT SET IN THIS PACKAGE!!! 
+
+			// Set CBFS off
+			BasicLibrary_CBFS.CBFS_Set (0);
+			println ("[HAL]:TestSettingsSetAdaptiveParametersOFF >>> Sets all adaptive parameters OFF");
+		} // Closing High_Level_Library_TestSettings.TestSettingsSetAdaptiveParametersOFF()
+
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:    TestSettingsCheckAdaptiveParametersOFF
+//   Input      :  none
+//   Ouput      :  <bool> All Adaptive Parameters are OFF - True, else False
+//   Description: Call basic lib to check that all adaptive Parameters
+-----------------------------------------------------------------------------------------------------------------$*/
+// ===================================== FUNCTION NOT REVIEWED ======================================
+		public function bool TestSettingsCheckAdaptiveParametersOFF ()
+		{
+			bool retval = false;
+
+			// check that all adaptive features are OFF.
+
+
+			if (BasicLibrary_Noiser.Noiser_MixMicrophoneEn_Get_Entry() == 0 &&
+					High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmntEn_Get () == false &&
+					High_Level_Library_SpeechNoiseMgmnt.SpeechNoiseMgmnt_SpeechInNoiseEn_Get () == false &&
+					High_Level_Library_SoundSmoothing.SoundSmoothingEn_Get () == 0 &&
+					High_Level_Library_EWindScreen.eWindScreenEn_Get () == 0 &&
+					BasicLibrary_SoundBriliance.SoundBrilianceEn_GetHwOnly () == 0 && // checks BLIB HW control instead of SW control. Need to ensure HW OFF.
+					High_Level_Library_AutoPhone.AutoPhoneEn_Get () == 0 &&
+					High_Level_Library_Beep.BeepPowerOnOffEn_Get () == 0)
+			{
+
+
+				retval = true;
+				println ('[HAL]TestSettingsCheckAdaptiveParametersOFF >> ALL adaptive parameters OFF');
+
+
+			}
+			else
+			{
+				retval = false;
+				println
+				('[HAL]TestSettingsCheckAdaptiveParametersOFF >> Error! NOT ALL adaptive parameters are OFF');
+			}
+			return retval;
+		} // Closing High_Level_Library_TestSettings.TestSettingsCheckAdaptiveParametersOFF()
+
+
+		/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Higher Level PP LIBRARY    TestSeetings 
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package High_Level_Library_TestSettings
+
+} //namespace shs.sat

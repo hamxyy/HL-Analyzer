@@ -1,0 +1,77 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                            MID LEVEL PRICEPOINT LIBRARY : CBFS
+// Initial Version                                          						: 2012-08-13 Nadia Neugeborn 
+// *********************************************CODE FREEZE*******************************************************
+// FR57284: Macro CBFS controls shall be enable after First Fit                     : 2012-09-03 Nadine Seubert
+// Added a new case for PP75 in CbfsEn_IsVisible(), which returns 'false'           : 2013-03-14 Al Manders
+// Added a new case for PP75 in CBFS_Default(), which returns '0'               : 2013-03-14 Al Manders
+// Update default after FirstFit for Nitro to set to CBFS to off					: 2013-04-25 Sonia
+// Sifit 7.2 MDS review: Only Nitro BTE default to OFF, Nitro customs follow platform settings. : 2013-07-02 Jenny
+// Sifit 7.2 Peer Review													: 2013-07-31 Jenny, Judith, Raymond
+// Sifit 7.3 PEER REVIEW														: 2014-04-14 MieMie, Mang Yew 
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	package Lib Mid_Level_Library_CBFS
+	{
+
+	/*---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    CbfsEn_IsVisible()
+//   Input		:  none
+//   Ouput      :  <bool> Returns True if visible; False if Not Visible 
+//   Description:  Decides the visibility of the CBFS checkbox
+-----------------------------------------------------------------------------------------------------------------*/
+		public function bool CbfsEn_IsVisible () // REVIEW 7.2 
+
+		{
+			bool retval = true;
+			if (cap:PricePoint >= PricePoint.PP500)
+			{
+			// CBFS available for PP700/PP500, therefore visible
+				retval = true;
+			}
+			else
+			{
+			// CBFS NOT available for PP300/PP100/PP75, therefore NOT visible
+				retval = false;
+			}
+			return retval;
+		} //Closes Mid_Level_Library_CBFS.CbfsEn_IsVisible()
+
+		/*$---------------------------------------------------------------------------------------------------------------*
+//   Mid Level PP LIBRARY Function:    CBFS_Default
+//   Input      :  void
+//   Ouput      :  <int> Default CBFS position (1 = on CBFS, 0 = off CBFS)
+//   Description:  Enable/disable CBFS. CBFS available for PP700/PP500, default to ON except Nitro BTE. Not available for all other pricepoint, default to OFF.
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function int CBFS_Default () // REVIEWED 7.2
+
+		{
+			int retval = 0;
+			if (Mid_Level_Library_CBFS.CbfsEn_IsVisible () == true)
+			{
+			// CBFS available for PP700/PP500, therefore default to ON, except Nitro BTE
+				retval = 1;
+				if (cap:GMax >= 80)
+				{
+				// CBFS not available for Nitro BTE only
+					retval = 0;
+				}
+			}
+			else
+			{
+			// CBFS NOT available for PP300/PP100/PP75, therefore default to OFF
+				retval = 0;
+			}
+			return retval;
+		} // Closes Mid_Level_Library_CBFS.CBFS_Default()
+
+		/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Middle Level PP LIBRARY CBFS
+-----------------------------------------------------------------------------------------------------------------*/
+	} //package Mid_Level_Library_CBFS
+
+} //namespace shs.sat
+		

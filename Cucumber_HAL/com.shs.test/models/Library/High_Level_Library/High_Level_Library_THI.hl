@@ -1,0 +1,90 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL PRICEPOINT LIBRARY   : THI Training
+// Initial Version                						                     	: 2011-11-21 CLY
+// Set default Thi Weight for PostFit									 	 	: 2011-11-25 Nadia		
+// Shift the pricePoint cheching to Mid level lib							 	: 2011-12-07 CLY
+// Remove the PricePoint dependency for Program Selection until further notice	: 2012-03-19 Jenny
+// Added Thi Weight for other PPs after FirstFit								: 2012-03-23 Nadia		
+// Added Learning/Logging activation in THI_Set_Default()						: 2012-04-03 Nadia
+// THI weight is 1/8 for PP700													: 2012-04-05 Nadia
+// Commented out THI_Learning_Set for now due to CR54579						: 2012-04-25 Nadia
+// Updated THI_Set_Default()													: 2012-05-11 Nadia
+// Updated THI_Set_Default() - set logging option								: 2012-05-28 Nadia
+// Updated based on peer review (ProgramSelection)								: 2012-06-27    Frauke, Jenny and co
+// *********************************************CODE FREEZE*******************************************************
+// Update ID number in Set_ProgramSelection function									:	2013-10-29 Sonia Stasiak
+// Comment update for Program Selection													: 2014-03-18 Sonia
+// Update comment on Set_Program Selection (added new Induction Loop (T) program)		: 2014-07-30 Sonia Stasiak
+// Peer Review of Changes during 7.4  		   			                           	 :2014-12-09 Sonia,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat {
+	using shs_sat.*;
+	    
+	package Lib High_Level_Library_THI 
+	{
+	/*---------------------------------------------------------------------------------------------------------*
+	//	HIGH LEVEL LIBRARY - THI_Set_ProgramSelection
+	//	Input		:	<int> ID 
+	//	Output		:	<void>
+	//	Description	:	Function is setting Trainable Hearing Instrument (THI) weight for all listening situation. 
+	//	ID			:   
+	//				:	2 = Noisy Environment		7 = TV						12 = Tek/miniTek		20 = Phone T
+	//				:	3 = Phone(Acoustically)		8 = Outdoor/Sport			13 = miniTek FM			21 = Induction Loop (T)		
+	//				:	4 = Phone mT				9 = Privacy					14 = miniTek Telecoil
+	//				:	5 = Bluetooth Phone			10 = Tinnitus				15 = Audio Input
+	//				:	6 = Music					11 = Induction Loop (mT)	19 = Phone MT
+	//	Comments	:	Variable int (ID) starts with ID 2, respectively to ID of each program.
+	/*---------------------------------------------------------------------------------------------------------*/
+
+	public function void THI_Set_ProgramSelection(int ID) //PEER REVIEWED CXX7.3
+	{	
+		println('[HAL]:HLIB-THI_Set_ProgramSelection ID = '+ ID);	
+			
+		switch(ID)
+		{
+			case 3:{ // Phone (Acoustically)
+			// THI weight set to 1/256
+				BasicLibrary_THI.THI_Set(12);	
+			}
+			default:{
+			//For all programs except Phone (Acoustically), THI weight set to = 1/1024
+				BasicLibrary_THI.THI_Set(14);
+			}
+		} // closes switch (ID)
+		
+	} // closes High_Level_Library_THI.THI_Set_ProgramSelection
+
+/*$---------------------------------------------------------------------------------------------------------------*
+//   Higher Level PP LIBRARY Function:     THI_Set_Default()
+//   Input      :  none     
+//   Ouput      :  void
+//   Description:  Sets the universal THI Weight and Learning/Logging after FirstFit based on PPs      
+-----------------------------------------------------------------------------------------------------------------$*/
+	public function void THI_Set_Default(){		
+		
+		// Get the THI Weight for different PPs	
+		int thiWeight = Mid_Level_Library_THI.THI_Weight_Default();	
+
+		// Set the THI weight 
+		BasicLibrary_THI.THI_Set(thiWeight);				
+	
+		// Get the learning capability for different PPs	 
+		int learnPos = Mid_Level_Library_THI.THI_Learning_Default();
+		
+		// Set the learning (on/off)	
+		BasicLibrary_THI.THI_Learning_Set(learnPos);	
+		
+		// Get the logging capability for different PPs	 
+		int logPos = Mid_Level_Library_THI.THI_Logging_Default();
+		
+		// Set the logging (on/off)	
+		BasicLibrary_THI.THI_Logging_Set(logPos);		
+					   
+	} //Closes High_Level_Library_THI.THI_Set_Default()	
+			
+/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Higher Level LIBRARY   THI Training
+-----------------------------------------------------------------------------------------------------------------*/		
+	}	//package High_Level_Library_THI
+}	//namespace shs.sat

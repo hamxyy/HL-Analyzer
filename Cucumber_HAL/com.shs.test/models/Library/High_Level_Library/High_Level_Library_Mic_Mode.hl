@@ -1,0 +1,309 @@
+//---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL PRICEPOINT LIBRARY 		 : Mic_Mode
+// Initial Version                						  		 	: 2011-03-11	Nadine Seubert
+// rework is enabled if TinNoiser is selected                   	: 2011-03-25	Nadine Seubert
+// rework and make calls to MicrophoneMix Basic Libs             	: 2011-04-08	Nadine Seubert
+// update Mic_Mode_Set for Spass adjustments                     	: 2011-05-05	Nadine Seubert
+// Relocated 'return' statement in Mic_Mode_Set()				 	: 2011-05-06	Cecil Wilson
+// update for new speech and noise setting                       	: 2011-06-03	Nadine Seubert
+// update for braodband Multichannel adjustments                 	: 2011-06-08	Nadine Seubert
+// Change && logical operator to || in  Mic_Mode_Is_Enabled      	: 2011-06-14	Chuah LayYuan
+// Updated MicMode_Set_Default									 	: 2011-07-07	Nadia Neugeborn
+// Added new function Mic_Mode_SetAfterRemapping                 	: 2011-09015	Chuah LayYuan
+// Added new function MicMode_Set_ProgramSelection				 	: 2012-03-06	Frauke Schall
+// rework Mic_Mode_Is_Enabled() to include d8SwAuxMode.off_MicOnly (Input mode select Microphone) condition
+// Mic_Mode_Get() to dependent on the HiDriverWorkMode.			 	: 2012-03-22	Jenny Lin
+// Updated Mic_Mode_SetAfterRemapping to set SPASS off when OMNI is set. Call BLIB:Set_PhlNruSpassMode 
+// to set the affected controls of SPASS. Updated MicMode_Set_ProgramSelection() to include 
+// tek programs and Privacy.									 	: 2012-04-09	Jenny Lin
+// Updated activation threshold									 	: 2012-04-12	Nadia Neugeborn									
+// Updated macros to the state on 2011-10-04   						: 2012-04-13	Jenny Lin
+// Calling ActivationThresholdDD_DefaultPos() 						: 2012-04-16	Nadia
+// Mic_Mode_SetAfterRemapping: re-activate Spass					: 2012-04-19	Meike Steinbuss and Frauke Schall
+// Updated structure of remapping and added new functions			: 2012-05-02	Cecil/Jenny 
+// Added the string "BLIBPos" for MLIB.Mic_Mode_Is_Enabled_Pos call	: 2012-05-04	Jenny 
+// Added MicMode omni for tinnitus program							: 2012-05-14	Nadia
+// Peer review changes												: 2012-06-18	Frauke and everyonelse
+// Updated based on peer review (ProgramSelection)					: 2012-06-27    Frauke, Jenny and co
+// Added DirStaticHP for PP100 functionality						: 2012-06-29	Jenny and Frauke
+// removed "hi:d8SwAuxMode != off_MicOnly &&" from Mic_Mode_Is_Enabled, as it was already covered	:2012-07-05 Frauke
+// moved parts of Mic_Mode_SetAfterRemapping to HLIB.Spass
+// and made Omni default in MicMode_Set_ProgramSelection			: 2012-07-09	Frauke
+// Macro Peer Review Updates (FirstFit)								: 2012-07-10	Nadia & Judith				
+// Call High_Level_Library_Spass.SpassEn_ForOmni in Mic_Mode_SetAfterRemapping even if Spass is not visible.
+// This ensures a valid setting fir d8PhlNruSpassMode				: 2012-07-12 Al and Frauke
+// *********************************************CODE FREEZE*******************************************************
+// Fixed ER56460:TESE - Microphone setting does not change to Omnidirectional after setting FOG :2012-08-28 Cecil Wilson
+// Fixed ER56788:Macros: Microphone Mode needs control update for non automatic modes
+// added HLIB call to ActivationThresholdDD Setter  				: 2012-09-04 Cecil Wilson
+// Updated the omnidirectional to (remapped_pos >= 90), and added omniopt.		: 2012-11-19 Jenny
+// Added assertion message									: 2012-12-14 Jenny Lin
+// Updated MicMode isenabled tests to call the MixMic get mode to check the state of AuxMode. : 2012-12-19 Jenny Lin
+// Macro Peer review implementation. Clean up comments.				: 2012-12-28 Jenny
+// ER58883: Listening situation is not correct realized				: 2013-02-12 Frauke
+// Update ID number in Set_ProgramSelection function				: 2013-10-29 Sonia Stasiak
+// Comment update for Program Selection								: 2014-03-18 Sonia
+// PEER REVIEWED CXX7.3 FOR PROGRAM SELECTION							: 2014-05-07 Sonia, Mie Mie, Jenny
+// Update comment on Set_Program Selection (added new Induction Loop (T) program)		: 2014-07-30 Sonia Stasiak
+// Peer Review of Changes during 7.4  		   			                           	 :2014-12-09 Sonia,Judith
+//----------------------------------------------------------------------------------------------------------------
+namespace shs_sat{
+	using shs_sat.*;
+	package  Lib High_Level_Library_Mic_Mode{
+
+/*---------------------------------------------------------------------------------------------------------------*
+   Higher Level PP LIBRARY Function:    Mic_Mode_Is_Enabled
+   Input      :  <int> Slider position from Cxx
+   Ouput      :  <int> Actual slider position with respect to 70x Price point 
+   Description:  remapping  Slider positions;  Price point and Family resolving function.    
+-----------------------------------------------------------------------------------------------------------------*/	
+	public function bool Mic_Mode_Is_Enabled(){	
+		bool is_enabled = true;
+		//User Interface controls should grey out when Telecoil Only, DAI only, Tek/MiniTek only, 
+		//bluetooth only, MiniTekFM only, MiniTekTelecoil only or Tinnnitus Noiser only
+		if(High_Level_Library_Noiser.Noiser_IsOnAndPure() == true || 
+			BasicLibrary_MicrophoneMix.MixMicrophoneEn_Get_Mode() == 0
+		){
+				is_enabled = false;
+		}
+		else{
+			is_enabled = true;
+		}
+		return is_enabled;
+	}	// Closing High_Level_Library_Mic_Mode.Mic_Mode_Is_Enabled()
+		
+		
+/*---------------------------------------------------------------------------------------------------------------*
+   Higher Level PP LIBRARY Function:    Mic_Mode_Set
+   Input      :  <int> Slider position from Cxx
+   Ouput      :  <int> Actual slider position with respect to 70x Price point 
+   Description:  remapping  Slider positions;  Price point and Family resolving function.    
+-----------------------------------------------------------------------------------------------------------------*/
+	public function int Mic_Mode_Set(int pos){			
+		int retval = -1;
+		int remappingValue = -1; 
+		
+		// Remap the pos to pos_wrt_basic_fcn  using the Remapping function
+		remappingValue = Mid_Level_Library_Mic_Mode.Mic_Mode_Remapping(pos);
+		println('[HAL]HLIB.Mic_Mode_Set >>> Remap the pos='+pos+'to pos_wrt_basic_fcn='+remappingValue+'  using the Remapping function');
+		
+		retval = High_Level_Library_Mic_Mode.Mic_Mode_SetAfterRemapping(remappingValue);
+		
+		return retval;
+	}  // Closing High_Level_Library_Mic_Mode.Mic_Mode_Set
+		
+/*---------------------------------------------------------------------------------------------------------------*
+   Higher Level PP LIBRARY Function:    Mic_Mode_SetAfterRemapping
+   Input      :  <int> Slider position from Cxx
+   Ouput      :  <int> Actual slider position with respect to 70x Price point 
+   Description:  remapping  Slider positions;  Price point and Family resolving function.    
+-----------------------------------------------------------------------------------------------------------------*/
+	public function int Mic_Mode_SetAfterRemapping(int pos_wrt_basic_fcn){
+		println('[HAL]HLIB:Mic_Mode_SetAfterRemapping   pos_wrt_basic_fcn'+pos_wrt_basic_fcn);
+		// If omni AND Spass are selected:
+		High_Level_Library_Spass.SpassEn_ForOmni(pos_wrt_basic_fcn);
+				
+		// Update Activation threshold based on the MicModes (ER56788)
+		High_Level_Library_ActivationThresholdDD.ActivationThresholdDD_UpdateForMicMode(pos_wrt_basic_fcn);
+		
+		return BasicLibrary_Mic_Mode.Mic_Mode_Set_RadioButton_Entrie(pos_wrt_basic_fcn);
+		
+	}//closing High_Level_Library_Mic_Mode.Mic_Mode_SetAfterRemapping
+						
+/*---------------------------------------------------------------------------------------------------------------*
+   Higher Level PP LIBRARY Function:    Mic_Mode_Get
+   Input      :  None
+   Ouput      :  <int> Actual slider position with respect to Current Device 
+   Description:  BACKMAPING  Slider positions;   Reverse of Price point and Family resolving function.    
+-----------------------------------------------------------------------------------------------------------------*/
+	public function int Mic_Mode_Get(){	
+		int pos               = -1;
+		int a                 = -1;
+		// Get the current position with respect to the Basic function  
+		int pos_wrt_basic_fcn = BasicLibrary_Mic_Mode.Mic_Mode_Get_RadioButton_Entrie();
+		// This function returns the Maxmimum number of steps for this UI
+		int maxstep = Mid_Level_Library_Mic_Mode.Mic_Mode_MaxPos();	
+		// Test Settings Overrides for Directional Static
+		if(pos_wrt_basic_fcn == Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir() && env:HiDriverWorkMode == HiDriverWorkMode.Fitting){
+			pos_wrt_basic_fcn = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional();
+		}
+		else if( (pos_wrt_basic_fcn == Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_DirAdaptiveFlat() ||
+			pos_wrt_basic_fcn == Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_DirStaticFlat() ) && 
+			env:HiDriverWorkMode == HiDriverWorkMode.Service){
+			// only needed for Hicoss: ER58883: Listening situation is not correct realized
+			pos_wrt_basic_fcn = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional();
+		}
+		// Test Settings Overrides for TestSetting:FOG with different Omnidirectional mode
+		if(pos_wrt_basic_fcn >= 90){
+			pos_wrt_basic_fcn = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional();
+		}
+		while(a < maxstep){   //  Test each position from 0 to maximum available for this device
+			++a;  			   // a=a+1
+			if(pos_wrt_basic_fcn == Mid_Level_Library_Mic_Mode.Mic_Mode_Remapping(a)){
+				pos=a;
+				break;
+			}
+		}
+		assertion(pos >= 0, "[MacroError] Undefined state of Microphone Mode Radiobutton!");
+		return pos;
+	} //closing High_Level_Library_Mic_Mode.Mic_Mode_Get
+	
+/*---------------------------------------------------------------------------------------------------------------*
+   Higher Level PP LIBRARY Function:    MicMode_Set_Default
+   Input      :  none
+   Ouput      :  none 
+   Description:  Actual Mic Mode RadioButton position and sub controls to the default after FF position 
+-----------------------------------------------------------------------------------------------------------------*/
+	public function void MicMode_Set_Default(){
+		int MicModeRb_CxxPos = -1;
+	
+		// call Checkbox SpeechFocusEn always before MicMode						
+		// set default position for Checkbox Speech Focus under Automatic MicMode (always off)
+		BasicLibrary_SpeechFocusEn.SpeechFocusEn_SetSW(0);		
+		
+		// Get the default position from Mid Level Library
+		MicModeRb_CxxPos = Mid_Level_Library_Mic_Mode.MicMode_DefaultPos();
+		
+		if (MicModeRb_CxxPos != -1){           
+			// Set the Default position for the Mic Mode
+			High_Level_Library_Mic_Mode.Mic_Mode_Set(MicModeRb_CxxPos);
+			// set default position for Checkbox Speech in Noise Only under Automatic Mic Mode (always off)
+			BasicLibrary_MicModeSpeechInNoiseEn.MicModeSpeechInNoiseEn_Set(0);				
+			// set default position for Activation Threshold dropdown menu
+			High_Level_Library_ActivationThresholdDD.ActivationThresholdDD_DefaultPos();
+		}		
+		else{
+			println("[HAL] HLIB MicMode_Set_Default: ERROR setting MicMode!");
+		}
+	} //closing High_Level_Library_Mic_Mode.MicMode_Set_Default
+	
+	/*---------------------------------------------------------------------------------------------------------*
+	//	HIGH LEVEL LIBRARY - MicMode_Set_ProgramSelection
+	//	Input		:	<int> ID 
+	//	Output		:	<void>
+	//	Description	:	Function is setting Microphone System for all listening situation. 
+	//	ID			:   
+	//	Program ID	:   
+	//				:	2 = Noisy Environment		7 = TV						12 = Tek/miniTek		20 = Phone T
+	//				:	3 = Phone(Acoustically)		8 = Outdoor/Sport			13 = miniTek FM			21 = Induction Loop (T)		
+	//				:	4 = Phone mT				9 = Privacy					14 = miniTek Telecoil
+	//				:	5 = Bluetooth Phone			10 = Tinnitus				15 = Audio Input
+	//				:	6 = Music					11 = Induction Loop (mT)	19 = Phone MT
+	//	Comments	:	Variable int (ID) starts with ID 2, respectively to ID of each program.
+	/*---------------------------------------------------------------------------------------------------------*/
+		public function void MicMode_Set_ProgramSelection(int ID) //PEER REVIEWED CXX7.3
+		{
+			println('[HAL]:HLIB MicMode_Set_ProgramSelection ID = '+ ID);
+			
+			switch(ID)
+			{
+				case 2:{ // Noisy Environment 
+				// Microphone Mode for twin mic device set to DIRECTIONAL,for one mic device set to OMNIDIRECTIONAL
+					if(cap:DirMicAvailable == DirMicAvailable.dir){
+						High_Level_Library_Mic_Mode.MicMode_Set_MPVPos_from_String('Directional');
+						println('[HAL]:PS - Noisy Environment: Mic Mode = Directional');
+					}
+					else{
+						High_Level_Library_Mic_Mode.MicMode_Set_MPVPos_from_String('Omni');
+						println('[HAL]:PS - Noisy Environment: Mic Mode = Omnidirectional');
+					}
+				}
+				case 10:{ // Tinnitus
+				// Microphone Mode do nothing
+				
+				}
+				default:{
+				// For all programs except Noisy Environment and Tinnitus, Microphone System set to OMNIDIRECTIONAL
+					High_Level_Library_Mic_Mode.MicMode_Set_MPVPos_from_String('Omni');
+					println('[HAL]:PS - Program ID ' + ID + ' : Mic Mode = Omnidirectional');	
+				}
+			} // closes switch (ID)
+			
+		} // closes High_Level_Library_Mic_Mode.MicMode_Set_ProgramSelection
+
+/*---------------------------------------------------------------------------------------------------------------*
+   Higher Level PP LIBRARY Function:    MicMode_Set_MPVPos_from_String
+   Input      :  Pass the desired Microphone Mode string, "Omni" ,'Automatic', 'SpeechFocus' ,'Directional','Directional_Static'
+   Ouput      :   
+   Description:  Sets the RadioButton position and sub controls to the default after FF position     
+-----------------------------------------------------------------------------------------------------------------*/
+	public function void MicMode_Set_MPVPos_from_String(string micmode){
+		int BliBPos = -1;
+					
+		if(micmode=='Omni'){
+			// Check for the availability of single microphone OMNI
+			BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional();
+		}
+		if(micmode=='OmniOpt'){
+			BliBPos = 100;
+		}
+		if(micmode=='OmniSingle'){
+			BliBPos = 95;
+		}
+		if(micmode=='OmniDual'){
+			BliBPos = 90;
+		}
+		if(micmode=='Automatic'){
+			BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_Automatic();
+		}
+		if(micmode=='SpeechFocus'){
+			BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_SpeechFocus();				
+		}
+		if(micmode=='Directional'){
+			BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional();				
+		}
+		if(micmode=='Directional_Adaptive_DirAdapHP'){
+			BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Adaptive();				
+		}
+		if(micmode=='Directional_Static_DirStaticHP'){
+			BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_DirStaticHP();							
+		}
+		if(micmode=='Directional_Static_TestDir'){
+			BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir();							
+		}				
+		// If the directional modes are not available then Default to Omnidirectional 
+		if(Mid_Level_Library_Mic_Mode.Mic_Mode_Is_Enabled_Pos(BliBPos, "BLIBPos") == false){
+	 		BliBPos = Mid_Level_Library_Mic_Mode.Mic_Mode_Omnidirectional();
+	 	}
+	 	
+	 	assertion(BliBPos >= 0, "[MacroError] Undefined state of Microphone Mode Radiobutton! Undefined string micmode passed into function.");
+		High_Level_Library_Mic_Mode.Mic_Mode_SetAfterRemapping(BliBPos);			
+	}  // Closing High_Level_Library_Mic_Mode.MicMode_Set_MPVPos_from_String
+
+/*---------------------------------------------------------------------------------------------------------------*
+   High Level PP LIBRARY Function:    Mic_Mode_Get_MPVPos_from_RemappedPos
+   Input      :  <int> the Remapped position from the BLIB (ie 10,20,30.....)
+   Ouput      :  <int> Actual MPV position with respect to Current MPV(Cxx/Hicoss) for this Device, Returns -1 if the Mic Mode is not available for this Device 
+   Description:  BACKMAPING positions;   Reverse of Price point and Family resolving function including the greyout    
+-----------------------------------------------------------------------------------------------------------------*/
+	public function int Mic_Mode_Get_MPVPos_from_RemappedPos(int blibpos ){
+		int pos = -1;
+ 		int a = -1;
+ 		int pos_wrt_basic_fcn = blibpos;
+		int maxstep = Mid_Level_Library_Mic_Mode.Mic_Mode_MaxPos(); // This function returns the Maxmimum number of steps for this UI
+		// TestDir available check ( it should return the positions for the Directional (ADAPT)
+ 		if(pos_wrt_basic_fcn == Mid_Level_Library_Mic_Mode.Mic_Mode_Directional_Static_TestDir() && env:HiDriverWorkMode == HiDriverWorkMode.Fitting){
+ 			pos_wrt_basic_fcn = Mid_Level_Library_Mic_Mode.Mic_Mode_Directional();
+        }
+ 	    while(a < maxstep){   //  Test each position from 0 to maximum available for this device
+ 			++a;  			   // a=a+1
+ 			if(pos_wrt_basic_fcn == Mid_Level_Library_Mic_Mode.Mic_Mode_Remapping(a)){
+ 				pos = a;
+ 			}
+ 		}
+ 		if(Mid_Level_Library_Mic_Mode.Mic_Mode_Is_Enabled_Pos(blibpos, "BLIBPos") == false){
+ 			pos = -1;
+ 		}
+ 		
+ 		
+ 		if(pos == -1){		 	
+			println('[HAL]MLIB-Mic_Mode_Get_MPVPos:Error - Microphone Mode is not available for this device, ID='+ pos_wrt_basic_fcn);
+ 		}
+ 		
+ 		assertion(pos >= 0, "[MacroError] Undefined state of Microphone Mode Radiobutton! No valid BLIB pos match the remapped_pos.");
+ 		return pos;
+	} //Closing High_Level_Library_Mic_Mode.Mic_Mode_Get_MPVPos_from_RemappedPos
+		
+	} //package High_Level_Library_Mic_Mode
+} //namespace shs.sat	
+//************************************ END Of Higher Level Library Mic_Mode ****************************************	

@@ -1,0 +1,36 @@
+/*---------------------------------------------------------------------------------------------------------------*
+//                           HIGH LEVEL PRICEPOINT LIBRARY   : POWER ON DELAY
+// Initial Version                						                     : 2012-04-19 Nadia Neugeborn
+// Sifit 7.2 Peer Review									     : 2013-07-31 Jenny, Judith, Raymond
+// Peer Review of Changes during 7.4  - no changes   			                    :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib High_Level_Library_PowerOnDelay
+	{
+
+	/*$---------------------------------------------------------------------------------------------------------------*
+//   High Level PP LIBRARY Function:    PowerOnDelay_SetDefault()
+//   Input		:  none
+//   Ouput      :  none
+//   Description:  Set the Power On delay controls
+-----------------------------------------------------------------------------------------------------------------$*/
+		public function void PowerOnDelay_SetDefault ()
+		{ // Reviewed 7.2
+
+		//Note: it is important to set the dropdown menu first and then set the checkbox to off because both share the same ctrl
+			BasicLibrary_PowerOnDelay.PowerOnDelayDD_Set_Entry (1); // Set the DropDown menu (12s)		
+			BasicLibrary_PowerOnDelay.PowerOnDelayEn_Set_Entry (0); // Set the checkbox to off
+
+		} // High_Level_Library_PowerOnDelay.PowerOnDelay_SetDefault()
+
+		/*---------------------------------------------------------------------------------------------------------------*
+// 								  END Of Higher Level LIBRARY   POWER ON DELAY
+-----------------------------------------------------------------------------------------------------------------*/
+	} // package High_Level_Library_PowerOnDelay
+
+} // namespace shs.sat	
+		
+

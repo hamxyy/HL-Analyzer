@@ -1,0 +1,99 @@
+/*-----------------------------------------------------------------------------------------------------------------*
+//									HIGH LEVEL LIBRARY : Program Selection 
+
+// Initial Version																			:	2013-09-16 Jenny
+// Page tuning																				:	2013-10-29 Sonia Stasiak
+// Updated with Noise Reduction module														:	2013-12-17 Sonia
+// Comment updated, removed SoundBrilliance as it is set together with InputMode			:	2014-03-18 Sonia
+// Sifit7.3 Peer review	(Beeps only)														: 2014-04-28 Jenny, Jeline
+// PEER REVIEWED CXX7.3 FOR PROGRAM SELECTION												: 2014-05-07 Sonia, Mie Mie, Jenny
+// Added new Induction Loop (T) program														: 2014-07-30 Sonia
+// Peer Review of Changes during 7.4  		   			                           			 :2014-12-09 Sonia,Judith
+*/
+/*------------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package Lib High_Level_Library_ProgramSelection
+	{
+	/*---------------------------------------------------------------------------------------------------------*
+	//	HIGH LEVEL LIBRARY - Set_ProgramSelection
+	//	Input		:	<int> ID 
+	//	Output		:	<void>
+	//	Description	:	Function is setting MixedMode features and gain modifications for all listening situation. 
+	//	Program ID	:   
+	//				:	2 = Noisy Environment		7 = TV						12 = Tek/miniTek		20 = Phone T
+	//				:	3 = Phone(Acoustically)		8 = Outdoor/Sport			13 = miniTek FM			21 = Induction Loop (T)		
+	//				:	4 = Phone mT				9 = Privacy					14 = miniTek Telecoil
+	//				:	5 = Bluetooth Phone			10 = Tinnitus				15 = Audio Input
+	//				:	6 = Music					11 = Induction Loop (mT)	19 = Phone MT
+	//	Comments	:	Variable int (ID) starts with ID 2, respectively to ID of each program.
+	//				:	Functions need to be called in respective order (to be confirmed).
+	//				:	MixedMode features that remain unchanged for all programs (settings same as universal): 
+	//					- Mm01) Frequency Compression	- Mm13) e2e Wireless 2.0
+	//					- Mm02) MPO	Type				- Mm14) System Sounds
+	//					- Mm12) Power-On Delay
+	/*---------------------------------------------------------------------------------------------------------*/		
+		public function void Set_ProgramSelection (int ID) //PEER REVIEWED CXX7.3
+		{
+		
+			// Mm11Tin : Tinnitus Noiser
+			High_Level_Library_Noiser.Noiser_Set_ProgramSelection (ID);
+
+			// Mm10Input : Input Mode
+			// Mm06Sb : Sound Brilliance is set together with Input Mode
+			High_Level_Library_InputMode.InputMode_Set_ProgramSelection (ID);
+
+			// Mm08Mic : Microphone System
+			High_Level_Library_Mic_Mode.MicMode_Set_ProgramSelection (ID);
+
+			// <<<<<<<<<<<<<<<<<<<<<< NOISE REDUCTION >>>>>>>>>>>>>>>>>>>>>>>
+			
+			// If Noise Reduction basic view selected, set:
+			// - Speech and Noise Management SW controls (to set default of advanced view)
+			// - Sound Smoothing SW controls (to set default of advanced view)
+			// - SPASS (Directional Speech Enhancement) SW controls (to set default of advanced view)
+			// - Noise Reduction HW and SW controls = setting SPASS, SNM and SS controls
+			
+			// If Noise Reduction advanced view selected, set:
+			// - Noise Reduction SW controls (to set default of reduced view)
+			// - Speech and Noise Management HW and SW controls
+			// - Sound Smoothing HW and SW controls
+			// - SPASS (Directional Speech Enhancement) HW and SW controls
+			
+			 High_Level_Library_NoiseReduction.NoiseReduction_ProgramSelection (ID);
+			
+			// <<<<<<<<<<<<<<<<<<< END of NOISE REDUCTION >>>>>>>>>>>>>>>>>>>
+
+			// Mm05Wnc : eWindScreen
+			High_Level_Library_EWindScreen.EWindScreen_Set_ProgramSelection (ID);
+
+			// Mm07Fbc : Feedback Stopper
+			High_Level_Library_FeedbackStopper.FeedbackStopper_Set_ProgramSelection (ID);
+
+			// Mm18Comp : Compression Method
+			High_Level_Library_Compression.Compression_Set_ProgramSelection (ID);
+	
+			// Mm15Thi : Training Weights
+			High_Level_Library_THI.THI_Set_ProgramSelection (ID);
+	
+			// Mm16Cbfs : Classification-Based Frequency Shaping (CBFS)
+			// CBFS is set to off for all programs, available only in Universal 
+			High_Level_Library_CBFS.CBFS_Set (0); //PEER REVIEWED CXX7.3
+			
+			// Mm14Beeps : Not Changed! (Same as Universal)
+
+			//  Insertion Gain modification
+			CL_CurveLibrary.ApplyInsertionGainOffsets_ProgramSelection (ID);
+
+			// Direct Sound modification
+			CL_CurveLibrary.ApplyDirectSoundModification_ProgramSelection (ID);
+			
+		} // closes High_Level_Library_ProgramSelection.Set_ProgramSelection
+
+	} // closes package High_Level_Library_ProgramSelection
+
+} // closes namespace shs.sat
+/*------------------------------------------------------------------------------------------------------------------
+// 								  END of HIGH LEVEL  LIBRARY  - Program Selection 
+-------------------------------------------------------------------------------------------------------------------*/
