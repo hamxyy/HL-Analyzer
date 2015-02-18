@@ -30,6 +30,7 @@ Export-Package: com.shs.hl;uses:="org.eclipse.xtext,org.eclipse.xtext.service,co
  com.shs.hl.generator,
  com.shs.hl.generator.halsa,
  com.shs.hl.generator.halsa.evaluation,
+ com.shs.hl.generator.halsa.generator,
  com.shs.hl.hearingLanguage;uses:="org.eclipse.emf.ecore,org.eclipse.emf.common.util,com.shs.common.commonLanguage",
  com.shs.hl.hearingLanguage.impl;
   uses:="com.shs.common.commonLanguage.impl,

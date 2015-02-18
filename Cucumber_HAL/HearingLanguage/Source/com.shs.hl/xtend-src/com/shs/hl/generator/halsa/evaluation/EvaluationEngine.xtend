@@ -2,7 +2,6 @@ package com.shs.hl.generator.halsa.evaluation
 
 import com.shs.common.commonLanguage.EnumLiteral
 import com.shs.common.commonLanguage.EnumParameter
-import com.shs.hl.generator.halsa.TemplateHalsaASTWalker
 import com.shs.hl.hearingLanguage.And
 import com.shs.hl.hearingLanguage.ArgList
 import com.shs.hl.hearingLanguage.AssignmentStatement
@@ -32,8 +31,9 @@ import java.util.List
 import java.util.Stack
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
+import com.shs.hl.generator.halsa.HalsaASTWalkerBase
 
-class EvaluationEngine extends TemplateHalsaASTWalker
+class EvaluationEngine extends HalsaASTWalkerBase
 {
 	String functionName
 	List<Object> params
@@ -43,9 +43,8 @@ class EvaluationEngine extends TemplateHalsaASTWalker
 
 	EvaluationContext context
 	StackMachine activeValues = new StackMachine
-	Object returnVal
-	LRValueSwitch lrValueSwitch = LRValueSwitch.RValue
 	AssignToObject lValue
+	Object returnVal
 	StringBuilder log = new StringBuilder
 
 	new(Resource resource, IFileSystemAccess fsa)
@@ -122,7 +121,7 @@ class EvaluationEngine extends TemplateHalsaASTWalker
 		lrValueSwitch = LRValueSwitch.RValue
 		walkExpression(assign.rvalue)
 		val value = activeValues.pop()
-		lValue.set(context, value)
+		lValue.set(value)
 	}
 
 	override walkPlusEqualsStatement(PlusEqualsStatement assign)
@@ -133,7 +132,7 @@ class EvaluationEngine extends TemplateHalsaASTWalker
 		walkExpression(assign.lvalue)
 		walkExpression(assign.rvalue)
 		val value = activeValues.pop() as Integer + activeValues.pop() as Integer
-		lValue.set(context, value)
+		lValue.set(value)
 	}
 
 	override walkLocalVariableReference(LocalVariableDeclaration declaration)
@@ -144,7 +143,7 @@ class EvaluationEngine extends TemplateHalsaASTWalker
 		}
 		else
 		{
-			lValue = new AssignToLocal(declaration.name)
+			lValue = new AssignToLocal(context, declaration.name)
 		}
 	}
 
@@ -189,7 +188,7 @@ class EvaluationEngine extends TemplateHalsaASTWalker
 		else
 		{
 			val param = expression.param as EnumParameter
-			lValue = new AssignToGlobal(expression.scope.getName() + ":" + param.name)
+			lValue = new AssignToGlobal(context, expression.scope.getName() + ":" + param.name)
 		}
 	}
 
@@ -241,7 +240,7 @@ class EvaluationEngine extends TemplateHalsaASTWalker
 			catch (ReturnException e)
 			{
 			}
-			
+
 			context.exitScope()
 			log.append("}\n")
 		}
@@ -332,19 +331,20 @@ enum LRValueSwitch
 
 interface AssignToObject
 {
-	def void set(EvaluationContext context, Object rValue)
+	def void set(Object rValue)
 }
 
 class AssignToGlobal implements AssignToObject
 {
 	String key
+	EvaluationContext context
 
-	new(String key)
+	new(EvaluationContext context, String key)
 	{
 		this.key = key
 	}
 
-	override set(EvaluationContext context, Object rValue)
+	override set(Object rValue)
 	{
 		context.setGlobalVar(key, rValue as String)
 	}
@@ -353,13 +353,14 @@ class AssignToGlobal implements AssignToObject
 class AssignToLocal implements AssignToObject
 {
 	String key
+	EvaluationContext context
 
-	new(String key)
+	new(EvaluationContext context, String key)
 	{
 		this.key = key
 	}
 
-	override set(EvaluationContext context, Object rValue)
+	override set(Object rValue)
 	{
 		context.addLocalVar(key, rValue)
 	}

@@ -46,7 +46,6 @@ import org.eclipse.xtext.ui.resource.IResourceSetProvider;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.shs.hl.ui.internal.HearingLanguageActivator;
-
 import com.shs.hl.ui.utils.LoggerUtil;
 
 public abstract class AbstractHLGenerator
@@ -215,8 +214,14 @@ public abstract class AbstractHLGenerator
 	 */
 	private boolean hasFileExtension(final IResource resource)
 	{
-		if ((resource instanceof IFile) && ("hlt".equals(resource.getFileExtension()))) { return true; }
+		if ((resource instanceof IFile) && (getExtension().equals(resource.getFileExtension()))) { return true; }
 		return false;
+	}
+
+
+	protected String getExtension()
+	{
+		return "hl";
 	}
 
 	protected void setGeneratorConsoleToActiveWindow()
