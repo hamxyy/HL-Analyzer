@@ -28,6 +28,11 @@ class HLTSingleValue implements HLTBoolExpression
 		return new HLTSingleValue(!value)
 	}
 
+	override toString()
+	{
+		return value.toString
+	}
+
 }
 
 class HLTLogicalExpression implements HLTBoolExpression
@@ -66,11 +71,25 @@ class HLTLogicalExpression implements HLTBoolExpression
 		return if (relation == HLTLogicalRelation.And) HLTLogicalRelation.Or else HLTLogicalRelation.And;
 	}
 
+	def getLeft()
+	{
+		return left
+	}
+
+	def getRight()
+	{
+		return right
+	}
+
 	def getRelation()
 	{
 		return rel
 	}
 
+	override toString()
+	{
+		return left + " " + rel + " " + right
+	}
 }
 
 class HLTCompareExpression implements HLTBoolExpression
@@ -148,6 +167,10 @@ class HLTCompareExpression implements HLTBoolExpression
 		}
 	}
 
+	override toString()
+	{
+		return left + " " + rel + " " + right
+	}
 }
 
 enum HLTLogicalRelation

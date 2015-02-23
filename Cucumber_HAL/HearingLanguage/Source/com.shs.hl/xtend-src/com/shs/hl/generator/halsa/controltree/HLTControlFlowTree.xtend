@@ -21,6 +21,11 @@ class HLTControlFlowTree
 	{
 		return root
 	}
+
+	override toString()
+	{
+		return "ControlTree: " + root.toString
+	}
 }
 
 class HLTControlTreeNode
@@ -39,6 +44,16 @@ class HLTControlTreeNode
 		children.add(node)
 	}
 
+	override toString()
+	{
+		var result = "["
+		for (n : children)
+		{
+			result += n.toString + ", "
+		}
+		result += "]"
+		return result
+	}
 }
 
 class HLTConditionNode extends HLTControlTreeNode
@@ -53,6 +68,11 @@ class HLTConditionNode extends HLTControlTreeNode
 	def getCondition()
 	{
 		return condition
+	}
+
+	override toString()
+	{
+		return "{" + condition.toString + "}"
 	}
 }
 
@@ -75,5 +95,10 @@ class HLTExecutionNode extends HLTControlTreeNode
 	def getValue()
 	{
 		return value
+	}
+
+	override toString()
+	{
+		return "{" + id + "=" + value + "}"
 	}
 }

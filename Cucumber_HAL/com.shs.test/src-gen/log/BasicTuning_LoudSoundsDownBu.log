@@ -1,2 +1,27 @@
 
-null
+TestCase SetPos_testcase_1 For BasicTuning_LoudSoundsDownBu->SetPos(1)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+End
+
+TestCase SetPos_testcase_2 For BasicTuning_LoudSoundsDownBu->SetPos(1)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+End
+
+TestCase GetPos_testcase_1 For BasicTuning_LoudSoundsDownBu->GetPos()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+End
+
+TestCase GetPos_testcase_2 For BasicTuning_LoudSoundsDownBu->GetPos()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+End
+

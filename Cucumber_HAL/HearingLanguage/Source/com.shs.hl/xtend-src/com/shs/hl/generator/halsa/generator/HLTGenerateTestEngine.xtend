@@ -7,11 +7,13 @@ import com.shs.hl.generator.halsa.controltree.HLTBoolExpression
 import com.shs.hl.generator.halsa.controltree.HLTCompareExpression
 import com.shs.hl.generator.halsa.controltree.HLTCompareRelation
 import com.shs.hl.generator.halsa.controltree.HLTConditionNode
+import com.shs.hl.generator.halsa.controltree.HLTControlFlowTree
 import com.shs.hl.generator.halsa.controltree.HLTControlTreeNode
 import com.shs.hl.generator.halsa.controltree.HLTExecutionNode
 import com.shs.hl.generator.halsa.controltree.HLTLogicalExpression
 import com.shs.hl.generator.halsa.controltree.HLTLogicalRelation
 import com.shs.hl.generator.halsa.evaluation.LRValueSwitch
+import com.shs.hl.generator.halsa.testcase.HLTTestSuiteFactory
 import com.shs.hl.hearingLanguage.And
 import com.shs.hl.hearingLanguage.AssignmentStatement
 import com.shs.hl.hearingLanguage.Equals
@@ -27,8 +29,7 @@ import com.shs.hl.hearingLanguage.ParameterReadExpression
 import com.shs.hl.hearingLanguage.Smaller
 import com.shs.hl.hearingLanguage.SmallerOrEquals
 import com.shs.hl.hearingLanguage.UnEquals
-import com.shs.hl.generator.halsa.testcase.HLTTestSuiteFactory
-import com.shs.hl.generator.halsa.controltree.HLTControlFlowTree
+import java.util.ArrayList
 
 class HLTGenerateTestEngine extends HalsaASTWalkerBase
 {
@@ -37,7 +38,7 @@ class HLTGenerateTestEngine extends HalsaASTWalkerBase
 	String lValue
 	String rValue
 
-	HLTTestSuiteFactory factory
+	HLTTestSuiteFactory factory = new HLTTestSuiteFactory
 
 	override walkApplicationMacro(Namespace macro)
 	{
@@ -49,10 +50,12 @@ class HLTGenerateTestEngine extends HalsaASTWalkerBase
 	{
 		var controlTree = HLTControlFlowTree.create
 		curNode = controlTree.root
+
 		super.walkFunction(declaration)
 
-		factory.forFunction(declaration.name)
-		factory.forControlTree(controlTree)
+		val args = new ArrayList<String>
+		declaration.args.forEach[a|args.add(a.name)]
+		factory.forFunction(declaration.name, args, controlTree)
 	}
 
 	override walkIfStatement(IfStatement ifStmt)
@@ -64,7 +67,7 @@ class HLTGenerateTestEngine extends HalsaASTWalkerBase
 		curNode = node
 		super.walkStatementList(ifStmt.thenBody)
 		curNode = curNode.parent
-		
+
 		for (elseIf : ifStmt.elseIfs)
 		{
 			super.walkIfCondition(elseIf.condition)
@@ -184,12 +187,20 @@ class HLTGenerateTestEngine extends HalsaASTWalkerBase
 		{
 			val param = expression.param as EnumParameter
 			lValue = expression.scope.getName() + ":" + param.name
+
+			// Add possible values for generating tests purpose
+			val possibleValues = new ArrayList<String>
+			for (literal : param.literals)
+			{
+				possibleValues.add(literal.name)
+			}
+			factory.addPossibleValues(param.name, possibleValues)
 		}
 	}
 
 	override walkEnumLiteralReference(EnumLiteral literal)
 	{
-		rValue = literal.name
+		rValue = (literal.eContainer as EnumParameter).name + "." + literal.name
 	}
 
 	override walkNumberLiteral(NumberLiteral literal)
