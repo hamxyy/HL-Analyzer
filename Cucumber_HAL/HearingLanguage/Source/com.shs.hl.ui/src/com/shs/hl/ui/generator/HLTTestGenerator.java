@@ -36,7 +36,7 @@ import com.google.inject.Inject;
 import com.shs.hl.generator.GenerationInfo;
 import com.shs.hl.generator.GenerationInfo.PlatformInformation;
 import com.shs.hl.generator.IHLGenerator;
-import com.shs.hl.generator.halsa.generator.HLTGenerateTestEngine;
+import com.shs.hl.generator.halsa.generator.HLTGenerateTestWalker;
 import com.shs.hl.ui.internal.HearingLanguageActivator;
 import com.shs.hl.ui.utils.BundleHelper;
 import com.shs.hl.ui.utils.BundleHelper.StdlibInfo;
@@ -62,7 +62,7 @@ public class HLTTestGenerator extends AbstractHLGenerator
 	 */
 	private void DoGenerate(PlatformInformation currentPlfInfo, Resource res)
 	{
-		HLTGenerateTestEngine engine = new HLTGenerateTestEngine();
+		HLTGenerateTestWalker engine = new HLTGenerateTestWalker();
 		engine.walk(res, fsa);
 	}
 

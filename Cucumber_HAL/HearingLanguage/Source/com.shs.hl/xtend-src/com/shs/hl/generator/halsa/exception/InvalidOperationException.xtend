@@ -11,3 +11,14 @@ class InvalidOperationException extends Exception
 	}
 
 }
+
+/**
+ * This exception is not supposed to happen.
+ */
+class OnlyHappenWhenBuggyException extends Exception
+{
+	new(String string)
+	{
+		super(string)
+	}
+}

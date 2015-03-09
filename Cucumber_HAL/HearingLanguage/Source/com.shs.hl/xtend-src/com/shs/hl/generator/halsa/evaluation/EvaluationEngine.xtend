@@ -31,9 +31,9 @@ import java.util.List
 import java.util.Stack
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
-import com.shs.hl.generator.halsa.HalsaASTWalkerBase
+import com.shs.hl.generator.halsa.HLTSyntaxTreeWalkerBase
 
-class EvaluationEngine extends HalsaASTWalkerBase
+class EvaluationEngine extends HLTSyntaxTreeWalkerBase
 {
 	String functionName
 	List<Object> params
