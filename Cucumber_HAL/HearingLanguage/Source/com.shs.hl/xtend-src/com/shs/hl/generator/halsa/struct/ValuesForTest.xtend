@@ -40,6 +40,8 @@ class ConditionalValuesForTest implements ValuesForTest
 			{
 				return each
 			}
+
+			viable = true
 		}
 		return null
 	}

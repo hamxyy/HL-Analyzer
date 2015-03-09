@@ -20,6 +20,11 @@ class LocalVariable implements ExpressionResult
 	{
 	}
 
+	new(ExpressionResult iniValue)
+	{
+		this.assign(iniValue, HLTConstantExpression.alwaysTrue)
+	}
+
 	new(String value, HLTBoolExpression expression)
 	{
 		this.put(value, expression)
@@ -50,14 +55,6 @@ class LocalVariable implements ExpressionResult
 		return all
 	}
 
-	def assign(ExpressionResult newValue, HLTBoolExpression curCondition)
-	{
-		for (eachCondVal : newValue.allValues)
-		{
-			values.put(eachCondVal.value, eachCondVal.condition.and(curCondition))
-		}
-	}
-
 	override compare(ExpressionResult that, HLTCompareRelation relation)
 	{
 		var HLTBoolExpression expr = new HLTDummyBoolExpression
@@ -79,6 +76,28 @@ class LocalVariable implements ExpressionResult
 		return expr
 	}
 
+	def assign(ExpressionResult newValue, HLTBoolExpression curCondition)
+	{
+		for (eachCondVal : newValue.allValues)
+		{
+			values.put(eachCondVal.value, eachCondVal.condition.and(curCondition))
+		}
+	}
+
+	def plusEquals(String increment, HLTBoolExpression curCondition)
+	{
+		for (eachCondVal : this.allValues)
+		{
+			values.put(String.valueOf(eachCondVal.value.toInt + increment.toInt),
+				eachCondVal.condition.and(curCondition))
+		}
+	}
+
+	def toInt(String string)
+	{
+		return Integer.parseInt(string)
+	}
+
 }
 
 class Constant implements ExpressionResult
@@ -88,6 +107,11 @@ class Constant implements ExpressionResult
 	new(String value)
 	{
 		this.value = value
+	}
+
+	def getValue()
+	{
+		return value
 	}
 
 	override getAllValues()

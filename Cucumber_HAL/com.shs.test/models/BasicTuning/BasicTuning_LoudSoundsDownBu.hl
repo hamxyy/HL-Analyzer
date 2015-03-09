@@ -51,16 +51,9 @@ namespace shs_sat
 			}
 			else if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.on)
 			{
-				on = 1;
+				on = Test_Library.getOne ();
 			}
-			if (on > 0)
-			{
-				hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off;
-			}
-			else
-			{
-				hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on;
-			}
+			Test_Library.setConnexxFitEn (on);
 			switch (on)
 			{
 				case 1:{ // Automatic MicMode + CarFocus checkbox = ON

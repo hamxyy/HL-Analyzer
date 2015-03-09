@@ -29,6 +29,7 @@ class HLTGeneratedTestCase
 	public String name;
 	public String macroName;
 	public String functionName;
+	public String returnValue;
 	public List<Object> paramList = new ArrayList;
 	public Map<String, String> globalValues = new HashMap;
 	public Map<String, String> expectedValues = new HashMap;
@@ -41,6 +42,7 @@ class HLTGeneratedTestCase
 			merged.name = name
 			merged.macroName = macroName
 			merged.functionName = functionName
+			merged.returnValue = returnValue
 			merged.paramList = paramList
 			merged.globalValues = globalValues
 			merged.expectedValues = expectedValues.merge(another.expectedValues)
@@ -103,12 +105,14 @@ class HLTGeneratedTestCase
 
 		return true
 	}
+
 }
 
 class HLTExecutionPath
 {
 	public Map<String, ValuesForTest> valuesRead = new HashMap
 	public Map<String, String> valuesChanged = new HashMap
+	public String valueReturned
 
 	def fork()
 	{
@@ -123,6 +127,8 @@ class HLTExecutionPath
 		{
 			cloned.valuesChanged.put(entry.key, entry.value)
 		}
+		cloned.valueReturned = valueReturned
 		return cloned
 	}
+
 }

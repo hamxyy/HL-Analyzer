@@ -15,3 +15,11 @@ TestCase SetPos_testcase_2 For BasicTuning_LoudSoundsDownBu->SetPos(?)
 		hi:d8SwMacroAutoSpeechFocusEnHP = d8SwMacroAutoSpeechFocusEnHP.on
 End
 
+TestCase SetPos_testcase_3 For BasicTuning_LoudSoundsDownBu->SetPos(?)
+	When
+		hi:d8SwMacroAutoSpeechFocusEnHP = d8SwMacroAutoSpeechFocusEnHP.on
+	Then
+	Return
+		true
+End
+

@@ -17,6 +17,8 @@ import java.util.List
 import java.util.Map
 import com.shs.hl.generator.halsa.struct.ValuesForTest
 import com.shs.hl.generator.halsa.struct.ConditionalValuesForTest
+import com.shs.hl.generator.halsa.struct.HLTConstantExpression
+import com.shs.hl.generator.halsa.struct.HLTReturnNode
 
 class HLTTestSuiteFactory
 {
@@ -64,6 +66,7 @@ class HLTTestSuiteFactory
 				testCase.globalValues.put(entry.key, entry.value.firstOrDefault)
 			}
 			testCase.expectedValues = path.valuesChanged
+			testCase.returnValue = path.valueReturned
 
 			var merged = false
 			for (var i = 0; i < curSuite.testCases.length; i++)
@@ -94,6 +97,11 @@ class HLTTestSuiteFactory
 			{
 				val exeNode = node as HLTExecutionNode
 				path.valuesChanged.put(exeNode.id, exeNode.value)
+			}
+			if (node instanceof HLTReturnNode)
+			{
+				var returnNode = node as HLTReturnNode
+				path.valueReturned = returnNode.value
 			}
 		}
 
@@ -170,6 +178,9 @@ class HLTTestSuiteFactory
 					}
 				}
 			}
+			case boolExpr instanceof HLTConstantExpression:
+			{
+			}
 			default:
 			{
 				throw new InvalidOperationException("")
@@ -188,6 +199,10 @@ class HLTTestSuiteFactory
 				«FOR p : testCase.expectedValues.entrySet»
 					«p.key» = «p.value.toString»
 				«ENDFOR»
+			«IF testCase.returnValue != null»
+				Return
+					«testCase.returnValue»
+			«ENDIF»
 		End
 		
 	'''

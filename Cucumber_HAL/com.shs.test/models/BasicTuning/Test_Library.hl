@@ -16,11 +16,23 @@ namespace shs_sat
 	using shs_sat.*;
 	package Lib Test_Library
 	{
-		public function int map (int pos)
+		public function int getOne ()
 		{
 			return 1;
 		} // closes MixedMode BasicTuning_LoudSoundsDownBu
-
+		public function void setConnexxFitEn (int on)
+		{
+			if (on == 1)
+			{
+				hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off;
+				int i = 1;
+			}
+			else
+			{
+				hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on;
+			}
+			i = 0;
+		}
 	}
 } //namespace shs.sat
 // end of file

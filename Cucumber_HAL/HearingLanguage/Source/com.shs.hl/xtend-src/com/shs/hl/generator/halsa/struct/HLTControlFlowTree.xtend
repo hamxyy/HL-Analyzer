@@ -181,3 +181,24 @@ class HLTExecutionNode extends HLTControlFlowTreeNode
 		return "- " + id + "=" + value
 	}
 }
+
+class HLTReturnNode extends HLTControlFlowTreeNode
+{
+	String value
+
+	new(String value)
+	{
+		this.value = value
+	}
+
+	def getValue()
+	{
+		return value
+	}
+
+	override toString()
+	{
+		return "- return " + value
+	}
+
+}

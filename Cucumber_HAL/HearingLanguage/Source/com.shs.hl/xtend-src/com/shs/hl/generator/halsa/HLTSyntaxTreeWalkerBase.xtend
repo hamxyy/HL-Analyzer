@@ -91,7 +91,6 @@ import com.shs.hl.hearingLanguage.WhileStatement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
-import java.io.PrintWriter
 
 class HLTSyntaxTreeWalkerBase
 {
@@ -122,9 +121,10 @@ class HLTSyntaxTreeWalkerBase
 							catch (Exception e)
 							{
 								error += "error: " + e.toString + "\n"
-//								var s = ""
-//								e.printStackTrace(new PrintWriter(s))
-//								error += s
+
+							//								var s = ""
+							//								e.printStackTrace(new PrintWriter(s))
+							//								error += s
 							}
 						}
 					}
@@ -218,7 +218,7 @@ class HLTSyntaxTreeWalkerBase
 				}
 				case statement instanceof WhileStatement:
 				{
-					neverGonnaHappen
+					walkWhileStatement(statement as WhileStatement)
 				}
 				case statement instanceof DoWhileStatement:
 				{
@@ -264,7 +264,13 @@ class HLTSyntaxTreeWalkerBase
 		}
 	}
 
-	protected def walkSwitchStatement(SwitchStatement switchStmt)
+	protected def void walkWhileStatement(WhileStatement statement)
+	{
+		walkExpression(statement.expr as Expression)
+		walkStatementList(statement.body)
+	}
+
+	protected def void walkSwitchStatement(SwitchStatement switchStmt)
 	{
 		walkExpression(switchStmt.expr as Expression)
 		for (^case : switchStmt.cases)
@@ -470,6 +476,7 @@ class HLTSyntaxTreeWalkerBase
 			}
 			case expression instanceof PreIncrementExpr:
 			{
+				walkPreIncrementExpr(expression as PreIncrementExpr)
 			}
 			case expression instanceof PreDecrementExpr:
 			{
@@ -588,6 +595,10 @@ class HLTSyntaxTreeWalkerBase
 			}
 		}
 
+	}
+
+	protected def void walkPreIncrementExpr(PreIncrementExpr expr)
+	{
 	}
 
 	protected def void walkParameterReference(ParameterDeclaration declaration)
