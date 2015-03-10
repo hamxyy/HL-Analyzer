@@ -4,6 +4,7 @@ import com.shs.common.commonLanguage.EnumLiteral
 import com.shs.common.commonLanguage.EnumParameter
 import com.shs.hl.generator.halsa.HLTSyntaxTreeWalkerBase
 import com.shs.hl.generator.halsa.evaluation.LRValueSwitch
+import com.shs.hl.generator.halsa.service.SymbolDeclarationService
 import com.shs.hl.generator.halsa.struct.Constant
 import com.shs.hl.generator.halsa.struct.ExpressionResult
 import com.shs.hl.generator.halsa.struct.GlobalVariable
@@ -23,6 +24,7 @@ import com.shs.hl.hearingLanguage.ArgList
 import com.shs.hl.hearingLanguage.AssignmentStatement
 import com.shs.hl.hearingLanguage.Equals
 import com.shs.hl.hearingLanguage.Expression
+import com.shs.hl.hearingLanguage.FalseLiteral
 import com.shs.hl.hearingLanguage.FunctionDeclaration
 import com.shs.hl.hearingLanguage.Greater
 import com.shs.hl.hearingLanguage.GreaterOrEquals
@@ -40,6 +42,7 @@ import com.shs.hl.hearingLanguage.ReturnStatement
 import com.shs.hl.hearingLanguage.Smaller
 import com.shs.hl.hearingLanguage.SmallerOrEquals
 import com.shs.hl.hearingLanguage.SwitchStatement
+import com.shs.hl.hearingLanguage.TrueLiteral
 import com.shs.hl.hearingLanguage.UnEquals
 import com.shs.hl.hearingLanguage.WhileStatement
 import java.util.ArrayList
@@ -353,8 +356,8 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 
 	override walkParameterRead(ParameterReadExpression expression)
 	{
-		val param = expression.param as EnumParameter
-		val paramText = expression.scope.getName() + ":" + param.name
+		val struct = SymbolDeclarationService.getStruct(expression.param)
+		val paramText = expression.scope.getName() + ":" + struct.name
 		if (lrValueSwitch == LRValueSwitch.RValue)
 		{
 			rValue = new GlobalVariable(paramText)
@@ -363,14 +366,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 		{
 			lValue = new StorageObject(paramText, true)
 		}
-
-		// Add possible values for generating tests purpose
-		val possibleValues = new ArrayList<String>
-		for (literal : param.literals)
-		{
-			possibleValues.add(param.name + "." + literal.name)
-		}
-		factory.addPossibleValues(paramText, possibleValues)
+		factory.addPossibleValues(paramText, struct.possibleValues)
 	}
 
 	override walkParameterReference(ParameterDeclaration declaration)
@@ -412,6 +408,16 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	override walkNumberLiteral(NumberLiteral literal)
 	{
 		rValue = new Constant(literal.value)
+	}
+
+	override walkFalseLiteral(FalseLiteral literal)
+	{
+		rValue = new Constant("false")
+	}
+
+	override walkTrueLiteral(TrueLiteral literal)
+	{
+		rValue = new Constant("true")
 	}
 
 	def HLTBoolExpression getCurBoolExpr()

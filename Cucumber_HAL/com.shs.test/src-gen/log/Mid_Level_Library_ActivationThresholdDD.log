@@ -1,2 +1,45 @@
-error: java.lang.NullPointerException
+
+TestCase MicActivationThresholdDD_IsVisible_testcase_1 For Mid_Level_Library_ActivationThresholdDD->MicActivationThresholdDD_IsVisible()
+	When
+		cap:PricePoint = PricePoint.PP100
+	Then
+	Return
+		true
+End
+
+TestCase MicActivationThresholdDD_IsVisible_testcase_2 For Mid_Level_Library_ActivationThresholdDD->MicActivationThresholdDD_IsVisible()
+	When
+		cap:PricePoint = PricePoint.PP50
+	Then
+	Return
+		false
+End
+
+TestCase ActivationThresholdDD_Remapping_testcase_3 For Mid_Level_Library_ActivationThresholdDD->ActivationThresholdDD_Remapping(0,?,?,?)
+	When
+	Then
+	Return
+		pos1
+End
+
+TestCase ActivationThresholdDD_Remapping_testcase_4 For Mid_Level_Library_ActivationThresholdDD->ActivationThresholdDD_Remapping(2,?,?,?)
+	When
+	Then
+	Return
+		pos3
+End
+
+TestCase ActivationThresholdDD_Remapping_testcase_5 For Mid_Level_Library_ActivationThresholdDD->ActivationThresholdDD_Remapping(1,?,?,?)
+	When
+	Then
+	Return
+		pos2
+End
+
+TestCase ActivationThresholdDD_Remapping_testcase_6 For Mid_Level_Library_ActivationThresholdDD->ActivationThresholdDD_Remapping(?,?,?,?)
+	When
+	Then
+	Return
+		9
+End
 

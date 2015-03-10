@@ -1,0 +1,38 @@
+
+TestCase AutoPhoneEn_IsVisible_testcase_1 For Mid_Level_Library_AutoPhone->AutoPhoneEn_IsVisible()
+	When
+		hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Telecoil
+		cap:AutocoilAvailable = AutocoilAvailable.exists
+	Then
+	Return
+		true
+End
+
+TestCase AutoPhoneEn_IsVisible_testcase_2 For Mid_Level_Library_AutoPhone->AutoPhoneEn_IsVisible()
+	When
+		hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Microphone
+		cap:AutocoilAvailable = AutocoilAvailable.exists
+		env:Prog = 0
+	Then
+	Return
+		false
+End
+
+TestCase AutoPhoneEn_IsVisible_testcase_3 For Mid_Level_Library_AutoPhone->AutoPhoneEn_IsVisible()
+	When
+		hi:d8SwMacroInputModeHp = d8SwMacroInputModeHp.Microphone
+		cap:AutocoilAvailable = AutocoilAvailable.exists
+		env:Prog = 1
+	Then
+	Return
+		true
+End
+
+TestCase AutoPhoneEn_IsVisible_testcase_4 For Mid_Level_Library_AutoPhone->AutoPhoneEn_IsVisible()
+	When
+		cap:AutocoilAvailable = AutocoilAvailable.none
+	Then
+	Return
+		false
+End
+
