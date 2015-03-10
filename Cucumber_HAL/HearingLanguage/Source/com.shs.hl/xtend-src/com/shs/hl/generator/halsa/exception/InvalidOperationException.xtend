@@ -4,12 +4,34 @@ import java.lang.Exception
 
 class InvalidOperationException extends Exception
 {
-
 	new(String string)
 	{
 		super(string)
 	}
+}
 
+class AbondonPathException extends Exception
+{
+	new(String string)
+	{
+		super(string)
+	}
+}
+
+class PathNoEffectException extends AbondonPathException
+{
+	new(String string)
+	{
+		super(string)
+	}
+}
+
+class UnreachablePathException extends AbondonPathException
+{
+	new(String string)
+	{
+		super(string)
+	}
 }
 
 /**

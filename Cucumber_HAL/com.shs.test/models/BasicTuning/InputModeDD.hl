@@ -27,18 +27,16 @@ namespace shs_sat
 	using shs_sat.*;
 	package MixedMode InputModeDD
 	{
-		
- 		application function int GetPos ()
-		{
-			println ('[HAL]MM - InputModeDD - GetPos');
-			return High_Level_Library_InputMode.InputModeDD_Get ();
-		} // Closes InputModeDD.GetPos
- 
-// 		application function void SetPos (int pos)
+//		application function int GetPos ()
 //		{
-//			println ('[HAL]MM - InputModeDD - SetPos = ' + pos);
-//			High_Level_Library_InputMode.InputModeDD_Set (pos);
-//		} // Closes InputModeDD.SetPos
+//			println ('[HAL]MM - InputModeDD - GetPos');
+//			return High_Level_Library_InputMode.InputModeDD_Get ();
+//		} // Closes InputModeDD.GetPos
+		application function void SetPos (int pos)
+		{
+			println ('[HAL]MM - InputModeDD - SetPos = ' + pos);
+			High_Level_Library_InputMode.InputModeDD_Set (pos);
+		} // Closes InputModeDD.SetPos
 
 	} //package MixedMode.InputModeDD
 

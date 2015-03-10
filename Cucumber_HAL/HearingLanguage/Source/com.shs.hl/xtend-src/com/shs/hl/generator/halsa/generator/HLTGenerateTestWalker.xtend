@@ -41,6 +41,7 @@ import com.shs.hl.hearingLanguage.Smaller
 import com.shs.hl.hearingLanguage.SmallerOrEquals
 import com.shs.hl.hearingLanguage.SwitchStatement
 import com.shs.hl.hearingLanguage.UnEquals
+import com.shs.hl.hearingLanguage.WhileStatement
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.Map
@@ -50,7 +51,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	val String RETURN_VALUE_KEY = "$return"
 
 	HLTControlFlowTreeNode curNode
-	HLTLocalVariables localVarHandler = new HLTLocalVariables
+	HLTLocalVariables localVarHandler
 	StorageObject lValue
 	ExpressionResult rValue
 
@@ -62,6 +63,12 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	{
 		factory.forMacro(macro.name)
 		super.walkApplicationMacro(macro)
+	}
+
+	override walkLibrary(Namespace macro)
+	{
+		factory.forMacro(macro.name)
+		super.walkLibrary(macro)
 	}
 
 	override walkFunction(FunctionDeclaration declaration)
@@ -79,6 +86,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	{
 		var controlTree = HLTControlFlowTree.create
 		curNode = controlTree.root
+		localVarHandler = new HLTLocalVariables
 		localVarHandler.declare(RETURN_VALUE_KEY)
 		super.walkFunction(declaration)
 		return controlTree
@@ -139,7 +147,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 			}
 			else
 			{
-				throw new Exception("Unreachable statements!")
+				//throw new Exception("Unreachable statements!")
 			}
 		}
 		else
@@ -203,6 +211,18 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 			super.walkStatementList(switchStmt.defaultBlock)
 			curNode = curNode.parent
 		}
+	}
+
+	override walkWhileStatement(WhileStatement statement)
+	{
+		this.lrValueSwitch = LRValueSwitch.RValue
+		walkExpression(statement.expr as Expression)
+		val condition = curBoolExpr
+		while (condition.evaluate)
+		{
+			walkStatementList(statement.body)
+		}
+
 	}
 
 	override walkLocalVariableDeclarationStatement(LocalVariableDeclarationStatement statement)
@@ -342,15 +362,15 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 		else
 		{
 			lValue = new StorageObject(paramText, true)
-
-			// Add possible values for generating tests purpose
-			val possibleValues = new ArrayList<String>
-			for (literal : param.literals)
-			{
-				possibleValues.add(param.name + "." + literal.name)
-			}
-			factory.addPossibleValues(paramText, possibleValues)
 		}
+
+		// Add possible values for generating tests purpose
+		val possibleValues = new ArrayList<String>
+		for (literal : param.literals)
+		{
+			possibleValues.add(param.name + "." + literal.name)
+		}
+		factory.addPossibleValues(paramText, possibleValues)
 	}
 
 	override walkParameterReference(ParameterDeclaration declaration)

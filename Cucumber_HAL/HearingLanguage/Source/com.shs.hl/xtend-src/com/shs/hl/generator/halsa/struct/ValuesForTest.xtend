@@ -7,10 +7,25 @@ import java.util.List
 interface ValuesForTest
 {
 	def String firstOrDefault()
+}
 
-	def String select(Function<String, Boolean> predicate)
+class IntegerForTest implements ValuesForTest
+{
+	List<Integer> notAllowedValues
 
-	def ValuesForTest withCondition(Function<String, Boolean> newCond)
+	new(List<Integer> notAllowedValues)
+	{
+		this.notAllowedValues = notAllowedValues
+	}
+
+	override firstOrDefault()
+	{
+		if (notAllowedValues == null || notAllowedValues.isEmpty)
+		{
+			return "0"
+		}
+		return (notAllowedValues.max + 1).toString
+	}
 }
 
 class ConditionalValuesForTest implements ValuesForTest
@@ -25,6 +40,11 @@ class ConditionalValuesForTest implements ValuesForTest
 
 	override firstOrDefault()
 	{
+		if (all == null)
+		{
+			return null
+		}
+
 		var viable = true
 		for (each : all)
 		{
@@ -46,28 +66,31 @@ class ConditionalValuesForTest implements ValuesForTest
 		return null
 	}
 
-	override select(Function<String, Boolean> exPredicate)
-	{
-		for (each : all)
-		{
-			if (exPredicate.apply(each))
-			{
-				for (predicate : predicates)
-				{
-					if (predicate.apply(each))
-					{
-
-						// Return the first viable one
-						return each
-					}
-				}
-
-			}
-		}
-		return null
-	}
-
-	override withCondition(Function<String, Boolean> newCond)
+	//	override select(Function<String, Boolean> exPredicate)
+	//	{
+	//		if (all == null)
+	//		{
+	//			return null
+	//		}
+	//		for (each : all)
+	//		{
+	//			if (exPredicate.apply(each))
+	//			{
+	//				for (predicate : predicates)
+	//				{
+	//					if (predicate.apply(each))
+	//					{
+	//
+	//						// Return the first viable one
+	//						return each
+	//					}
+	//				}
+	//
+	//			}
+	//		}
+	//		return null
+	//	}
+	def withCondition(Function<String, Boolean> newCond)
 	{
 		predicates.add(newCond)
 		return this

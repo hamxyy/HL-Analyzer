@@ -1,9 +1,13 @@
 package com.shs.hl.generator.halsa.generator
 
+import com.shs.hl.generator.halsa.exception.AbondonPathException
 import com.shs.hl.generator.halsa.exception.InvalidOperationException
+import com.shs.hl.generator.halsa.exception.UnreachablePathException
+import com.shs.hl.generator.halsa.struct.ConditionalValuesForTest
 import com.shs.hl.generator.halsa.struct.HLTBoolExpression
 import com.shs.hl.generator.halsa.struct.HLTCompareExpression
 import com.shs.hl.generator.halsa.struct.HLTConditionNode
+import com.shs.hl.generator.halsa.struct.HLTConstantExpression
 import com.shs.hl.generator.halsa.struct.HLTControlFlowTree
 import com.shs.hl.generator.halsa.struct.HLTControlFlowTreeNode
 import com.shs.hl.generator.halsa.struct.HLTExecutionNode
@@ -11,14 +15,13 @@ import com.shs.hl.generator.halsa.struct.HLTExecutionPath
 import com.shs.hl.generator.halsa.struct.HLTGeneratedTestCase
 import com.shs.hl.generator.halsa.struct.HLTGeneratedTestSuite
 import com.shs.hl.generator.halsa.struct.HLTLogicalExpression
+import com.shs.hl.generator.halsa.struct.HLTReturnNode
+import com.shs.hl.generator.halsa.struct.IntegerForTest
+import com.shs.hl.generator.halsa.struct.ValuesForTest
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
 import java.util.Map
-import com.shs.hl.generator.halsa.struct.ValuesForTest
-import com.shs.hl.generator.halsa.struct.ConditionalValuesForTest
-import com.shs.hl.generator.halsa.struct.HLTConstantExpression
-import com.shs.hl.generator.halsa.struct.HLTReturnNode
 
 class HLTTestSuiteFactory
 {
@@ -40,50 +43,60 @@ class HLTTestSuiteFactory
 
 		for (path : execPaths)
 		{
-			val testCase = curSuite.createTestCase()
-			testCase.name = functionName + "_testcase_" + (curSuite.testCases.length + 1)
-			testCase.functionName = functionName
-			args.forEach [ n |
-				{
-					var value = path.valuesRead.get(n)
-					if (value == null)
-					{
-						testCase.paramList.add("?")
-					}
-					else
-					{
-						testCase.paramList.add(value.firstOrDefault)
-						path.valuesRead.remove(n)
-					}
-				}
-			]
-			for (entry : path.valuesRead.entrySet)
+			try
 			{
-				if (entry.value.firstOrDefault == null)
+				if (!path.hasNoEffect())
 				{
-					throw new Exception("Logic conflicting!")
-				}
-				testCase.globalValues.put(entry.key, entry.value.firstOrDefault)
-			}
-			testCase.expectedValues = path.valuesChanged
-			testCase.returnValue = path.valueReturned
 
-			var merged = false
-			for (var i = 0; i < curSuite.testCases.length; i++)
-			{
-				if (!merged)
-				{
-					val mergedTestCase = curSuite.testCases.get(i).merge(testCase)
-					if (mergedTestCase != null)
+					val testCase = curSuite.createTestCase()
+					testCase.name = functionName + "_testcase_" + (curSuite.testCases.length + 1)
+					testCase.functionName = functionName
+					args.forEach [ n |
+						{
+							var value = path.valuesRead.get(n)
+							if (value == null)
+							{
+								testCase.paramList.add("?")
+							}
+							else
+							{
+								testCase.paramList.add(value.firstOrDefault)
+								path.valuesRead.remove(n)
+							}
+						}
+					]
+					for (entry : path.valuesRead.entrySet)
 					{
-						curSuite.testCases.set(i, mergedTestCase)
-						merged = true
+						if (entry.value.firstOrDefault == null)
+						{
+							throw new UnreachablePathException("Logic conflicting or unreachable!")
+						}
+						testCase.globalValues.put(entry.key, entry.value.firstOrDefault)
+					}
+					testCase.expectedValues = path.valuesChanged
+					testCase.returnValue = path.valueReturned
+
+					var merged = false
+					for (var i = 0; i < curSuite.testCases.length; i++)
+					{
+						if (!merged)
+						{
+							val mergedTestCase = curSuite.testCases.get(i).merge(testCase)
+							if (mergedTestCase != null)
+							{
+								curSuite.testCases.set(i, mergedTestCase)
+								merged = true
+							}
+						}
+					}
+					if (!merged)
+					{
+						curSuite.testCases.add(testCase)
 					}
 				}
 			}
-			if (!merged)
+			catch (AbondonPathException e)
 			{
-				curSuite.testCases.add(testCase)
 			}
 		}
 	}
@@ -144,9 +157,20 @@ class HLTTestSuiteFactory
 					}
 					case Unequals:
 					{
-						val values = possibleValues.get(compExpr.left.toString)
-						globalValues.put(compExpr.left.toString,
-							new ConditionalValuesForTest(values).withCondition([s|!s.equals(compExpr.right.toString)]))
+						if (possibleValues.containsKey(compExpr.left.toString)) // This means it's an enum value.
+						{
+							val values = possibleValues.get(compExpr.left.toString)
+							globalValues.put(compExpr.left.toString,
+								new ConditionalValuesForTest(values).withCondition(
+									[s|!s.equals(compExpr.right.toString)]))
+						}
+						else
+						{
+							val list = new ArrayList<Integer>()
+							list.add(Integer.parseInt(compExpr.right))
+							globalValues.put(compExpr.left.toString, new IntegerForTest(list))
+						}
+
 					}
 					case GreaterThan:
 					{

@@ -131,4 +131,9 @@ class HLTExecutionPath
 		return cloned
 	}
 
+	def hasNoEffect()
+	{
+		return valueReturned == null && valuesChanged.isEmpty
+	}
+
 }

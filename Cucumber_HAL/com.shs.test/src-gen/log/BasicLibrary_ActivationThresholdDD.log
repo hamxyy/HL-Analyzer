@@ -1,0 +1,91 @@
+
+TestCase ActivationThresholdDD_Get_testcase_1 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Get()
+	When
+		hi:d8SwMacroMicActThrHp = d8SwMacroMicActThrHp.high
+	Then
+	Return
+		2
+End
+
+TestCase ActivationThresholdDD_Get_testcase_2 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Get()
+	When
+		hi:d8SwMacroMicActThrHp = d8SwMacroMicActThrHp.med
+	Then
+	Return
+		1
+End
+
+TestCase ActivationThresholdDD_Get_testcase_3 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Get()
+	When
+		hi:d8SwMacroMicActThrHp = d8SwMacroMicActThrHp.low
+	Then
+	Return
+		0
+End
+
+TestCase ActivationThresholdDD_SetSwMacroMicActThr_testcase_4 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_SetSwMacroMicActThr(0)
+	When
+	Then
+		hi:d8SwMacroMicActThrHp = d8SwMacroMicActThrHp.low
+End
+
+TestCase ActivationThresholdDD_SetSwMacroMicActThr_testcase_5 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_SetSwMacroMicActThr(1)
+	When
+	Then
+		hi:d8SwMacroMicActThrHp = d8SwMacroMicActThrHp.med
+End
+
+TestCase ActivationThresholdDD_SetSwMacroMicActThr_testcase_6 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_SetSwMacroMicActThr(2)
+	When
+	Then
+		hi:d8SwMacroMicActThrHp = d8SwMacroMicActThrHp.high
+End
+
+TestCase ActivationThresholdDD_Set_testcase_7 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(0)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact._0_dB
+End
+
+TestCase ActivationThresholdDD_Set_testcase_8 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(1)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact._3_dB
+End
+
+TestCase ActivationThresholdDD_Set_testcase_9 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(2)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact._6_dB
+End
+
+TestCase ActivationThresholdDD_Set_testcase_10 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(3)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact._9_dB
+End
+
+TestCase ActivationThresholdDD_Set_testcase_11 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(4)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact._12_dB
+End
+
+TestCase ActivationThresholdDD_Set_testcase_12 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(5)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact.M9_dB
+End
+
+TestCase ActivationThresholdDD_Set_testcase_13 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(6)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact.M6_dB
+End
+
+TestCase ActivationThresholdDD_Set_testcase_14 For BasicLibrary_ActivationThresholdDD->ActivationThresholdDD_Set(7)
+	When
+	Then
+		hi:d8FMicNoisefloorFact = d8FMicNoisefloorFact.M3_dB
+End
+

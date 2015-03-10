@@ -160,9 +160,13 @@ class GlobalVariable implements ExpressionResult
 	{
 		if (that instanceof GlobalVariable) // if both Constant then expand directly.
 		{
-			new HLTCompareExpression(this.name, HLTCompareRelation.Equals, (that as GlobalVariable).name)
+			new HLTCompareExpression(this.name, relation, (that as GlobalVariable).name)
 		}
-		else
+		else if (that instanceof Constant) // if that is a constant, then compare directly
+		{
+			new HLTCompareExpression(this.name, relation, (that as Constant).value)
+		}
+		else // local variable, then let variable compare
 		{
 			return that.compare(this, relation)
 		}

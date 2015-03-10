@@ -1,0 +1,2 @@
+error: java.lang.ClassCastException: com.shs.common.commonLanguage.impl.IntegerParameterImpl cannot be cast to com.shs.common.commonLanguage.EnumParameter
+
