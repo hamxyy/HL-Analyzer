@@ -98,7 +98,7 @@ class HLTSyntaxTreeWalkerBase
 
 	def walk(Resource resource, IFileSystemAccess fsa)
 	{
-		var fileName = "";
+		var macroName = "";
 		var error = "";
 
 		for (namesp : resource.allContents.toIterable.filter(typeof(Namespace)))
@@ -112,7 +112,7 @@ class HLTSyntaxTreeWalkerBase
 					{
 						if (package.isIsPackage)
 						{
-							fileName = package.name
+							macroName = package.name
 
 							try
 							{
@@ -132,12 +132,13 @@ class HLTSyntaxTreeWalkerBase
 			}
 		}
 
-		//		fsa.generateFile(
-		//			"d:/hl_analysis/generated_" + fileName + ".hlt",
-		//			error + handler.log
-		//		)
+		generateFile(fsa, macroName, error)
+	}
+
+	def generateFile(IFileSystemAccess fsa, String macroName, String error)
+	{
 		fsa.generateFile(
-			"/log/" + fileName + ".log",
+			"/log/" + macroName + ".log",
 			error + "\n" + log
 		)
 	}

@@ -48,6 +48,7 @@ namespace shs_sat
 //   Description:  remapping  Menu positions  
 -----------------------------------------------------------------------------------------------------------------*/
 		public function int InputModeDD_Remapping (int pos) //SIFIT7.3PEERREVIEWED
+
 		{
 			int physicalPos = 0;
 			int caseID = 0;
@@ -60,7 +61,7 @@ namespace shs_sat
 			     * 5 -> miniTek Telecoil
 			     * 6 -> Direct Audio Input(FM)	*/
 
-			// Different cases of Input mode Lists are as below
+// Different cases of Input mode Lists are as below
 			/* Case ID      Mic  	 	 Tcoil		   Wireless		    DAI
 		      * 	1		available     NA 			 NA					NA
 		      * 	2		available     NA 			 NA					available
@@ -75,18 +76,18 @@ namespace shs_sat
 			caseID = 1; // Microphone alone exist is case ID = 1
 			if (cap:TelecoilAvailable == TelecoilAvailable.exists)
 			{
-				println('[HAL]MLIB.InputModeDD_Remapping >> TelecoilAvailable.exists');
+				println ('[HAL]MLIB.InputModeDD_Remapping >> TelecoilAvailable.exists');
 				caseID += 4; // Telecoil CaseIDs start from 5 
 
 			}
 			if (cap:WlsAudio == WlsAudio.exists)
 			{
-				println('[HAL]MLIB.InputModeDD_Remapping >> WlsAudio.exists');
+				println ('[HAL]MLIB.InputModeDD_Remapping >> WlsAudio.exists');
 				caseID += 2;
 			}
 			if (cap:AudioshoeAvailable == AudioshoeAvailable.exists)
 			{
-				println('[HAL]MLIB.InputModeDD_Remapping >> AudioshoeAvailable.exists');
+				println ('[HAL]MLIB.InputModeDD_Remapping >> AudioshoeAvailable.exists');
 				caseID += 1;
 			}
 			switch (caseID)
@@ -224,7 +225,8 @@ namespace shs_sat
 				} // Closing Case  8 
 
 			} // Closing Switch(CaseID)
-			println('[HAL]MLIB.InputModeDD_Remapping >> CaseID=' + caseID + '  CxxPos=' + pos + '   physicalPos=' + physicalPos);
+			println ('[HAL]MLIB.InputModeDD_Remapping >> CaseID=' + caseID + '  CxxPos=' + pos +
+				'   physicalPos=' + physicalPos);
 			return physicalPos;
 		} //Closing Mid_Level_Library_InputMode.InputModeDD_Remapping
 
@@ -235,6 +237,7 @@ namespace shs_sat
 //   Description:   Maximum no of input modes available for Current Device
 -----------------------------------------------------------------------------------------------------------------*/
 		public function int InputModeDD_MaxPos () //SIFIT7.3PEERREVIEWED
+
 		{
 
 		//Default Value for ALL PricePoints and Family is 6 
@@ -250,29 +253,29 @@ namespace shs_sat
 			int retval = 0; // Microphone is always available 			 
 			if (cap:TelecoilAvailable == TelecoilAvailable.exists)
 			{
-				println('[HAL]MLIB.InputModeDD_MaxPos >> TelecoilAvailable.exists');
+				println ('[HAL]MLIB.InputModeDD_MaxPos >> TelecoilAvailable.exists');
 				retval += 1; // Telecoil adds one more entry to the input mode drop down list/menu
 
 			}
 			if (cap:WlsAudio == WlsAudio.exists)
 			{
-				println('[HAL]MLIB.InputModeDD_MaxPos >> WlsAudio.exists');
+				println ('[HAL]MLIB.InputModeDD_MaxPos >> WlsAudio.exists');
 				retval += 3; // Wireless Audio i.e. Tek/Minitek adds 3 more entry to the input mode drop down list/menu
 
 			}
 			if (cap:WlsPhone == WlsPhone.exists)
 			{
-				println('[HAL]MLIB.InputModeDD_MaxPos >> WlsPhone.exists');
+				println ('[HAL]MLIB.InputModeDD_MaxPos >> WlsPhone.exists');
 				retval += 1; // Wireless Phone i.e. Bluetooth Phone adds 1 more entry to the input mode drop down list/menu
 
 			}
 			if (cap:AudioshoeAvailable == AudioshoeAvailable.exists)
 			{
-				println('[HAL]MLIB.InputModeDD_MaxPos >> AudioshoeAvailable.exists');
+				println ('[HAL]MLIB.InputModeDD_MaxPos >> AudioshoeAvailable.exists');
 				retval += 1; // DAI adds one more entry to the input mode drop down list/menu
 
 			}
-			println('[HAL]MLIB.InputModeDD_MaxPos = ' + retval);
+			println ('[HAL]MLIB.InputModeDD_MaxPos = ' + retval);
 			return retval;
 		} //Closes Mid_Level_Library_InputMode.InputModeDD_MaxPos
 
@@ -285,6 +288,7 @@ namespace shs_sat
 //              :  This position should be used in case there is invalid Menu position found in macro
 -----------------------------------------------------------------------------------------------------------------*/
 		public function int InputModeDD_DefaultPos () //SIFIT7.3PEERREVIEWED
+
 		{
 			return 0; // physicalPos = 0 ; Microphone InputMode
 
@@ -297,6 +301,7 @@ namespace shs_sat
 //   Description:  Decides the visibility of the Tcoil Child controls are visible
 -----------------------------------------------------------------------------------------------------------------$*/
 		public function bool Is_Telecoil_Input_Mode () //SIFIT7.3PEERREVIEWED
+
 		{
 			return (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Telecoil);
 		} //Closes Mid_Level_Library_InputMode.Is_Telecoil_Input_Mode	 
@@ -308,11 +313,12 @@ namespace shs_sat
 //   Description:  Decides the visibility of the WLS Child controls are visible
 -----------------------------------------------------------------------------------------------------------------$*/
 		public function bool Is_Wireless_Input_Mode () //SIFIT7.3PEERREVIEWED
+
 		{
 			return (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Bluetooth_Phone ||
-					hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.MiniTek_FM ||
-					hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Tek_d_miniTek ||
-					hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.miniTek_Telecoil);
+				hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.MiniTek_FM ||
+				hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Tek_d_miniTek ||
+				hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.miniTek_Telecoil);
 		} //Closes Mid_Level_Library_InputMode.Is_Wireless_Input_Mode	 
 
 		/*$---------------------------------------------------------------------------------------------------------------*
@@ -322,9 +328,12 @@ namespace shs_sat
 //   Description:  Decides the visibility of the WLS Child controls are visible
 -----------------------------------------------------------------------------------------------------------------$*/
 		public function bool Is_Wireless_Input_Mode_basedon_PhysicalPos (int physicalPos) //SIFIT7.3PEERREVIEWED
+
 		{
-			// not equal to Microphone (0), Telecoil (1) and DAI (6)
-			return(physicalPos != 0 && physicalPos != 1 && physicalPos != 6);
+		// not equal to Microphone (0), Telecoil (1) and DAI (6)
+			return (physicalPos != 0 &&
+				physicalPos != 1 &&
+				physicalPos != 6);
 		} //Closes Mid_Level_Library_InputMode.Is_Wireless_Input_Mode_basedon_PhysicalPos	 
 		/*$---------------------------------------------------------------------------------------------------------------*
 //   Mid Level PP LIBRARY Function:    Is_DAI_Input_Mode
@@ -333,6 +342,7 @@ namespace shs_sat
 //   Description:  Decides the visibility of the DAI Child controls are visible
 -----------------------------------------------------------------------------------------------------------------$*/
 		public function bool Is_DAI_Input_Mode () //SIFIT7.3PEERREVIEWED
+
 		{
 			return (hi:d8SwMacroInputModeHp == d8SwMacroInputModeHp.Direct_Audio_InputFM);
 		} //Closes Mid_Level_Library_InputMode.Is_DAI_Input_Mode	
@@ -347,6 +357,7 @@ namespace shs_sat
 // In Service mode, it shall always be enabled. 
 -----------------------------------------------------------------------------------------------------------------*/
 		public function bool Is_available_Inputmode_Telecoil () //SIFIT7.3PEERREVIEWED
+
 		{
 			if (cap:TelecoilAvailable == TelecoilAvailable.none)
 			{
@@ -359,7 +370,8 @@ namespace shs_sat
 				{
 					return false;
 				}
-				else{
+				else
+				{
 					return true;
 				}
 			}
@@ -379,39 +391,45 @@ namespace shs_sat
 // In Service mode, it shall be enabled when Tek/miniTek is connected.
 * -----------------------------------------------------------------------------------------------------------------*/
 		public function bool Is_available_Inputmode_Tek_MiniTek () //SIFIT7.3PEERREVIEWED
+
 		{
 			bool retval = false;
 			if (cap:WlsAudio == WlsAudio.exists)
 			{
 				if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
 				{ // Connexx case 
-					println('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> in CXX');
-					if (BasicLibrary_UserControl.IsTekORminiTekConnected() &&
+					println ('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> in CXX');
+					if (BasicLibrary_UserControl.IsTekORminiTekConnected () &&
 							(BasicLibrary_InputMode.Is_TekdMTek_in_Use () == env:Prog || // If already selected in Current HP					    	    
 								BasicLibrary_InputMode.Is_TekdMTek_in_Use () == -1) // If  -1 Not selected in any of the HPs so it is available here
-						)
+)
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> TRUE >> IsTekORminiTekConnected connected & Tek_Minitek not in-use');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> TRUE >> IsTekORminiTekConnected connected & Tek_Minitek not in-use');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> FALSE >> IsTekORminiTekConnected NOT connected / Tek_Minitek in-use');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> FALSE >> IsTekORminiTekConnected NOT connected / Tek_Minitek in-use');
 					}
 				}
 				else
 				{ // HICOSS case 		
-					println('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> in HICOSS');
-					if (BasicLibrary_UserControl.IsTekORminiTekConnected())
+					println ('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> in HICOSS');
+					if (BasicLibrary_UserControl.IsTekORminiTekConnected ())
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> TRUE >> IsTekORminiTekConnected connected');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> TRUE >> IsTekORminiTekConnected connected');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> FALSE >> IsTekORminiTekConnected NOT connected');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> FALSE >> IsTekORminiTekConnected NOT connected');
 					}
 				}
 			} // if (cap) closes
-			
 			return retval;
 		} //Closes Mid_Level_Library_InputMode.Is_available_Inputmode_Tek_MiniTek
 
@@ -429,35 +447,42 @@ namespace shs_sat
 // In Service mode, it shall be enabled when Tek/miniTek is connected.
 -----------------------------------------------------------------------------------------------------------------*/
 		public function bool Is_available_Inputmode_BluetoothPhone () //SIFIT7.3PEERREVIEWED
+
 		{
 			bool retval = false;
 			if (cap:WlsPhone == WlsPhone.exists)
 			{
 				if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
 				{ // Connexx case 
-					println('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> in CXX');
-					if (BasicLibrary_UserControl.IsTekORminiTekConnected() &&
+					println ('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> in CXX');
+					if (BasicLibrary_UserControl.IsTekORminiTekConnected () &&
 							(BasicLibrary_InputMode.Is_BluetoothPhone_in_Use () == env:Prog || // If already selected in Current HP
 								BasicLibrary_InputMode.Is_BluetoothPhone_in_Use () == -1) // If  -1 Not selected in any of the HPs so it is available here
-					)
+)
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> TRUE >> IsTekORminiTekConnected connected & BluetoothPhone not in-use');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> TRUE >> IsTekORminiTekConnected connected & BluetoothPhone not in-use');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> FALSE >> IsTekORminiTekConnected NOT connected / BluetoothPhone in-use');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> FALSE >> IsTekORminiTekConnected NOT connected / BluetoothPhone in-use');
 					}
 				}
 				else
 				{ // HICOSS case 		
-					println('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> in HICOSS');
-					if (BasicLibrary_UserControl.IsTekORminiTekConnected())
+					println ('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> in HICOSS');
+					if (BasicLibrary_UserControl.IsTekORminiTekConnected ())
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> TRUE >> IsTekORminiTekConnected connected');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> TRUE >> IsTekORminiTekConnected connected');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> FALSE >> IsTekORminiTekConnected NOT connected');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_BluetoothPhone >> FALSE >> IsTekORminiTekConnected NOT connected');
 					}
 				}
 			}
@@ -478,40 +503,46 @@ namespace shs_sat
 // In Service mode, it shall be enabled when miniTek is connected.
 -----------------------------------------------------------------------------------------------------------------*/
 		public function bool Is_available_Inputmode_MiniTekFM () //SIFIT7.3PEERREVIEWED
+
 		{
 			bool retval = false;
 			if (cap:WlsAudio == WlsAudio.exists)
 			{
 				if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
 				{ // Connexx case 
-					println('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> in CXX');
+					println ('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> in CXX');
 					if (hi:d8SwMiniTekConf == d8SwMiniTekConf.Yes &&
 							(BasicLibrary_InputMode.Is_MiniTek_FM_in_Use () == env:Prog || // If already selected in Current HP
 								BasicLibrary_InputMode.Is_MiniTek_FM_in_Use () == -1)) // If  -1 Not selected in any of the HPs so it is available here	    	       							    										    							    	
 
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> TRUE >> IsminiTekConnected connected & MiniTekFM not in-use');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> TRUE >> IsminiTekConnected connected & MiniTekFM not in-use');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> FALSE >> IsminiTekConnected NOT connected / MiniTekFM in-use');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> FALSE >> IsminiTekConnected NOT connected / MiniTekFM in-use');
 					}
 				}
 				else
 				{ // HICOSS case 		
-					println('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> in HICOSS');
+					println ('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> in HICOSS');
 					if (hi:d8SwMiniTekConf == d8SwMiniTekConf.Yes)
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> TRUE >> IsminiTekConnected connected');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> TRUE >> IsminiTekConnected connected');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> FALSE >> IsminiTekConnected NOT connected');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekFM >> FALSE >> IsminiTekConnected NOT connected');
 					}
 				}
 			}
 			return retval;
-
 		} //Closes Mid_Level_Library_InputMode.Is_available_Inputmode_MiniTekFM	
 
 
@@ -528,40 +559,46 @@ namespace shs_sat
 // In Service mode, it shall be enabled when miniTek is connected.
 -----------------------------------------------------------------------------------------------------------------*/
 		public function bool Is_available_Inputmode_MiniTekTelecoil () //SIFIT7.3PEERREVIEWED
+
 		{
 			bool retval = false;
 			if (cap:WlsAudio == WlsAudio.exists)
 			{ // For all Pricepoints above 100 MiniTekTelecoil CAN be available but check is based on CAP:WlsAudio										
 				if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
 				{ // Connexx case 
-					println('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> in CXX');
+					println ('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> in CXX');
 					if (hi:d8SwMiniTekConf == d8SwMiniTekConf.Yes &&
 							(BasicLibrary_InputMode.Is_miniTek_Telecoil_in_Use () == env:Prog || // If already selected in Current HP
 								BasicLibrary_InputMode.Is_miniTek_Telecoil_in_Use () == -1)) // If  -1 Not selected in any of the HPs so it is available here	    	       							    										    							    							    							    	
 
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> TRUE >> IsminiTekConnected connected & MiniTekTelecoil not in-use');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> TRUE >> IsminiTekConnected connected & MiniTekTelecoil not in-use');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> FALSE >> IsminiTekConnected NOT connected / MiniTekTelecoil in-use');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> FALSE >> IsminiTekConnected NOT connected / MiniTekTelecoil in-use');
 					}
 				}
 				else
 				{ // HICOSS case 		
-					println('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> in HICOSS');
+					println ('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> in HICOSS');
 					if (hi:d8SwMiniTekConf == d8SwMiniTekConf.Yes)
 					{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> TRUE >> IsminiTekConnected connected');
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> TRUE >> IsminiTekConnected connected');
 						retval = true;
 					}
-					else{
-						println('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> FALSE >> IsminiTekConnected NOT connected');
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_MiniTekTelecoil >> FALSE >> IsminiTekConnected NOT connected');
 					}
 				}
 			}
 			return retval;
-
 		} //Closes Mid_Level_Library_InputMode.Is_available_Inputmode_MiniTekTelecoil    	
 
 
@@ -574,6 +611,7 @@ namespace shs_sat
 // In Fitting mode and Service mode, it shall always be enabled.
 -----------------------------------------------------------------------------------------------------------------*/
 		public function bool Is_available_Inputmode_DAI () //SIFIT7.3PEERREVIEWED
+
 		{
 			return (cap:AudioshoeAvailable == AudioshoeAvailable.exists);
 		} //Closes Mid_Level_Library_InputMode.Is_available_Inputmode_DAI    	
@@ -588,6 +626,7 @@ namespace shs_sat
 //				:	2 = Tek/miniTek		5 = miniTek Telecoil
 -----------------------------------------------------------------------------------------------------------------$*/
 		public function bool InputModeDD_IsVisiblePhysicalPos (int physicalPos) //SIFIT7.3PEERREVIEWED
+
 		{
 			bool retval = false; // initialise to false. If HI cap not exists, shall return false.
 			switch (physicalPos)
@@ -635,7 +674,8 @@ namespace shs_sat
 					retval = false;
 				}
 			}
-			println('[HAL]MLIB.InputModeDD_IsVisiblePhysicalPos for Wireless physicalPos=' + physicalPos + ' >>>> ' + retval);
+			println ('[HAL]MLIB.InputModeDD_IsVisiblePhysicalPos for Wireless physicalPos=' + physicalPos +
+				' >>>> ' + retval);
 			return retval;
 		} // Closes Mid_Level_Library_InputMode.InputModeDD_IsVisiblePhysicalPos
 

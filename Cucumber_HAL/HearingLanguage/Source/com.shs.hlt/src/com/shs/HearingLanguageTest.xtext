@@ -10,7 +10,7 @@ Model:
 	(testcases+=TestCase)*;
 
 TestCase:
-	"TestCase" name=ID for=ForBlock when=WhenBlock? then=ThenBlock? "End"?;
+	"TestCase" name=ID for=ForBlock when=WhenBlock? then=ThenBlock? ("Return" returnValue=LiteralValue)? "End"?;
 
 ForBlock:
 	"For" macro=QID "->" function=ID "(" (actualArgs+=LiteralValue ","?)* ")";
@@ -19,11 +19,11 @@ WhenBlock:
 	"When" setups+=KeyValuePair ("," setups+=KeyValuePair)*;
 
 ThenBlock:
-	{ThenBlock} "Then" (asserts+=KeyValuePair ("," asserts+=KeyValuePair)*)? ("Return" returnValue=LiteralValue)?;
+	{ThenBlock} "Then" (asserts+=KeyValuePair ("," asserts+=KeyValuePair)*)?;
 
 KeyValuePair:
 	scope=ParameterScope ":" param=[common::SymbolDeclaration] "=" (value=[common::SymbolDeclaration|QID] |
 	LiteralValue);
 
 LiteralValue:
-	"true" | "false" | DECIMAL_NUMBER;
+	"true" | "false" | DECIMAL_NUMBER | "?";

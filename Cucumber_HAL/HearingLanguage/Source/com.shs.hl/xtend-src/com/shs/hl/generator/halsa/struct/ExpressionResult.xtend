@@ -9,50 +9,20 @@ interface ExpressionResult
 {
 	def List<ConditionalValue> getAllValues()
 
+	/**
+	 * This method will evaluate the result if possible.
+	 */
 	def HLTBoolExpression compare(ExpressionResult that, HLTCompareRelation relation)
+
 }
 
 class LocalVariable implements ExpressionResult
 {
-	Map<String, HLTBoolExpression> values = new HashMap
-
-	new()
-	{
-	}
-
-	new(ExpressionResult iniValue)
-	{
-		this.assign(iniValue, HLTConstantExpression.alwaysTrue)
-	}
-
-	new(String value, HLTBoolExpression expression)
-	{
-		this.put(value, expression)
-	}
-
-	def put(String value, HLTBoolExpression expression)
-	{
-		values.put(value, expression)
-	}
-
-	def HLTBoolExpression getConditionForValue(String value)
-	{
-		return values.get(value)
-	}
-
-	def getValues()
-	{
-		return values
-	}
+	VariableScope scope = new VariableScope()
 
 	override getAllValues()
 	{
-		val all = new ArrayList<ConditionalValue>
-		for (pair : values.entrySet)
-		{
-			all.add(new ConditionalValue(pair.key, pair.value))
-		}
-		return all
+		return scope.allValues
 	}
 
 	override compare(ExpressionResult that, HLTCompareRelation relation)
@@ -76,26 +46,29 @@ class LocalVariable implements ExpressionResult
 		return expr
 	}
 
-	def assign(ExpressionResult newValue, HLTBoolExpression curCondition)
+	def assign(ExpressionResult newValue)
 	{
-		for (eachCondVal : newValue.allValues)
-		{
-			values.put(eachCondVal.value, eachCondVal.condition.and(curCondition))
-		}
+		scope.assign(newValue.allValues)
 	}
 
-	def plusEquals(String increment, HLTBoolExpression curCondition)
+	def plusEquals(String increment)
 	{
-		for (eachCondVal : this.allValues)
-		{
-			values.put(String.valueOf(eachCondVal.value.toInt + increment.toInt),
-				eachCondVal.condition.and(curCondition))
-		}
+		scope.plusEquals(increment)
 	}
 
-	def toInt(String string)
+	def enterNewScope(HLTBoolExpression condition)
 	{
-		return Integer.parseInt(string)
+		scope = scope.enterNewScope(condition)
+	}
+
+	def exitScope()
+	{
+		scope = scope.exitScope
+	}
+
+	override toString()
+	{
+		return scope.toString
 	}
 
 }
@@ -131,6 +104,11 @@ class Constant implements ExpressionResult
 		{
 			return that.compare(this, relation)
 		}
+	}
+
+	override toString()
+	{
+		return value
 	}
 
 }
@@ -172,6 +150,36 @@ class GlobalVariable implements ExpressionResult
 		}
 	}
 
+	override toString()
+	{
+		return name
+	}
+}
+
+class TempExpressionResult<T> implements ExpressionResult
+{
+	T value
+
+	new(T value)
+	{
+		this.value = value
+	}
+
+	def T getValue()
+	{
+		return value as T
+	}
+
+	override getAllValues()
+	{
+		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	}
+
+	override compare(ExpressionResult that, HLTCompareRelation relation)
+	{
+		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	}
+
 }
 
 class ConditionalValue
@@ -183,5 +191,117 @@ class ConditionalValue
 	{
 		this.value = value
 		this.condition = condition
+	}
+
+	override toString()
+	{
+		return value + "=" + condition
+	}
+}
+
+class VariableScope
+{
+	HLTBoolExpression scopeCondition = HLTConstantExpression.alwaysTrue
+	ConditionalValueMap values = new ConditionalValueMap
+	List<VariableScope> nestedScopes = new ArrayList
+	VariableScope parentScope
+
+	def VariableScope enterNewScope(HLTBoolExpression condition)
+	{
+		val cloned = new ConditionalValueMap
+		for (possibleValue : allValues)
+		{
+			cloned.put(possibleValue.value, possibleValue.condition)
+		}
+		val newScope = new VariableScope
+		newScope.scopeCondition = condition.and(this.scopeCondition)
+		newScope.values = cloned
+		newScope.parentScope = this
+		this.nestedScopes.add(newScope)
+		return newScope
+	}
+
+	def VariableScope exitScope()
+	{
+		return this.parentScope
+	}
+
+	def assign(List<ConditionalValue> newValues)
+	{
+
+		// Override whatever value it had before
+		nestedScopes.clear
+		values.clear
+		for (newCondValue : newValues)
+		{
+			values.put(newCondValue.value, newCondValue.condition.and(scopeCondition))
+		}
+	}
+
+	def plusEquals(String increment)
+	{
+		val allValues = this.getAllValues()
+		nestedScopes.clear
+		values.clear
+		for (value : allValues)
+		{
+			values.put(String.valueOf(value.value.toInt + increment.toInt), value.condition.and(scopeCondition))
+		}
+	}
+
+	def List<ConditionalValue> getAllValues()
+	{
+		val all = new ArrayList<ConditionalValue>
+		for (pair : values.entrySet)
+		{
+			all.add(new ConditionalValue(pair.key, pair.value))
+		}
+		for (nestedScope : nestedScopes)
+		{
+			all.addAll(nestedScope.allValues)
+		}
+		return all
+	}
+
+	private def toInt(String string)
+	{
+		return Integer.parseInt(string)
+	}
+
+	override toString()
+	{
+		return allValues.toString
+	}
+}
+
+class ConditionalValueMap
+{
+	Map<String, HLTBoolExpression> values = new HashMap
+
+	def clear()
+	{
+		values.clear
+	}
+
+	def entrySet()
+	{
+		return values.entrySet
+	}
+
+	def put(String key, HLTBoolExpression value)
+	{
+		if (values.containsKey(key))
+		{
+			values.put(key, values.get(key).or(value))
+		}
+		else
+		{
+			values.put(key, value)
+		}
+	}
+
+	override toString()
+	{
+		return values.toString
 	}
 }

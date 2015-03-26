@@ -1,0 +1,89 @@
+/*---------------------------------------------------------------------------------------------------------------*
+// CXX UI:                        Basic Tuning: BasicTuning_LoudSoundsDownBu
+// Initial Version                						     						:2011-08-18 Chuah LayYuan
+// Updated SetPos and IsEnable														:2011-11-21	Frauke Schall
+// Updated SetPos (3dB broadband, partial: for test purposes)						:2012-01-13 Frauke Schall
+// Updated SetPos (3dB broadband, complete: for test purposes)						:2012-01-18 Frauke Schall
+// Updated IsEnabled (grey out if curve cannot be applied)							:2012-02-01 Frauke Schall
+// Added println in IsEnabled														:2012-02-10	Frauke Schall
+// *********************************************CODE FREEZE*******************************************************
+// FR68941 to disable Basic Tuning Button when tinnitus is ON and Pure				:2014-09-02 Mang Yew
+// Peer Review of Changes during 7.4                                                 :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package MixedMode Test_Basic
+	{
+		application function void SetPos (int pos)
+		{
+			if (pos == 1 || pos == 2)
+			{
+				if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.off)
+				{
+					hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on;
+				}
+				else if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.on)
+				{
+					hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off;
+				}
+			}
+		}
+		application function int GetPos ()
+		{
+			if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.off)
+			{
+				return 0;
+			}
+			else if (hi:d8SwMacroConnexxFitEn == d8SwMacroConnexxFitEn.on)
+			{
+				return 1;
+			}
+			return -1;
+		}
+		application function void minus ()
+		{
+			SetPos (1);
+		}
+		application function int map (int i)
+		{
+			int retval = -1;
+			switch (i)
+			{
+				case 0:{
+					retval = 9;
+				}
+				case 1:{
+					retval = 8;
+				}
+				case 2:{
+					retval = 7;
+				}
+				case 3:{
+					retval = 6;
+				}
+				case 4:{
+					retval = 5;
+				}
+				case 5:{
+					retval = 4;
+				}
+				case 6:{
+					retval = 3;
+				}
+				case 7:{
+					retval = 2;
+				}
+				case 8:{
+					retval = 1;
+				}
+				case 9:{
+					retval = 0;
+				}
+			}
+			return retval;
+		}
+	}
+} //namespace shs.sat
+// end of file

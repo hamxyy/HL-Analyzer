@@ -1,0 +1,27 @@
+
+TestCase CBFS_Set_testcase_1 For BasicLibrary_CBFS->CBFS_Set(0)
+	Then
+		hi:d8FCbfsEn = d8FCbfsEn.off
+End
+
+TestCase CBFS_Set_testcase_2 For BasicLibrary_CBFS->CBFS_Set(1)
+	Then
+		hi:d8FCbfsEn = d8FCbfsEn.on
+End
+
+TestCase CBFS_Get_testcase_3 For BasicLibrary_CBFS->CBFS_Get()
+	When
+		hi:d8FCbfsEn = d8FCbfsEn.off
+	Then
+	Return
+		0
+End
+
+TestCase CBFS_Get_testcase_4 For BasicLibrary_CBFS->CBFS_Get()
+	When
+		hi:d8FCbfsEn = d8FCbfsEn.on
+	Then
+	Return
+		1
+End
+

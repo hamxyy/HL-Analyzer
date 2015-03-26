@@ -45,6 +45,7 @@ import com.shs.hl.ui.utils.LoggerUtil;
 
 public class HLTTestGenerator extends AbstractHLGenerator
 {
+	private static final String GENERATED_TEST_FOLDER = "tests";
 	@Inject
 	protected IHLGenerator hlGenerator;
 	protected final IPreferenceStore store = HearingLanguageActivator.getInstance().getPreferenceStore();
@@ -59,11 +60,12 @@ public class HLTTestGenerator extends AbstractHLGenerator
 	 * 
 	 * @param currentPlfInfo
 	 * @param res
+	 * @param resource
 	 */
-	private void DoGenerate(PlatformInformation currentPlfInfo, Resource res)
+	private void DoGenerate(PlatformInformation currentPlfInfo, Resource res, IResource resource)
 	{
 		HLTGenerateTestWalker engine = new HLTGenerateTestWalker();
-		engine.walk(res, fsa);
+		engine.generate(res, fsa, resource.getParent().getName());
 	}
 
 	public HLTTestGenerator(final String consoleName)
@@ -93,7 +95,7 @@ public class HLTTestGenerator extends AbstractHLGenerator
 				project = ((IContainer) firstElement).getProject();
 			}
 
-			srcGenFolder = project.getFolder(store.getDefaultString(Constants.GENERATION_OUTPUT_FOLDER));
+			srcGenFolder = project.getFolder(GENERATED_TEST_FOLDER);
 			if (!srcGenFolder.exists())
 			{
 				try
@@ -227,7 +229,7 @@ public class HLTTestGenerator extends AbstractHLGenerator
 				messageConsoleStream.print(message + " ...");
 				monitor.subTask(message);
 
-				DoGenerate(currentPlfInfo, res);
+				DoGenerate(currentPlfInfo, res, resource);
 				messageConsoleStream.println("done");
 
 			} catch (final IOException e)
@@ -235,275 +237,6 @@ public class HLTTestGenerator extends AbstractHLGenerator
 				LoggerUtil.log(IStatus.ERROR, "Problem during resource gathering and code generation  --> " + e.getMessage());
 			}
 		}
-	}
-
-	public void startUpAssemblyGeneration(final IStructuredSelection structSel)
-	{
-		final String nameSpace = store.getString(Constants.ASSEMBLY_NAMESPACE);
-		final String assemblyNameD8 = store.getString(Constants.PLATFORM_MACROS_D8);
-		final String assemblyNameD9 = store.getString(Constants.PLATFORM_MACROS_D9);
-		final String vendorOutput = store.getString(Constants.VENDOR_OUT_PUT);
-		final String referenceDirectory = store.getString(Constants.REFERENCE_DIR);
-		final String genDir = store.getString(Constants.GENERATION_OUTPUT_FOLDER);
-		// GENERATION_OUTPUT_FOLDER
-		final String cmd = store.getString(Constants.BUILD_ASSEMBLY_BATCH);
-		final String cmdPath = "." + File.separator + store.getString(Constants.ASSEMBLY_GENERATOR_BASEDIR) + File.separator;
-
-		final ImmutableMap<String, String> map = new ImmutableMap.Builder<String, String>().put(Constants.BUILD_ASSEMBLY_BATCH, cmd)
-				.put(Constants.BUILD_ASSEMBLY_COMMAND_PATH, cmdPath).put(Constants.REFERENCE_DIR, referenceDirectory)
-				.put(Constants.FULLY_QUALIFIED_NAME_D8, nameSpace + "." + assemblyNameD8)
-				.put(Constants.FULLY_QUALIFIED_NAME_D9, nameSpace + "." + assemblyNameD9).put(Constants.FULLY_QUALIFIED_NAME, nameSpace + ".")
-				.put(Constants.PLATFORM_MACROS_D8, assemblyNameD8).put(Constants.PLATFORM_MACROS_D9, assemblyNameD9)
-				.put(Constants.VENDOR_OUT_PUT, vendorOutput).put(Constants.GENERATION_OUTPUT_FOLDER, genDir).build();
-
-		// super.initPlatformVersion(structSel); // works only if one project is
-		// selected
-		startUpAssemblyGenerationInternal(structSel, map);
-	}
-
-	// Hook up for testing purpose
-	public void startUpUnconfiguratedGeneration(final IStructuredSelection structSel, final Map<String, String> configs)
-	{
-		// if necessary add hooks here ...
-		startUpAssemblyGenerationInternal(structSel, configs);
-	}
-
-	private void startUpAssemblyGenerationInternal(final IStructuredSelection structSel, final Map<String, String> configs)
-	{
-
-		messageConsoleStream.println("Generate file artifacts");
-
-		// the Set is very important to avoid double IProject entries for
-		// multi-selected files in one Project
-		final Set<IProject> projects = new HashSet<IProject>();
-
-		// in case of Multi-Selections, find all the projectfiles
-		for (final Object selectedObject : structSel.toList())
-		{
-			if (selectedObject != null)
-			{
-				// find out the resource we want to generate from
-				IResource resource = null;
-				if (selectedObject instanceof IResource)
-				{
-					resource = (IResource) selectedObject;
-				} else if (selectedObject instanceof IJavaElement)
-				{
-					resource = ((IJavaElement) selectedObject).getResource();
-				}
-				// add the IProject for Resource to the set
-				if (resource != null)
-				{
-					projects.add(resource.getProject());
-				}
-			}
-		}
-
-		for (final IProject project : projects)
-		{
-			String dllName = project.getName();
-			dllName = dllName.substring(dllName.lastIndexOf(".") + 1);
-
-			GenerationInfo.PlatformInformation plfInfo = GetPlatformInfoForProject(project);
-
-			PlattformGenerationInformation info = new PlattformGenerationInformation(plfInfo);
-
-			info.setProjectPath(project.getLocation().toString());
-
-			info.setProjectName(dllName);
-			final String accessKey = Constants.FULLY_QUALIFIED_NAME + Constants.PLATFORM_DELIMITER + plfInfo.toString();
-			final String macroName = configs.get(accessKey);
-
-			if (StringUtils.isNotBlank(macroName))
-			{
-				info.setDllName(macroName);
-			}
-
-			try
-			{
-				this.generateAssmblyFromSources(info, configs);
-			} catch (Exception e) // if we switch to Java 7 reduce stupid boiler
-									// code here
-			{
-				e.printStackTrace();
-			}
-		}
-
-	}
-
-	private class PlattformGenerationInformation
-	{
-		PlatformInformation _platformInfo;
-		private String _outputFolder;
-		private String _dllName;
-		private String _projectName;
-		private String _projectPath;
-
-		public PlatformInformation getPlatformInfo()
-		{
-			return _platformInfo;
-		}
-
-		public void setProjectName(String name)
-		{
-			_projectName = name;
-		}
-
-		public String getProjectName()
-		{
-			return _projectName;
-		}
-
-		public String getDllName()
-		{
-			return _dllName;
-		}
-
-		public void setDllName(String name)
-		{
-			_dllName = name;
-		}
-
-		public void setProjectPath(String path)
-		{
-			_projectPath = path;
-		}
-
-		public String getProjectPath()
-		{
-			return _projectPath;
-		}
-
-		public String getPlatformString()
-		{
-			return _platformInfo.PlfName();
-		}
-
-		public String getGenerationPath()
-		{
-			return getProjectPath() + "\\" + getOutputExt();
-		}
-
-		public PlattformGenerationInformation(PlatformInformation plf)
-		{
-
-			_platformInfo = plf;
-			_outputFolder = store.getString(Constants.GENERATION_OUTPUT_FOLDER);
-		}
-
-		private String getOutputExt()
-		{
-			if (_outputFolder == null || _outputFolder == "")
-			{
-				_outputFolder = store.getString(Constants.GENERATION_OUTPUT_FOLDER);
-			}
-			return _outputFolder;
-		}
-	}
-
-	// internal helper method doing the real work
-	// private void generateAssmblyFromSources(final String projectPath, final
-	// String dllName, String platform, final Map<String, String> configs)
-	private void generateAssmblyFromSources(PlattformGenerationInformation info, final Map<String, String> configs)
-	{
-		boolean errorOccured = false;
-
-		boolean usePrjectName = store.getBoolean(Constants.USE_PROJECT_NAME_AS_DLL_SELECTION);
-
-		// final String generationPath = projectPath + "\\src-gen";
-		final String referenceDirectory = cleanString(configs.get(Constants.REFERENCE_DIR)); // FITTING
-																								// DLL
-		final String generatedModel = info.getGenerationPath();// cleanString(configs.get(Constants.GENERATION_OUTPUT_FOLDER));
-																// //
-																// MODEL-DIRECTORY
-		final String vendorOutput = cleanString(configs.get(Constants.VENDOR_OUT_PUT)); // Where
-																						// to
-																						// copy
-																						// to
-
-		// determine platform specific settings
-
-		String fullyQualifiedName;
-		if (usePrjectName)
-		{
-			fullyQualifiedName = cleanString(configs.get(Constants.FULLY_QUALIFIED_NAME));
-			fullyQualifiedName += info.getProjectName();
-
-		} else
-		{
-			fullyQualifiedName = cleanString(info.getDllName());
-		}
-
-		LoggerUtil.log(IStatus.INFO, "Start generating dll from source files");
-
-		final File assemblyDir = new File(configs.get(Constants.BUILD_ASSEMBLY_COMMAND_PATH));
-		final File currentDir = new File(".");
-
-		if (!assemblyDir.exists())
-		{
-			String pathToCheck = currentDir.getAbsolutePath().toString();
-			LoggerUtil.log(IStatus.ERROR, "Generating dll from source files failed - cannot find any file generator - Path does not exist");
-			LoggerUtil.log(IStatus.WARNING, "Please check " + pathToCheck);
-			errorConsoleStream.println("Generating dll from source files failed: cannot find specified command path");
-			messageConsoleStream.println("   Please check working directory " + pathToCheck);
-			return;
-		}
-
-		try
-		{
-			ProcessBuilder pb = null;
-			final File batch = new File(assemblyDir.getCanonicalPath() + File.separator + cleanString(configs.get(Constants.BUILD_ASSEMBLY_BATCH)));
-			if (!assemblyDir.exists())
-			{
-				LoggerUtil.log(IStatus.ERROR, "Generating dll from source files failed - cannot find specified file generator - File does not exist");
-				errorConsoleStream.println("Generating dll from source files failed: cannot find specified generator command" + assemblyDir.toString());
-				return;
-			}
-
-			// REM /P:MacroLibrary =%1 : The name of the resulting assembly
-			// without ".dll" #1
-			// REM /P:GenerationPath =%2 : Path to the generated cs-files
-			// including the src-gen folder #2
-			// REM /P:Configuration =%3 : The project configuration to be built
-			// (Debug/Release) ---> Always set to DEBUG (not needed to be
-			// passed)
-			// REM /P:PlatformVersion =%4 : Platform version to compile against
-			// (D8/D9) #3 ---> NEW
-			// REM /P:TestConfiguration : Indicating if output is planned to be
-			// used as TestConfig #4 ---> Always set to NoTest (elsewise Test)
-			// REM /P:ReferenceDirectory =%5 : Path to the Fitting dlls #5
-			// REM /P:OutputBasePath =%6 : The Path to where the dll will be
-			// copied #6
-
-			boolean testing = false;
-			// String alternativeOutput = "";
-
-			// HearingLanguageRuntime.ProjectTemplate.csproj
-			pb = new ProcessBuilder(batch.getCanonicalFile().toString(), // command
-					fullyQualifiedName, // # 1 DLL-Name
-					generatedModel, // # 2 c# source
-					info.getPlatformString(), // # 3 Platform to compile against
-					testing == true ? "Test" : "NoTest", // # 4 Testing
-					referenceDirectory, // # 5 needed Fitting dlls
-					vendorOutput); // # 6 Vendor Directory
-			pb.directory(assemblyDir.getCanonicalFile());
-
-			messageConsoleStream.print(pb.toString());
-			runExternal(pb);
-		} catch (final IOException e)
-		{
-			errorOccured = true;
-			LoggerUtil.log(IStatus.ERROR, "Generating dll from source files failed");
-			errorConsoleStream.println("Generating dll from source files failed: " + e.getMessage());
-			e.printStackTrace();
-		}
-
-		if (!errorOccured)
-		{
-			LoggerUtil.log(IStatus.INFO, "Generating dll from source files done");
-			messageConsoleStream.println("Generating dll from source files done");
-		}
-
 	}
 
 	String cleanString(final String str)

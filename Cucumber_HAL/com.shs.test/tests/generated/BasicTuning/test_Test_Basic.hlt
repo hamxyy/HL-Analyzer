@@ -1,0 +1,131 @@
+
+TestCase SetPos_testcase_1 For Test_Basic->SetPos(1)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+End
+
+TestCase SetPos_testcase_2 For Test_Basic->SetPos(1)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+End
+
+TestCase SetPos_testcase_3 For Test_Basic->SetPos(2)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+End
+
+TestCase SetPos_testcase_4 For Test_Basic->SetPos(2)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+End
+
+TestCase GetPos_testcase_5 For Test_Basic->GetPos()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+	Return
+		0
+End
+
+TestCase GetPos_testcase_6 For Test_Basic->GetPos()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+	Return
+		1
+End
+
+TestCase GetPos_testcase_7 For Test_Basic->GetPos()
+	Then
+	Return
+		-1
+End
+
+TestCase minus_testcase_8 For Test_Basic->minus()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+End
+
+TestCase minus_testcase_9 For Test_Basic->minus()
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+End
+
+TestCase map_testcase_10 For Test_Basic->map(?)
+	Then
+	Return
+		-1
+End
+
+TestCase map_testcase_11 For Test_Basic->map(0)
+	Then
+	Return
+		9
+End
+
+TestCase map_testcase_12 For Test_Basic->map(1)
+	Then
+	Return
+		8
+End
+
+TestCase map_testcase_13 For Test_Basic->map(2)
+	Then
+	Return
+		7
+End
+
+TestCase map_testcase_14 For Test_Basic->map(3)
+	Then
+	Return
+		6
+End
+
+TestCase map_testcase_15 For Test_Basic->map(4)
+	Then
+	Return
+		5
+End
+
+TestCase map_testcase_16 For Test_Basic->map(5)
+	Then
+	Return
+		4
+End
+
+TestCase map_testcase_17 For Test_Basic->map(6)
+	Then
+	Return
+		3
+End
+
+TestCase map_testcase_18 For Test_Basic->map(7)
+	Then
+	Return
+		2
+End
+
+TestCase map_testcase_19 For Test_Basic->map(8)
+	Then
+	Return
+		1
+End
+
+TestCase map_testcase_20 For Test_Basic->map(9)
+	Then
+	Return
+		0
+End
+

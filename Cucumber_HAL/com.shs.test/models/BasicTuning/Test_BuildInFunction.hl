@@ -1,0 +1,63 @@
+/*---------------------------------------------------------------------------------------------------------------*
+// CXX UI:                        Basic Tuning: BasicTuning_LoudSoundsDownBu
+// Initial Version                						     						:2011-08-18 Chuah LayYuan
+// Updated SetPos and IsEnable														:2011-11-21	Frauke Schall
+// Updated SetPos (3dB broadband, partial: for test purposes)						:2012-01-13 Frauke Schall
+// Updated SetPos (3dB broadband, complete: for test purposes)						:2012-01-18 Frauke Schall
+// Updated IsEnabled (grey out if curve cannot be applied)							:2012-02-01 Frauke Schall
+// Added println in IsEnabled														:2012-02-10	Frauke Schall
+// *********************************************CODE FREEZE*******************************************************
+// FR68941 to disable Basic Tuning Button when tinnitus is ON and Pure				:2014-09-02 Mang Yew
+// Peer Review of Changes during 7.4                                                 :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package MixedMode Test_BuildInFunction
+	{
+		public function bool Is_available_Inputmode_Tek_MiniTek () //SIFIT7.3PEERREVIEWED
+
+		{
+			bool retval = false;
+			if (cap:WlsAudio == WlsAudio.exists)
+			{
+				if (env:HiDriverWorkMode == HiDriverWorkMode.Fitting)
+				{
+					println ('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> in CXX');
+					if (BasicLibrary_UserControl.IsTekORminiTekConnected () &&
+							(BasicLibrary_InputMode.Is_TekdMTek_in_Use () == env:Prog ||
+								BasicLibrary_InputMode.Is_TekdMTek_in_Use () == -1))
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> TRUE >> IsTekORminiTekConnected connected & Tek_Minitek not in-use');
+						retval = true;
+					}
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> FALSE >> IsTekORminiTekConnected NOT connected / Tek_Minitek in-use');
+					}
+				}
+				else
+				{
+					println ('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> in HICOSS');
+					if (BasicLibrary_UserControl.IsTekORminiTekConnected ())
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> TRUE >> IsTekORminiTekConnected connected');
+						retval = true;
+					}
+					else
+					{
+						println
+						('[HAL]MLIB.Is_available_Inputmode_Tek_MiniTek >> FALSE >> IsTekORminiTekConnected NOT connected');
+					}
+				}
+			}
+			return retval;
+		} //Closes Mid_Level_Library_InputMode.Is_available_Inputmode_Tek_MiniTek
+
+	}
+} //namespace shs.sat
+ // end of file

@@ -1,0 +1,6 @@
+TestCase SetPos_testcase_1 For Test_Basic->SetPos(1)
+	When
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.off
+	Then
+		hi:d8SwMacroConnexxFitEn = d8SwMacroConnexxFitEn.on
+End

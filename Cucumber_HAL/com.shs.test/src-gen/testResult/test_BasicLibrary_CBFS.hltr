@@ -1,0 +1,4 @@
+Pass CBFS_Set_testcase_1;
+Pass CBFS_Set_testcase_2;
+Pass CBFS_Get_testcase_3;
+Pass CBFS_Get_testcase_4;

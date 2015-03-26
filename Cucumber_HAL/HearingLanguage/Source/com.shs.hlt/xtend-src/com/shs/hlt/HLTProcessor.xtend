@@ -33,19 +33,25 @@ class HLTProcessor
 				hltTestCase.paramList.add(convert(actualArg))
 			}
 
-			for (setup : (testCaseAST.when as WhenBlock).setups)
+			if (testCaseAST.when != null)
 			{
-				hltTestCase.globalValues.put(setup.scope.getName() + ":" + setup.param.name, setup.value.name)
+				for (setup : (testCaseAST.when as WhenBlock).setups)
+				{
+					hltTestCase.globalValues.put(setup.scope.getName() + ":" + setup.param.name, setup.value.name)
+				}
 			}
 
-			for (assert : (testCaseAST.then as ThenBlock).asserts)
+			if (testCaseAST.then != null)
 			{
-				hltTestCase.expectedValues.put(assert.scope.getName() + ":" + assert.param.name, assert.value.name)
+				for (assert : (testCaseAST.then as ThenBlock).asserts)
+				{
+					hltTestCase.expectedValues.put(assert.scope.getName() + ":" + assert.param.name, assert.value.name)
+				}
 			}
 
-			if ((testCaseAST.then as ThenBlock).returnValue != null)
+			if (testCaseAST.returnValue != null)
 			{
-				hltTestCase.expectedValues.put("return", (testCaseAST.then as ThenBlock).returnValue)
+				hltTestCase.expectedValues.put("return", testCaseAST.returnValue)
 			}
 
 			suite.testCases.add(hltTestCase)
@@ -56,7 +62,11 @@ class HLTProcessor
 
 	private def convert(String string)
 	{
-		if (string == "true")
+		if (string == "?")
+		{
+			return "?"
+		}
+		else if (string == "true")
 		{
 			return true;
 		}

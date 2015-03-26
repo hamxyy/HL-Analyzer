@@ -103,6 +103,10 @@ class HLTGeneratedTestCase
 			}
 		}
 
+		if (this.returnValue != null && !this.returnValue.equals(another.returnValue))
+		{
+			return false
+		}
 		return true
 	}
 

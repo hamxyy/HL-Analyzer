@@ -1,0 +1,203 @@
+/*---------------------------------------------------------------------------------------------------------------*
+// CXX UI:                        Basic Tuning: BasicTuning_LoudSoundsDownBu
+// Initial Version                						     						:2011-08-18 Chuah LayYuan
+// Updated SetPos and IsEnable														:2011-11-21	Frauke Schall
+// Updated SetPos (3dB broadband, partial: for test purposes)						:2012-01-13 Frauke Schall
+// Updated SetPos (3dB broadband, complete: for test purposes)						:2012-01-18 Frauke Schall
+// Updated IsEnabled (grey out if curve cannot be applied)							:2012-02-01 Frauke Schall
+// Added println in IsEnabled														:2012-02-10	Frauke Schall
+// *********************************************CODE FREEZE*******************************************************
+// FR68941 to disable Basic Tuning Button when tinnitus is ON and Pure				:2014-09-02 Mang Yew
+// Peer Review of Changes during 7.4                                                 :2014-12-10 Frauke,Judith
+*/
+/*---------------------------------------------------------------------------------------------------------------*/
+namespace shs_sat
+{
+	using shs_sat.*;
+	package MixedMode Test_Nested_Switch
+	{
+		public function int InputModeDD_Remapping (int pos) //SIFIT7.3PEERREVIEWED
+
+		{
+			int physicalPos = 0;
+			int caseID = 0;
+			/* Default The List box entries are in the following order D8_Platform 
+			     * 0 -> Microphone
+			     * 1 -> Telecoil
+			     * 2 -> Tek/miniTek
+			     * 3 -> Bluetooth Phone
+			     * 4 -> MiniTek FM
+			     * 5 -> miniTek Telecoil
+			     * 6 -> Direct Audio Input(FM)	*/
+
+// Different cases of Input mode Lists are as below
+			/* Case ID      Mic  	 	 Tcoil		   Wireless		    DAI
+		      * 	1		available     NA 			 NA					NA
+		      * 	2		available     NA 			 NA					available
+		      * 	3		available     NA 			 available			NA
+		      * 	4		available     NA 			 available			available
+		      * 	5		available     available      NA					NA
+		      * 	6		available     available      NA					available
+		      * 	7		available     available      available			NA
+		      * 	8		available     available      available			available 
+		     
+		     */
+			caseID = 1; // Microphone alone exist is case ID = 1
+			if (cap:TelecoilAvailable == TelecoilAvailable.exists)
+			{
+				println ('[HAL]MLIB.InputModeDD_Remapping >> TelecoilAvailable.exists');
+				caseID += 4; // Telecoil CaseIDs start from 5 
+
+			}
+			if (cap:WlsAudio == WlsAudio.exists)
+			{
+				println ('[HAL]MLIB.InputModeDD_Remapping >> WlsAudio.exists');
+				caseID += 2;
+			}
+			if (cap:AudioshoeAvailable == AudioshoeAvailable.exists)
+			{
+				println ('[HAL]MLIB.InputModeDD_Remapping >> AudioshoeAvailable.exists');
+				caseID += 1;
+			}
+			switch (caseID)
+			{
+				case 1:{ // Mic only available
+					physicalPos = 0;
+				}
+				case 2:{ // Mic and DAI available
+					if (pos == 0)
+					{
+						physicalPos = 0;
+					}
+					else
+					{
+						physicalPos = 6;
+					}
+				}
+				case 3:{ // Mic and Wireless available
+					switch (pos)
+					{
+						case 0:{ // Input mode = microphone
+							physicalPos = 0;
+						}
+						case 1:{ // input mode = Tek/miniTek
+							physicalPos = 2;
+						}
+						case 2:{ // Input mode =bluetooth phone
+							physicalPos = 3;
+						}
+						case 3:{ // Input mode =MiniTek FM
+							physicalPos = 4;
+						}
+						case 4:{ // Input mode =miniTek Telecoil
+							physicalPos = 5;
+						}
+					}
+				}
+				case 4:{ // Mic ,Wireless and DAI available
+					switch (pos)
+					{
+						case 0:{ // Input mode = microphone
+							physicalPos = 0;
+						}
+						case 1:{ // Input mode = Tek/miniTek
+							physicalPos = 2;
+						}
+						case 2:{ // Input mode =bluetooth phone
+							physicalPos = 3;
+						}
+						case 3:{ // Input mode =MiniTek FM
+							physicalPos = 4;
+						}
+						case 4:{ // Input mode =miniTek Telecoil
+							physicalPos = 5;
+						}
+						case 5:{ // Input mode =DAI
+							physicalPos = 6;
+						}
+					}
+				}
+				case 5:{ // Mic and Tcoil available
+					switch (pos)
+					{
+						case 0:{ // Input mode = microphone
+							physicalPos = 0;
+						}
+						case 1:{ // Input mode = Telecoil
+							physicalPos = 1;
+						}
+					}
+				}
+				case 6:{ // Mic ,Tcoil and DAI available
+					switch (pos)
+					{
+						case 0:{ // Input mode = microphone
+							physicalPos = 0;
+						}
+						case 1:{ // Input mode = Telecoil
+							physicalPos = 1;
+						}
+						case 2:{ // Input mode =DAI
+							physicalPos = 6;
+						}
+					}
+				}
+				case 7:{ // Mic ,Tcoil and Wireless available
+					switch (pos)
+					{
+						case 0:{ // Input mode = microphone
+							physicalPos = 0;
+						}
+						case 1:{ // Input mode = Telecoil
+							physicalPos = 1;
+						}
+						case 2:{ // Input mode = Tek/miniTek
+							physicalPos = 2;
+						}
+						case 3:{ // Input mode =bluetooth phone
+							physicalPos = 3;
+						}
+						case 4:{ // Input mode =MiniTek FM
+							physicalPos = 4;
+						}
+						case 5:{ // Input mode =miniTek Telecoil
+							physicalPos = 5;
+						}
+					}
+				}
+				case 8:{ // Mic ,Tcoil ,Wireless and DAI available		     	  
+					switch (pos)
+					{
+						case 0:{ // Input mode = microphone
+							physicalPos = 0;
+						}
+						case 1:{ // Input mode = Telecoil
+							physicalPos = 1;
+						}
+						case 2:{ // Input mode = Tek/miniTek
+							physicalPos = 2;
+						}
+						case 3:{ // Input mode =bluetooth phone
+							physicalPos = 3;
+						}
+						case 4:{ // Input mode =MiniTek FM
+							physicalPos = 4;
+						}
+						case 5:{ // Input mode =miniTek Telecoil
+							physicalPos = 5;
+						}
+						case 6:{ // Input mode =dai
+							physicalPos = 6;
+						}
+					} // Closing Case 8 Switch
+
+				} // Closing Case  8 
+
+			} // Closing Switch(CaseID)
+			println ('[HAL]MLIB.InputModeDD_Remapping >> CaseID=' + caseID + '  CxxPos=' + pos +
+				'   physicalPos=' + physicalPos);
+			return physicalPos;
+		} //Closing Mid_Level_Library_InputMode.InputModeDD_Remapping
+	}
+} //namespace shs.sat
+// end of file

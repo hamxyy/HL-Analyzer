@@ -317,6 +317,13 @@ class EvaluationEngine extends HLTSyntaxTreeWalkerBase
 		return returnVal.toString + "\n" + log.toString + "\n" + context.errorLog
 	}
 
+	override generateFile(IFileSystemAccess fsa, String macroName, String error)
+	{
+//		fsa.generateFile(
+//			"/test_result/test_" + macroName + ".log",
+//			error + "\n" + log
+//		)
+	}
 }
 
 class ReturnException extends RuntimeException
@@ -341,6 +348,7 @@ class AssignToGlobal implements AssignToObject
 
 	new(EvaluationContext context, String key)
 	{
+		this.context = context
 		this.key = key
 	}
 
@@ -357,6 +365,7 @@ class AssignToLocal implements AssignToObject
 
 	new(EvaluationContext context, String key)
 	{
+		this.context = context
 		this.key = key
 	}
 

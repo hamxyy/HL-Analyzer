@@ -1,0 +1,20 @@
+Fail SetPos_testcase_1 because
+  hi:d8SwMacroConnexxFitEn=off (expect on)
+;
+Pass SetPos_testcase_2;
+Pass SetPos_testcase_3;
+Pass SetPos_testcase_4;
+Pass GetPos_testcase_5;
+Pass GetPos_testcase_6;
+Pass GetPos_testcase_7;
+Pass map_testcase_8;
+Pass map_testcase_9;
+Pass map_testcase_10;
+Pass map_testcase_11;
+Pass map_testcase_12;
+Pass map_testcase_13;
+Pass map_testcase_14;
+Pass map_testcase_15;
+Pass map_testcase_16;
+Pass map_testcase_17;
+Pass map_testcase_18;

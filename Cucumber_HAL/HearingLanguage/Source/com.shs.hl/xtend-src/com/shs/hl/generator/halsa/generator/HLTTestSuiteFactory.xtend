@@ -17,7 +17,6 @@ import com.shs.hl.generator.halsa.struct.HLTGeneratedTestSuite
 import com.shs.hl.generator.halsa.struct.HLTLogicalExpression
 import com.shs.hl.generator.halsa.struct.HLTReturnNode
 import com.shs.hl.generator.halsa.struct.IntegerForTest
-import com.shs.hl.generator.halsa.struct.ValuesForTest
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
@@ -28,7 +27,7 @@ class HLTTestSuiteFactory
 	HLTGeneratedTestSuite curSuite
 
 	// Stores all the possible values for a certain variable
-	Map<String, List<String>> possibleValues = new HashMap
+	static Map<String, List<String>> possibleValues = new HashMap
 
 	def forMacro(String macroName)
 	{
@@ -123,14 +122,12 @@ class HLTTestSuiteFactory
 			if (node instanceof HLTConditionNode)
 			{
 				deterministic = false
-				var subPath = path.fork
 				val condition = (node as HLTConditionNode).condition
-
-				//				if (condition.evaluate())
-				//				{
-				//				}
-				fulfillCondition(subPath.valuesRead, condition)
-				walkTreeNodeRecur(node, subPath, execPaths)
+				var subPaths = fulfillCondition(path, condition)
+				for (subPath : subPaths)
+				{
+					walkTreeNodeRecur(node, subPath, execPaths)
+				}
 			}
 		}
 
@@ -140,12 +137,16 @@ class HLTTestSuiteFactory
 		}
 	}
 
-	private def void fulfillCondition(Map<String, ValuesForTest> globalValues, HLTBoolExpression boolExpr)
+	private def List<HLTExecutionPath> fulfillCondition(HLTExecutionPath path, HLTBoolExpression boolExpr)
 	{
+		val subPaths = new ArrayList<HLTExecutionPath>
+
 		switch (boolExpr)
 		{
 			case boolExpr instanceof HLTCompareExpression:
 			{
+				var subPath = path.fork
+				var globalValues = subPath.valuesRead
 				val compExpr = boolExpr as HLTCompareExpression
 				switch (compExpr.relation)
 				{
@@ -185,6 +186,8 @@ class HLTTestSuiteFactory
 					{
 					}
 				}
+
+				subPaths.add(subPath)
 			}
 			case boolExpr instanceof HLTLogicalExpression:
 			{
@@ -193,32 +196,43 @@ class HLTTestSuiteFactory
 				{
 					case And:
 					{
-						fulfillCondition(globalValues, logicalExpr.left)
-						fulfillCondition(globalValues, logicalExpr.right)
+						var leftPaths = fulfillCondition(path, logicalExpr.left)
+						for (leftPath : leftPaths)
+						{
+							subPaths.addAll(fulfillCondition(path, logicalExpr.right))
+						}
 					}
 					case Or:
 					{
-						fulfillCondition(globalValues, logicalExpr.left)
+						subPaths.addAll(fulfillCondition(path, logicalExpr.left))
+						subPaths.addAll(fulfillCondition(path, logicalExpr.right))
 					}
 				}
 			}
 			case boolExpr instanceof HLTConstantExpression:
 			{
+				if (boolExpr.evaluate)
+				{
+					subPaths.add(path)
+				}
 			}
 			default:
 			{
 				throw new InvalidOperationException("")
 			}
 		}
+		return subPaths
 	}
 
 	private def String generateTestCase(HLTGeneratedTestCase testCase)
 	'''
 		TestCase «testCase.name» For «testCase.macroName»->«testCase.functionName»(«toParamString(testCase.paramList)»)
+			«IF testCase.globalValues.size>0»
 			When
 				«FOR p : testCase.globalValues.entrySet»
 					«p.key» = «p.value.toString»
 				«ENDFOR»
+			«ENDIF»
 			Then
 				«FOR p : testCase.expectedValues.entrySet»
 					«p.key» = «p.value.toString»

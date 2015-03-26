@@ -228,8 +228,7 @@ public class HLTTestRunner extends AbstractHLGenerator
 				List<HLTTestResult> results = new ArrayList<HLTTestResult>();
 				for (HLTTestCase testCase : testSuite.testCases)
 				{
-					String targetMacroPath = resource.getParent().getParent().findMember("models").getFullPath() + "/" + testCase.macroName.replace(".", "/")
-							+ ".hl";
+					String targetMacroPath = findMacroFile(resource, testCase.macroName);
 					Resource targetRes = resSet.getResource(URI.createPlatformResourceURI(targetMacroPath, false), true);
 					targetRes.load(Collections.EMPTY_MAP);
 
@@ -286,6 +285,50 @@ public class HLTTestRunner extends AbstractHLGenerator
 				LoggerUtil.log(IStatus.ERROR, "Problem during resource gathering and code generation  --> " + e.getMessage());
 			}
 		}
+	}
+
+	private String findMacroFile(IResource resource, String macroName)
+	{
+		String macroFileName = macroName.replace(".", "/") + ".hl";
+
+		IContainer currentFolder = resource.getParent();// .getParent().findMember("models").getFullPath();
+		IResource modelsFolder = currentFolder.findMember("models");
+		while (modelsFolder == null)
+		{
+			currentFolder = currentFolder.getParent();
+			modelsFolder = currentFolder.findMember("models");
+		}
+
+		IContainer macroFolder = ((IContainer) modelsFolder);
+		return findMacroFileRecur(macroFolder, macroFileName).getFullPath().toString();
+	}
+
+	private IResource findMacroFileRecur(IContainer macroFolder, String macroName)
+	{
+		IResource macro = macroFolder.findMember(macroName);
+		if (macro != null)
+		{
+			return macro;
+		}
+
+		try
+		{
+			for (IResource member : macroFolder.members())
+			{
+				if (member instanceof IContainer)
+				{
+					macro = findMacroFileRecur((IContainer) member, macroName);
+					if (macro != null)
+					{
+						return macro;
+					}
+				}
+			}
+		} catch (CoreException e)
+		{
+			throw new RuntimeException();
+		}
+		return null;
 	}
 
 	public void startUpAssemblyGeneration(final IStructuredSelection structSel)

@@ -5,6 +5,7 @@ import com.shs.common.commonLanguage.EnumParameter
 import com.shs.hl.generator.halsa.HLTSyntaxTreeWalkerBase
 import com.shs.hl.generator.halsa.evaluation.LRValueSwitch
 import com.shs.hl.generator.halsa.service.SymbolDeclarationService
+import com.shs.hl.generator.halsa.struct.ConditionalValue
 import com.shs.hl.generator.halsa.struct.Constant
 import com.shs.hl.generator.halsa.struct.ExpressionResult
 import com.shs.hl.generator.halsa.struct.GlobalVariable
@@ -19,6 +20,7 @@ import com.shs.hl.generator.halsa.struct.HLTExecutionNode
 import com.shs.hl.generator.halsa.struct.HLTReturnNode
 import com.shs.hl.generator.halsa.struct.LocalVariable
 import com.shs.hl.generator.halsa.struct.StorageObject
+import com.shs.hl.generator.halsa.struct.TempExpressionResult
 import com.shs.hl.hearingLanguage.And
 import com.shs.hl.hearingLanguage.ArgList
 import com.shs.hl.hearingLanguage.AssignmentStatement
@@ -41,16 +43,21 @@ import com.shs.hl.hearingLanguage.PreIncrementExpr
 import com.shs.hl.hearingLanguage.ReturnStatement
 import com.shs.hl.hearingLanguage.Smaller
 import com.shs.hl.hearingLanguage.SmallerOrEquals
+import com.shs.hl.hearingLanguage.StatementList
 import com.shs.hl.hearingLanguage.SwitchStatement
 import com.shs.hl.hearingLanguage.TrueLiteral
 import com.shs.hl.hearingLanguage.UnEquals
 import com.shs.hl.hearingLanguage.WhileStatement
 import java.util.ArrayList
 import java.util.HashMap
+import java.util.List
 import java.util.Map
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.generator.IFileSystemAccess
 
 class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 {
+	String packageName
 	val String RETURN_VALUE_KEY = "$return"
 
 	HLTControlFlowTreeNode curNode
@@ -61,6 +68,12 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	HLTTestSuiteFactory factory = new HLTTestSuiteFactory
 
 	boolean isSubFunction
+
+	def generate(Resource resource, IFileSystemAccess fsa, String packageName)
+	{
+		this.packageName = packageName
+		super.walk(resource, fsa)
+	}
 
 	override walkApplicationMacro(Namespace macro)
 	{
@@ -77,9 +90,11 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	override walkFunction(FunctionDeclaration declaration)
 	{
 		isSubFunction = false
+		localVarHandler = new HLTLocalVariables
+		localVarHandler.declare(RETURN_VALUE_KEY)
 		var controlTree = generateControlFlowTree(declaration)
 
-		val s = controlTree.format
+//		val s = controlTree.format
 		val args = new ArrayList<String>
 		declaration.args.forEach[a|args.add(a.name)]
 		factory.forFunction(declaration.name, args, controlTree)
@@ -89,8 +104,6 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	{
 		var controlTree = HLTControlFlowTree.create
 		curNode = controlTree.root
-		localVarHandler = new HLTLocalVariables
-		localVarHandler.declare(RETURN_VALUE_KEY)
 		super.walkFunction(declaration)
 		return controlTree
 	}
@@ -98,6 +111,8 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	override walkFunctionCall(FunctionDeclaration function, ArgList argList)
 	{
 		val funcWalker = new HLTGenerateTestWalker
+		funcWalker.localVarHandler = new HLTLocalVariables
+		funcWalker.localVarHandler.declare(RETURN_VALUE_KEY)
 		funcWalker.isSubFunction = true
 		for (var i = 0; i < function.args.length; i++)
 		{
@@ -123,7 +138,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 	{
 		lrValueSwitch = LRValueSwitch.RValue
 		super.walkReturnStatement(returnStmt)
-		returnValue.assign(rValue, curNode.conditionsAlongPath)
+		returnValue.assign(rValue)
 
 		if (!isSubFunction)
 		{
@@ -146,7 +161,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 			{
 
 				// Directly walk the thenBody because the condition is always true.
-				super.walkStatementList(ifStmt.thenBody)
+				walkBlock(ifStmt.thenBody)
 			}
 			else
 			{
@@ -158,7 +173,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 			var ifConditionNode = new HLTConditionNode(curBoolExpr)
 			curNode.append(ifConditionNode)
 			curNode = ifConditionNode
-			super.walkStatementList(ifStmt.thenBody)
+			walkBlock(ifStmt.thenBody)
 			curNode = curNode.parent
 		}
 
@@ -169,17 +184,17 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 			var elseIfConditionNdoe = new HLTConditionNode(elseIfCondition)
 			curNode.append(elseIfConditionNdoe)
 			curNode = elseIfConditionNdoe
-			super.walkStatementList(elseIf.body)
+			walkBlock(elseIf.body)
 			curNode = curNode.parent
 		}
 
 		if (ifStmt.elseBody != null)
 		{
-			val elseCondition = ifCondition.not
-			var elseConditionNode = new HLTConditionNode(elseCondition)
+			curBoolExpr = ifCondition.not
+			var elseConditionNode = new HLTConditionNode(curBoolExpr)
 			curNode.append(elseConditionNode)
 			curNode = elseConditionNode
-			super.walkStatementList(ifStmt.elseBody)
+			walkBlock(ifStmt.elseBody)
 			curNode = curNode.parent
 		}
 	}
@@ -202,7 +217,8 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 			var caseConditionNode = new HLTConditionNode(caseCondition)
 			curNode.append(caseConditionNode)
 			curNode = caseConditionNode
-			super.walkStatementList(eachCase.body)
+			curBoolExpr = caseCondition
+			walkBlock(eachCase.body)
 			curNode = curNode.parent
 		}
 
@@ -211,21 +227,117 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 			var defaultConditionNode = new HLTConditionNode(defaultCondition)
 			curNode.append(defaultConditionNode)
 			curNode = defaultConditionNode
-			super.walkStatementList(switchStmt.defaultBlock)
+			curBoolExpr = defaultCondition
+			walkBlock(switchStmt.defaultBlock)
 			curNode = curNode.parent
 		}
 	}
 
 	override walkWhileStatement(WhileStatement statement)
 	{
-		this.lrValueSwitch = LRValueSwitch.RValue
-		walkExpression(statement.expr as Expression)
-		val condition = curBoolExpr
-		while (condition.evaluate)
+		localVarHandler.enterNewScope(HLTConstantExpression.alwaysTrue)
+		var loop = true
+		while (loop)
 		{
-			walkStatementList(statement.body)
+			this.lrValueSwitch = LRValueSwitch.RValue
+			walkExpression(statement.expr as Expression)
+			val condition = curBoolExpr
+			if (condition instanceof HLTConstantExpression)
+			{
+				if (condition.evaluate)
+				{
+					super.walkStatementList(statement.body)
+				}
+				else
+				{
+					curNode = curNode.parent
+					loop = false // Otherwise exit the loop
+				}
+			}
+			else
+			{
+				val condNode = new HLTConditionNode(condition)
+				curNode.append(condNode)
+				curNode = condNode
+				super.walkStatementList(statement.body)
+
+				loop = true
+			}
+		}
+		localVarHandler.exitScope()
+
+	}
+
+	private def walkBlock(StatementList statements)
+	{
+		localVarHandler.enterNewScope(curBoolExpr)
+		super.walkStatementList(statements)
+		localVarHandler.exitScope()
+	}
+
+	private def List<Map<String, ConditionalValue>> makeAllCombinations(List<String> variables)
+	{
+		val variablesSize = variables.length
+
+		var combinations = new ArrayList<Map<String, ConditionalValue>>(variablesSize)
+		if (variablesSize == 0) return combinations
+		var Map<String, ConditionalValue> combination
+		val total = new ArrayList<Integer>(variablesSize)
+		val counter = new ArrayList<Integer>(variablesSize)
+		for (variable : variables)
+		{
+			if (localVarHandler.isDefined(variable))
+			{
+				total.add(localVarHandler.getVariable(variable).allValues.length)
+			}
+			else
+			{
+				total.add(1)
+			}
+			counter.add(1)
+		}
+		var digit = 0
+		var ok = false
+		while (!ok)
+		{
+			combination = new HashMap
+
+			for (var i = 0; i < variablesSize; i++)
+			{
+				val varName = variables.get(i)
+				if (localVarHandler.isDefined(varName))
+				{
+					combination.put(varName, localVarHandler.getVariable(varName).allValues.get(counter.get(i) - 1))
+				}
+				else
+				{
+					combination.put(varName, new ConditionalValue(varName, HLTConstantExpression.alwaysTrue))
+				}
+			}
+			combinations.add(combination)
+
+			ok = true
+			for (var x = 0; x < variablesSize; x++)
+			{
+				if (counter.get(x) != total.get(x))
+				{
+					ok = false
+				}
+			}
+
+			counter.set(digit, counter.get(digit) + 1)
+			for (var x = 0; x < variablesSize - 1; x++)
+			{
+				if (counter.get(x) > total.get(x))
+				{
+					counter.set(x, 1)
+					counter.set(x + 1, counter.get(x + 1) + 1)
+					digit = 1
+				}
+			}
 		}
 
+		return combinations
 	}
 
 	override walkLocalVariableDeclarationStatement(LocalVariableDeclarationStatement statement)
@@ -252,7 +364,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 		{
 			val newValue = rValue
 			val oldVar = localVarHandler.getVariable(lValue.name)
-			oldVar.assign(newValue, curNode.conditionsAlongPath)
+			oldVar.assign(newValue)
 		}
 	}
 
@@ -272,7 +384,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 		{
 			val increment = (rValue as Constant).value
 			val oldVar = localVarHandler.getVariable(lValue.name)
-			oldVar.plusEquals(increment, curNode.conditionsAlongPath)
+			oldVar.plusEquals(increment)
 		}
 	}
 
@@ -283,7 +395,7 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 
 		val increment = "1"
 		val oldVar = localVarHandler.getVariable(lValue.name)
-		oldVar.plusEquals(increment, curNode.conditionsAlongPath)
+		oldVar.plusEquals(increment)
 	}
 
 	override walkAndExpression(And andExpr)
@@ -422,18 +534,20 @@ class HLTGenerateTestWalker extends HLTSyntaxTreeWalkerBase
 
 	def HLTBoolExpression getCurBoolExpr()
 	{
-		return (rValue as LocalVariable).getConditionForValue("true")
+		return (rValue as TempExpressionResult<HLTBoolExpression>).value
 	}
 
 	def void setCurBoolExpr(HLTBoolExpression expression)
 	{
-		val localVar = new LocalVariable("true", expression)
-		rValue = localVar
+		rValue = new TempExpressionResult<HLTBoolExpression>(expression)
 	}
 
-	override getLog()
+	override generateFile(IFileSystemAccess fsa, String macroName, String error)
 	{
-		factory.generate
+		fsa.generateFile(
+			"/generated/" + packageName + "/test_" + macroName + ".hlt",
+			error + "\n" + factory.generate
+		)
 	}
 
 }
@@ -444,12 +558,30 @@ class HLTLocalVariables
 
 	def declare(String varName)
 	{
-		return addVariable(varName, new LocalVariable())
+		addVariable(varName, new LocalVariable())
 	}
 
 	def define(String varName, ExpressionResult value)
 	{
-		return addVariable(varName, new LocalVariable(value))
+		val localVariable = new LocalVariable()
+		localVariable.assign(value)
+		return addVariable(varName, localVariable)
+	}
+
+	def enterNewScope(HLTBoolExpression condition)
+	{
+		for (variable : localVars.values)
+		{
+			variable.enterNewScope(condition)
+		}
+	}
+
+	def exitScope()
+	{
+		for (variable : localVars.values)
+		{
+			variable.exitScope()
+		}
 	}
 
 	private def addVariable(String varName, LocalVariable localVariable)
